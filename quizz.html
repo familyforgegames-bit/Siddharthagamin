@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Lionforge Academy · 5 Levels</title>
+  <style>
+    :root {
+      --bg: #f0f4f8;
+      --card: #ffffff;
+      --ink: #1e293b;
+      --hl: #f8fafc;
+      --fx: #e0f2fe;
+      --fact: #fef9c3;
+      --border: #cbd5e1;
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --card: #1e293b;
+        --ink: #f1f5f9;
+        --hl: #334155;
+        --fx: #1e3a5f;
+        --fact: #423d1e;
+        --border: #475569;
+      }
+    }
+    html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+    body {
+      margin: 0;
+      font: 18px/1.5 "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      transition: background 0.3s, color 0.3s;
+    }
+    header {
+      background: linear-gradient(135deg, #43a047, #2e7d32);
+      color: #fff;
+      padding: 18px 20px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border-bottom: none;
+    }
+    header h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 0.5px; }
+    header p { margin: 6px 0 0; font-size: 15px; opacity: 0.9; font-weight: 400; }
+    main { max-width: 640px; margin: 24px auto; padding: 0 16px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .mod { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    button { font: inherit; cursor: pointer; border: none; }
+    .big {
+      background: #ff9800;
+      color: #fff;
+      border-radius: 14px;
+      padding: 12px 24px;
+      font-size: 18px;
+      font-weight: 700;
+      box-shadow: 0 4px #e65100;
+      transition: transform 0.1s, box-shadow 0.1s;
+      width: auto;
+    }
+    .big:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px #e65100;
+    }
+    .big.g { background: #64748b; box-shadow: 0 4px #334155; }
+    .big.g:active { box-shadow: 0 2px #334155; }
+    .big.n { background: #10b981; box-shadow: 0 4px #047857; }
+    .big.n:active { box-shadow: 0 2px #047857; }
+    .big.l2 { background: #8b5cf6; box-shadow: 0 4px #5b21b6; }
+    .big.l2:active { box-shadow: 0 2px #5b21b6; }
+    .big.l3 { background: #f59e0b; box-shadow: 0 4px #b45309; color: #1e293b; }
+    .big.l3:active { box-shadow: 0 2px #b45309; }
+    .big.l4 { background: #6366f1; box-shadow: 0 4px #3730a3; }
+    .big.l4:active { box-shadow: 0 2px #3730a3; }
+    .big.l5 { background: #ec4899; box-shadow: 0 4px #9d174d; }
+    .big.l5:active { box-shadow: 0 2px #9d174d; }
+    .end .big { margin: 8px 4px; }
+    .opt {
+      display: block;
+      width: 100%;
+      text-align: left;
+      margin: 10px 0;
+      padding: 16px 20px;
+      background: var(--hl);
+      color: var(--ink);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 600;
+      transition: background 0.2s, border-color 0.2s, transform 0.1s;
+    }
+    .opt:active { transform: scale(0.98); }
+    .opt.ok { background: #86efac; border-color: #16a34a; color: #14532d; }
+    .opt.bad { background: #fca5a5; border-color: #dc2626; color: #7f1d1d; }
+    .opt:disabled { cursor: default; opacity: 0.7; }
+    .shake { animation: sk 0.4s; }
+    @keyframes sk { 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+    #snd {
+      position: fixed;
+      top: calc(12px + env(safe-area-inset-top, 0px));
+      right: 12px;
+      font-size: 24px;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 4px 12px;
+      z-index: 9;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .bar { height: 14px; background: var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
+    .bar i { display: block; height: 100%; background: #10b981; border-radius: 10px; transition: width 0.3s; }
+    .fx {
+      font-weight: 700;
+      background: var(--fx);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      border-left: 6px solid #0ea5e9;
+    }
+    .cover { text-align: center; }
+    .cover img { width: 100%; border: 4px solid #94a3b8; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+    .cover h2 { margin: 16px 0 4px; color: #2e7d32; font-size: 26px; }
+    .note { font-size: 14px; color: #dc2626; }
+    .fact {
+      background: var(--fact);
+      border-left: 8px solid #f59e0b;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-weight: 500;
+    }
+    h2 { font-size: 24px; font-weight: 800; margin: 16px 0 8px; }
+    h3 { font-size: 20px; font-weight: 700; margin: 12px 0; }
+    small { font-size: 15px; font-weight: 500; color: #64748b; }
+    .mod b { font-size: 18px; }
+  </style>
+</head>
+<body>
+<a href="index.html" style="display:inline-block;margin:12px;padding:10px 20px;background:#0ea5e9;color:#fff;font-family:sans-serif;font-weight:700;text-decoration:none;border-radius:12px;box-shadow:0 4px #0369a1;">← Back to Forge Family</a>
+<header>
+  <h1>🦁 Lionforge Academy · 5 Levels</h1>
+  <p>New questions, more fun! Mobs, building, redstone and silly facts.</p>
+</header>
+<button id="snd" onclick="toggleSnd()">🔊</button>
+<main id="app"></main>
+<script>
+  // ---------- DATA ----------
+  const L1 = [
+    { e:'🐔', t:'Animal Friends', f:['Chickens lay eggs and drop feathers.','Wolves love bones — give one to make a loyal friend.','Pigs can be ridden with a saddle and a carrot on a stick.'], q:[
+      ['🐔','What does a chicken lay?',['Eggs','Diamonds','Bread','Pillows'],'Eggs! No diamond eggs yet.'],
+      ['🐔','What makes a wolf your pet?',['Bones','Singing','Pizza','A carrot'],'Woof! Bones win wolf hearts.'],
+      ['🐔','Which animal gives milk?',['Cow','Creeper','Spider','Zombie'],'Mooo! Please don’t milk the zombie.'],
+      ['🐔','What do zombies do in sunlight?',['Catch fire','Dance','Turn into pigs','Nap'],'Sunny days are bad for zombies.'],
+      ['🐔','Which pet scares Creepers?',['Cat','Cow','Pig','Fish'],'Cats are creeper-proof heroes!'],
+      ['🐔','Which animal can you ride with a saddle and carrot on a stick?',['Pig','Chicken','Cow','Sheep'],'Oink express!'],
+      ['🐔','What does a sheep give you when sheared?',['Wool','Milk','Diamonds','String'],'Baa! Wool for beds and banners.'],
+      ['🐔','Which animal hops and loves carrots?',['Rabbit','Squid','Creeper','Golem'],'Hop hop crunch!'],
+      ['🐔','Which water animal can be carried in a bucket?',['Axolotl','Cow','Zombie','Horse'],'Axolotl in a bucket — cute!'],
+      ['🐔','What do bees make?',['Honey','Pizza','Soup','Milk'],'Bzzz! Sticky and sweet.'] ]},
+    { e:'🏠', t:'Build & Survive', f:['A crafting table needs 4 planks.','Torches keep monsters away from your base.','A bed sets your spawn point and skips the night.'], q:[
+      ['🏠','What color is a diamond?',['Light blue','Red','Pink','Orange'],'Shiny blue treasure.'],
+      ['🏠','What does TNT do?',['Explodes','Makes cake','Plays music','Grows flowers'],'BOOM! Stand back!'],
+      ['🏠','What does a bed let you do?',['Skip the night','Eat dinner','Go swimming','Mine faster'],'Zzz… Good night, Steve.'],
+      ['🏠','Which tool digs stone?',['Pickaxe','Spoon','Banana','Paintbrush'],'Mining time!'],
+      ['🏠','What do you get when you punch a tree?',['Wood','Pizza','Water','Gold'],'Ouch, but yay wood!'],
+      ['🏠','What should you build before night?',['A safe shelter','A giant cake','A skateboard','Nothing'],'Monsters are not shy!'],
+      ['🏠','What can a bucket carry?',['Water, milk and lava','Only pizza','Only sand','Only air'],'Careful with lava!'],
+      ['🏠','What do you need to make bread?',['Wheat','Rocks','Fish','Sand'],'3 wheat = 1 bread.'],
+      ['🏠','What lights up a dark cave?',['Torch','Carrot','Bread','Pillow'],'Torches = monster repellent.'],
+      ['🏠','What lights TNT?',['Flint and steel','Spoon','Feather','Carrot'],'Spark, then run!'] ]},
+    { e:'🎮', t:'Modes & Editions', f:['Bedrock Edition lets friends on different devices play together.','Java Edition is famous for mods.','Minecraft Education is used in classrooms around the world.'], q:[
+      ['🎮','Which edition supports cross-play between phones and consoles?',['Bedrock Edition','Java Edition','Both same','Neither'],'Bedrock = team-up edition.'],
+      ['🎮','Which Minecraft is made for schools?',['Minecraft Education','Minecraft Pizza','Minecraft Sleep','Minecraft Homework'],'Learning with blocks!'],
+      ['🎮','Which edition is best for mods on PC?',['Java Edition','Bedrock Edition','Pocket Pizza','Toaster Edition'],'Java = mod heaven.'],
+      ['🎮','What do you build a Nether portal from?',['Obsidian','Sand','Cotton candy','Dirt'],'Hard black blocks!'],
+      ['🎮','Where does the Ender Dragon live?',['The End','The Kitchen','The Beach','The Toy Box'],'The End dimension.'],
+      ['🎮','How many hearts at full health?',['10','3','100','1'],'10 hearts. Eat food!'],
+      ['🎮','Which block is used to craft things?',['Crafting table','Dirt','Water','Glass'],'Your workbench.'],
+      ['🎮','Which monster shoots arrows?',['Skeleton','Cow','Chicken','Sheep'],'Rattle rattle! Hide!'],
+      ['🎮','Which mode lets you fly and build freely?',['Creative','Hardcore','Sleep','Pizza'],'Build anything!'],
+      ['🎮','Who is the default player?',['Steve','Creeper','Pig','Tree'],'Hi Steve!'] ]},
+    { e:'🍎', t:'Food & Farming', f:['Bone meal makes crops grow instantly.','If your hunger bar is empty, you slowly lose hearts.','Cake has 7 slices.'], q:[
+      ['🍎','What do you plant to grow wheat?',['Seeds','Pizza','Rocks','Water'],'Seeds → wheat.'],
+      ['🍎','What do you get when you plant a carrot?',['More carrots','A rabbit','A dinosaur','Candy'],'Carrot magic!'],
+      ['🍎','Which tree drops apples?',['Oak','Diamond','Cake','Stone'],'Oak leaves sometimes drop apples.'],
+      ['🍎','What do you need to bake a cake?',['Milk, sugar, egg, wheat','Rocks & sticks','Lava & sand','Dirt & string'],'Yum, cake!'],
+      ['🍎','Which fruit grows on a stem?',['Melon','Diamond','Pickaxe','Coal'],'Juicy melon slices!'],
+      ['🍎','What can you wear to calm Endermen?',['Carved pumpkin','A sock','A crown','Sunglasses'],'Pumpkin head = safe!'],
+      ['🍎','What happens when your food bar is empty?',['You lose hearts','You become a chicken','You turn invisible','Nothing'],'Eat snacks!'],
+      ['🍎','Which mob gives mushroom stew?',['Mooshroom','Creeper','Zombie','Squid'],'Moo-shroom!'],
+      ['🍎','What do you use to catch fish?',['Fishing rod','Spoon','Bucket of sand','Shovel'],'Wait for the splash!'],
+      ['🍎','Which treat needs cocoa beans?',['Cookie','Bread','Steak','Apple'],'Cookies need wheat + cocoa.'] ]},
+    { e:'💎', t:'Tools & Treasure', f:['Netherite is stronger than diamond and survives lava.','Elytra lets you glide; fireworks give a boost.','An anvil repairs and renames items.'], q:[
+      ['💎','Which tool is best for fighting?',['Sword','Hoe','Bowl','Fishing rod'],'Swish swish!'],
+      ['💎','What does a shield do?',['Blocks hits','Makes you fly','Cooks food','Makes rain'],'Block those arrows!'],
+      ['💎','What do you need to shoot a bow?',['Arrows','Carrots','Pillows','Eggs'],'No arrows, no pew pew.'],
+      ['💎','Which tool chops trees fastest?',['Axe','Spoon','Brush','Bucket'],'Chop chop!'],
+      ['💎','Which tool material is strongest?',['Diamond','Wood','Stone','Gold'],'Diamond > gold.'],
+      ['💎','What does a clock show?',['Time of day','Weather in Paris','Your age','Creeper count'],'Day or night?'],
+      ['💎','Where do you keep stuff safe?',['Chest','Lava','Creeper','Sheep'],'Chests = safe.'],
+      ['💎','What gives your sword magic powers?',['Enchanting table','Toaster','Bed','Crafting spoon'],'Sparkle sparkle!'],
+      ['💎','What lets you glide through the air?',['Elytra','Umbrella','Pig','Stick'],'Whee!'],
+      ['💎','Which apple heals and boosts you?',['Golden apple','Rotten apple','Green apple','Candy apple'],'Super snack!'] ]},
+    { e:'🧑‍🌾', t:'Villagers & Trading', f:['Villagers trade with emeralds.','Iron Golems protect villages.','Curing a zombie villager gives big discounts.'], q:[
+      ['🧑‍🌾','What sound does a villager make?',['Hrmm!','Woof!','Moo!','Vroom!'],'Hrmm!'],
+      ['🧑‍🌾','Which job block makes a farmer?',['Composter','Bed','Piano','TV'],'Composter → farmer.'],
+      ['🧑‍🌾','Which big helper protects villagers?',['Iron Golem','Pig','Chicken','Slime'],'Village superhero!'],
+      ['🧑‍🌾','What do villagers do at night?',['Sleep in beds','Play soccer','Fish','Mine'],'Zzz…'],
+      ['🧑‍🌾','Which villager loves books?',['Librarian','Farmer','Fisherman','Butcher'],'Shhh! Library.'],
+      ['🧑‍🌾','What happens if a zombie catches a villager?',['Zombie villager','Haircut','Golem','Pig'],'You can cure it!'],
+      ['🧑‍🌾','What happens when lightning hits a villager?',['Witch','Haircut','Pig','Golem'],'Zap! Witch!'],
+      ['🧑‍🌾','Which mob attacks villages with a crossbow?',['Pillager','Cow','Sheep','Bee'],'Defend the village!'],
+      ['🧑‍🌾','What is an Iron Golem made of?',['Iron','Wood','Wool','Sand'],'Strong and shiny.'],
+      ['🧑‍🌾','Where do villagers live?',['Villages','The End','The sea','Lava'],'Cozy villages!'] ]},
+    { e:'🌦️', t:'Biomes & Weather', f:['A biome is a region like desert, jungle or snowy land.','Lightning turns a creeper into a charged creeper.','Mooshrooms live in mushroom fields.'], q:[
+      ['🌦️','Which biome is full of sand and cactus?',['Desert','Ocean','Snowy plains','Jungle'],'Hot and prickly!'],
+      ['🌦️','What falls in snowy biomes?',['Snow','Pizza','Rocks','Candy'],'Snowball fight!'],
+      ['🌦️','Which biome has pink trees?',['Cherry grove','Desert','Nether','The End'],'Pretty pink!'],
+      ['🌦️','What happens when lightning hits a creeper?',['Charged creeper','Disappears','Pig','Sings'],'Super boom! Run!'],
+      ['🌦️','Where do Mooshrooms live?',['Mushroom fields','Desert','Ocean','Snowy plains'],'Rare mushroom land.'],
+      ['🌦️','What happens to water in very cold places?',['Freezes','Milk','Lava','Disappears'],'Slippery!'],
+      ['🌦️','Which biome has colorful fish and coral?',['Warm ocean','Desert','Nether','Snowy plains'],'Splash!'],
+      ['🌦️','Which colorful bird lives in jungles?',['Parrot','Penguin','Eagle','Chicken'],'Parrot party!'],
+      ['🌦️','Which biome has tall trees and vines?',['Jungle','Desert','Snowy plains','Ocean'],'Swing like a monkey!'],
+      ['🌦️','What can you see at night?',['Moon and stars','Pizza','Only sun','Rainbow cows'],'Twinkle twinkle!'] ]},
+    { e:'🔴', t:'Redstone Basics', f:['Redstone is like electricity in Minecraft.','A lever turns signals on and off.','Note blocks play music when hit.'], q:[
+      ['🔴','What color is redstone dust?',['Red','Blue','Green','Yellow'],'Tomato red!'],
+      ['🔴','Which block flips on/off?',['Lever','Dirt','Wool','Glass'],'Click clack!'],
+      ['🔴','What do you press to open a redstone door?',['Button','Banana','Carrot','Pillow'],'Click!'],
+      ['🔴','Which block makes music when hit?',['Note block','Furnace','Chest','Bed'],'Do re mi!'],
+      ['🔴','Which block lights up with redstone?',['Redstone lamp','Stone','Sand','Dirt'],'Let there be light!'],
+      ['🔴','What does a piston do?',['Pushes blocks','Sings','Cooks','Grows trees'],'Push!'],
+      ['🔴','What does a hopper collect?',['Falling items','Bunnies','Rain','Sunshine'],'Tiny vacuum.'],
+      ['🔴','What does a pressure plate do?',['Sends a signal','Makes you jump','Pig','Food'],'Step and click!'],
+      ['🔴','Where do you mine redstone?',['Deep underground','Clouds','Trees','On a pig'],'Dig down!'],
+      ['🔴','What happens when you flip a lever?',['Turns signal on','Rains','Spawns pigs','Makes cake'],'Click!'] ]},
+    { e:'🧟', t:'Silly Monster Facts', f:['Creepers were born from a coding mistake.','Endermen hate water and rain.','Skeletons burn in daylight unless they wear a helmet.'], q:[
+      ['🧟','What does a Creeper say?',['Ssssss… BOOM!','Moo!','Hello friend!','Meow!'],'Never hug a creeper!'],
+      ['🧟','What do you get when you cook a pig?',['Cooked porkchop','Pizza','Ice cream','Socks'],'Yummy!'],
+      ['🧟','What happens if you stare at an Enderman?',['It gets angry','Tells a joke','Gives a gift','Sleeps'],'Don’t stare!'],
+      ['🧟','Which mob drops string?',['Spider','Cow','Pig','Sheep'],'String for bows!'],
+      ['🧟','Which mob is tall, black and has purple eyes?',['Enderman','Zombie','Creeper','Cow'],'Don’t look!'],
+      ['🧟','What hurts Endermen?',['Water','Sand','Wool','Wood'],'Rain = bad for Endermen.'],
+      ['🧟','Which mob explodes?',['Creeper','Cow','Chicken','Sheep'],'Boom!'],
+      ['🧟','What do spiders do in bright light?',['Stay neutral until hit','Turn into cows','Disappear','Fly'],'Calm in daylight.'],
+      ['🧟','Which mob can teleport?',['Enderman','Zombie','Creeper','Pig'],'Poof!'],
+      ['🧟','What do skeletons drop?',['Bones and arrows','Diamonds','Wool','Leather'],'Rattle rattle!'] ]},
+    { e:'🏆', t:'Mixed Fun Facts', f:['Minecraft is one of the best-selling games ever.','A Minecraft day is 20 minutes.','You can build almost anything in Creative mode.'], q:[
+      ['🏆','How long is a Minecraft day?',['20 minutes','24 hours','5 minutes','1 hour'],'20 real minutes.'],
+      ['🏆','Which mode lets you build without limits?',['Creative','Hardcore','Survival','Sleep'],'Build anything!'],
+      ['🏆','Who created Minecraft?',['Notch','Steve','Alex','Jeb'],'Notch = Markus Persson.'],
+      ['🏆','Which company owns Mojang?',['Microsoft','Google','Sony','Nintendo'],'Bought in 2014.'],
+      ['🏆','What block do you need to make a Nether portal?',['Obsidian','Dirt','Sand','Wool'],'Obsidian frame.'],
+      ['🏆','What is the final boss in the End?',['Ender Dragon','Wither','Giant','Warden'],'Dragon fight!'],
+      ['🏆','What do you get from a Wither?',['Nether star','Dragon egg','Elytra','Totem'],'Beacon time!'],
+      ['🏆','Which mob drops a Totem of Undying?',['Evoker','Witch','Pillager','Vindicator'],'Woodland mansion.'],
+      ['🏆','What’s the strongest tool material?',['Netherite','Gold','Iron','Stone'],'Netherite > diamond.'],
+      ['🏆','Can you tame a Creeper?',['No','Yes with TNT','Yes with fish','Yes with bones'],'Myth! Creepers stay wild.'] ]}
+  ];
+
+  const L2 = [
+    { e:'🔥', t:'Nether Challenge', f:['Piglins love gold — wear gold armor to stay safe.','Beds explode in the Nether!','Water evaporates in the Nether.'], q:[
+      ['🔥','What do Piglins love?',['Gold','Diamonds','Iron','Emeralds'],'Shiny gold!'],
+      ['🔥','What happens if you sleep in the Nether?',['Explosion','Good rest','Pig','Nothing'],'Boom!'],
+      ['🔥','What do you need to breathe underwater?',['Water breathing potion','Fire potion','Speed potion','Jump potion'],'Bubble bubble!'],
+      ['🔥','Which mob shoots fireballs?',['Ghast','Cow','Bee','Pig'],'Fireball!'],
+      ['🔥','What block lights a portal?',['Flint and steel','Spoon','Feather','Carrot'],'Whoosh!'],
+      ['🔥','Which mob drops blaze rods?',['Blaze','Ghast','Hoglin','Strider'],'Blaze rods for brewing.'],
+      ['🔥','What can you ride on lava?',['Strider','Pig','Cow','Chicken'],'Strider walks on lava!'],
+      ['🔥','What does a Ghast drop?',['Ghast tear','Diamond','Wool','Bone'],'Healing potions!'],
+      ['🔥','What happens if you hit a zombified piglin?',['All attack you','Give gold','Sleep','Dance'],'Don’t anger them!'],
+      ['🔥','What heals the Ender Dragon?',['End crystals','Golden apples','Milk','Bread'],'Break crystals first!'] ]},
+    { e:'🧮', t:'Maths & Minecraft', f:['A double chest has 54 slots.','9 iron ingots = 1 iron block.','1 Nether block = 8 Overworld blocks.'], q:[
+      ['🧮','How many slots in a double chest?',['54','27','36','64'],'27+27=54.'],
+      ['🧮','How many iron ingots make an iron block?',['9','4','6','16'],'3×3 grid.'],
+      ['🧮','How many planks from 1 log?',['4','1','2','8'],'4 planks.'],
+      ['🧮','How many diamonds for a pickaxe?',['3','2','5','1'],'3 diamonds + 2 sticks.'],
+      ['🧮','How many minutes in a Minecraft day?',['20','10','60','5'],'20 minutes.'],
+      ['🧮','How many blocks does a Nether step equal?',['8','2','4','16'],'1:8 ratio.'],
+      ['🧮','How many cobblestone for a furnace?',['8','4','6','10'],'Ring of 8.'],
+      ['🧮','How many wheat for bread?',['3','2','5','9'],'3 in a row.'],
+      ['🧮','How many slots in a single chest?',['27','9','36','54'],'3 rows of 9.'],
+      ['🧮','How many planks for a crafting table?',['4','2','6','9'],'2×2 square.'] ]},
+    { e:'🔨', t:'Crafting Challenge', f:['A shield needs 6 planks + 1 iron.','A bed needs 3 wool + 3 planks.','A torch needs a stick + coal.'], q:[
+      ['🔨','What do you need for a chest?',['8 planks','4 planks','8 stone','2 logs'],'Ring of planks.'],
+      ['🔨','What do you need for a furnace?',['8 cobblestone','8 planks','4 iron','8 sand'],'Smelt food!'],
+      ['🔨','What do you craft from 9 iron ingots?',['Iron block','Anvil','Chest','Bucket'],'Shiny block.'],
+      ['🔨','What do you need for a boat?',['5 planks','5 sticks','5 stone','5 wool'],'Row row!'],
+      ['🔨','What do you need for a fishing rod?',['Sticks + string','Sticks + wool','Iron + string','Planks + feathers'],'Go fish!'],
+      ['🔨','How do you make glass?',['Smelt sand','Mix sand+water','Mine it','Burn wood'],'Clear and shiny.'],
+      ['🔨','What do you need for a sword?',['Material + stick','2 sticks','Wool','Dirt'],'Wood, stone, iron…'],
+      ['🔨','How do you make charcoal?',['Smelt a log','Mine it','Burn sand','Cook bread'],'Coal substitute!'],
+      ['🔨','What do you need for a bookshelf?',['6 planks + 3 books','3 planks + 6 books','9 planks','9 books'],'Enchanting time.'],
+      ['🔨','What do you need for paper?',['Sugar cane','Wheat','Dirt','Stone'],'3 sugar cane = 3 paper.'] ]},
+    { e:'🌍', t:'Biome Explorer', f:['Badlands have red sand and colorful clay.','Jungles have parrots, vines and ocelots.','Savannas have acacia trees.'], q:[
+      ['🌍','Which biome has pink trees?',['Cherry grove','Desert','Nether','The End'],'Pretty pink!'],
+      ['🌍','Which biome has giant mushrooms?',['Mushroom fields','Desert','Jungle','Ocean'],'Mooshroom land!'],
+      ['🌍','Where do coral reefs grow?',['Warm oceans','Deserts','Snowy plains','Nether'],'Colorful fish!'],
+      ['🌍','Which biome can have igloos?',['Snowy plains','Desert','Jungle','Swamp'],'Cozy cold house.'],
+      ['🌍','Which biome has desert temples?',['Desert','Snowy plains','Ocean','Jungle'],'Watch for traps!'],
+      ['🌍','What do you find in jungles?',['Parrots & vines','Polar bears','Cactus','Penguins'],'Jungle party!'],
+      ['🌍','Where can slimes spawn at night?',['Swamps','Deserts','Oceans','Snowy plains'],'Boing boing!'],
+      ['🌍','Which biome has acacia trees?',['Savanna','Taiga','Desert','Ocean'],'Flat top trees!'],
+      ['🌍','Which ocean plant can be smelted into food?',['Kelp','Cactus','Wheat','Carrot'],'Dried kelp snack.'],
+      ['🌍','Which biome has red sand and layers?',['Badlands','Desert','Swamp','Taiga'],'Orange, red, yellow!'] ]},
+    { e:'🧑‍🌾', t:'Villager Expert', f:['Iron Golems drop iron ingots and poppies.','Defeating a raid gives Hero of the Village.','A village bell calls villagers together.'], q:[
+      ['🧑‍🌾','What do villagers trade with?',['Emeralds','Diamonds','Gold','Iron'],'Emerald money.'],
+      ['🧑‍🌾','What does a Cartographer sell?',['Maps','Potions','Swords','Bread'],'Find treasure!'],
+      ['🧑‍🌾','What helps villagers breed?',['Food + beds','Swords','Water','Diamonds'],'Baby villagers!'],
+      ['🧑‍🌾','What is a Nitwit?',['Villager with no job','A mob','A zombie','A golem'],'Hrmm.'],
+      ['🧑‍🌾','What does a village bell do?',['Calls villagers','Music','Light','Grows crops'],'Ding dong!'],
+      ['🧑‍🌾','What effect for defeating a raid?',['Hero of the Village','Bad Omen','Haste','Slowness'],'Cheaper trades!'],
+      ['🧑‍🌾','Which villager uses a fletching table?',['Fletcher','Farmer','Cleric','Shepherd'],'Arrows for sale.'],
+      ['🧑‍🌾','Which villager uses a loom?',['Shepherd','Farmer','Fletcher','Mason'],'Wool & banners.'],
+      ['🧑‍🌾','Which job block makes a Mason?',['Stonecutter','Barrel','Lectern','Furnace'],'Stone blocks.'],
+      ['🧑‍🌾','What does an Iron Golem drop?',['Iron + poppies','Gold','Diamonds','Wool'],'Village superhero.'] ]},
+    { e:'🧪', t:'Potions & Enchanting', f:['Blaze powder fuels a brewing stand.','Gunpowder makes a splash potion.','Lapis lazuli is spent at the enchanting table.'], q:[
+      ['🧪','What do you need to make potions?',['Brewing stand','Crafting table','Furnace','Chest'],'Bubble bubble!'],
+      ['🧪','What fuels a brewing stand?',['Blaze powder','Coal','Wood','Redstone'],'Hot and fiery.'],
+      ['🧪','What does a Potion of Healing do?',['Heals','Fly','Invisible','Spawns pets'],'Instant health!'],
+      ['🧪','What does Invisibility do?',['Makes you invisible','Heals','Burns','Teleports'],'Sneaky!'],
+      ['🧪','What makes a potion last longer?',['Redstone dust','Sugar','Coal','Sand'],'Longer effects.'],
+      ['🧪','What turns a potion into a splash potion?',['Gunpowder','Sugar','Wheat','Bone'],'Throw it!'],
+      ['🧪','What does Protection do?',['Reduces damage','Fly','Food','Light'],'Armor power.'],
+      ['🧪','Where do you enchant items?',['Enchanting table','Crafting table','Furnace','Chest'],'Sparkle sparkle!'],
+      ['🧪','Which blue item do you spend to enchant?',['Lapis lazuli','Redstone','Coal','Emerald'],'Plus XP.'],
+      ['🧪','What does Looting do?',['More drops','Faster mining','Stronger shield','Light'],'More loot!'] ]},
+    { e:'🌾', t:'Farming Pro', f:['Farmland needs water nearby.','Bone meal speeds up crops.','Pumpkin pie needs pumpkin, sugar and an egg.'], q:[
+      ['🌾','What turns dirt into farmland?',['Hoe','Pickaxe','Sword','Bucket'],'Till the soil!'],
+      ['🌾','What keeps farmland wet?',['Water nearby','Lava','Sand','Wool'],'Plant near water.'],
+      ['🌾','Which bush hurts you?',['Sweet berry bush','Wheat','Carrots','Melon'],'Ouch! Yummy.'],
+      ['🌾','Where must sugar cane be planted?',['Next to water','On lava','On wool','In the End'],'Thirsty plant.'],
+      ['🌾','What do you need for pumpkin pie?',['Pumpkin, sugar, egg','Pumpkin + wheat','Melon + egg','Carrot + bread'],'Yum!'],
+      ['🌾','What do you get from cooking beef?',['Steak','Bread','Pie','Soup'],'Hearty meal.'],
+      ['🌾','What do you plant for potatoes?',['A potato','A carrot','Wheat seeds','A melon'],'Potato magic.'],
+      ['🌾','What speeds up crop growth?',['Bone meal','Sand','Coal','String'],'Grow grow!'],
+      ['🌾','What can you make from wheat + cocoa?',['Cookies','Bread','Cake','Pie'],'Yummy cookies.'],
+      ['🌾','What do you plant for beetroot?',['Beetroot seeds','Carrot','Potato','Wheat seeds'],'Red and earthy.'] ]},
+    { e:'🔴', t:'Redstone Circuits', f:['A redstone signal travels 15 blocks before needing a repeater.','A piston can push up to 12 blocks.','An observer detects block updates.'], q:[
+      ['🔴','How far does a redstone signal travel?',['15 blocks','5','30','64'],'Use a repeater.'],
+      ['🔴','What does a repeater do?',['Boosts + delays','Light','Pushes','Music'],'Signal booster.'],
+      ['🔴','What does an observer detect?',['Block changes','Mobs','Daylight','Water level'],'Pulse!'],
+      ['🔴','What can a sticky piston do that normal can’t?',['Pull blocks back','Fly','Light','Break bedrock'],'Sticky = pull!'],
+      ['🔴','How many blocks can a piston push?',['12','6','4','20'],'12 max.'],
+      ['🔴','What does a daylight detector sense?',['Sunlight','Rain','Lava','Mobs'],'Auto lights.'],
+      ['🔴','What connects tripwire hooks?',['String','Wool','Redstone','Vines'],'Step and click.'],
+      ['🔴','What does a dispenser do?',['Shoots/places items','Eats','Sleeps','Grows trees'],'Arrow traps!'],
+      ['🔴','What does a redstone torch do when its block is powered?',['Turns off','Explodes','Brighter','Floats'],'Inverter!'],
+      ['🔴','What does a comparator measure?',['Container fullness','Time','Mob health','Hunger'],'Fancy machines.'] ]},
+    { e:'🧊', t:'Snow & Ice', f:['Polar bears live in icy biomes.','Strays shoot arrows of slowness.','Ice can be mined with Silk Touch.'], q:[
+      ['🧊','Where do polar bears live?',['Icy biomes','Desert','Jungle','Mushroom fields'],'Brrr!'],
+      ['🧊','Which skeleton shoots slowness arrows?',['Stray','Wither skeleton','Skeleton','Bogged'],'Strays are cold.'],
+      ['🧊','What do you need to mine ice without breaking it?',['Silk Touch','Fortune','Sharpness','Efficiency'],'Keep the block.'],
+      ['🧊','What falls in snowy biomes?',['Snow','Pizza','Rocks','Candy'],'Snowball fight!'],
+      ['🧊','What happens to water in cold biomes?',['Freezes','Boils','Milk','Lava'],'Slippery ice.'],
+      ['🧊','Which mob lives in igloos?',['Villagers','Zombies','Creepers','Wolves'],'Cozy home.'],
+      ['🧊','What helps you walk on powder snow?',['Leather boots','Diamond boots','Bare feet','A sword'],'Leather boots!'],
+      ['🧊','Which mob is white and lives in snow?',['Polar bear','Panda','Fox','Cat'],'Big fluffy bear.'],
+      ['🧊','What can you make with snowballs?',['Snow golem','Snow house','Snow sword','Snow pig'],'Snow golem friend!'],
+      ['🧊','What happens when a snow golem walks on sand?',['Takes damage','Grows','Flies','Sleeps'],'Snow melts in heat.'] ]},
+    { e:'🏆', t:'Expert Mix', f:['Ancient debris is found in the Nether.','Elytra are found in End ships.','A beacon needs a Nether star.'], q:[
+      ['🏆','Where do you find ancient debris?',['Nether','Overworld','The End','All'],'Netherite source.'],
+      ['🏆','What helps you glide?',['Elytra','Beacon','Trident','Totem'],'End ships!'],
+      ['🏆','What is a beacon made from?',['Nether star','Dragon egg','Elytra','Totem'],'Wither drop.'],
+      ['🏆','Which mob drops a trident?',['Drowned','Guardian','Squid','Zombie'],'Sometimes!'],
+      ['🏆','Which mob carries blocks?',['Enderman','Creeper','Skeleton','Spider'],'Block thief.'],
+      ['🏆','What does a conduit do?',['Powers underwater','Flies','Cooks','Farms'],'Heart of the sea.'],
+      ['🏆','What does Mending do?',['Repairs with XP','Sharpens','Flies','Burns'],'XP repair!'],
+      ['🏆','Which block cannot be broken in Survival?',['Bedrock','Obsidian','Netherite','Ancient debris'],'Unbreakable.'],
+      ['🏆','What does the Wither drop?',['Nether star','Dragon egg','Elytra','Totem'],'Beacon time!'],
+      ['🏆','Where do shulkers live?',['End cities','Nether','Overworld','Ocean'],'Levitation!'] ]}
+  ];
+
+  const L3 = [
+    { e:'⚔️', t:'Combat & Bosses', f:['The Ender Dragon has 200 HP (100 hearts).','A Wither is built from soul sand + wither skulls.','The Warden lives in the Deep Dark.'], q:[
+      ['⚔️','How many hearts does the Ender Dragon have?',['100','50','20','10'],'200 HP = 100 hearts.'],
+      ['⚔️','What do you need to build a Wither?',['Soul sand + wither skulls','Sand + bones','Iron + pumpkins','Gold + diamonds'],'Do it far from home!'],
+      ['⚔️','Where does the Warden live?',['Deep Dark','Desert','Jungle','Nether'],'Shhh! Don’t wake it.'],
+      ['⚔️','What does an Evoker drop?',['Totem of Undying','Diamond','Wool','Bone'],'Woodland mansion.'],
+      ['⚔️','What cures a zombie villager?',['Weakness + golden apple','Water + bread','Milk + carrot','Sword + bed'],'Doctor trick!'],
+      ['⚔️','What mob rides a chicken?',['Baby zombie','Skeleton','Creeper','Spider'],'Chicken jockey!'],
+      ['⚔️','Which mob is immune to sunlight?',['Husk','Zombie','Skeleton','Stray'],'Desert zombie.'],
+      ['⚔️','What does a Creeper drop?',['Gunpowder','Diamond','Wool','Bone'],'TNT time.'],
+      ['⚔️','What scares Creepers?',['Cats','Cows','Pigs','Fish'],'Kitty heroes!'],
+      ['⚔️','What does the Ender Dragon leave behind?',['Dragon egg','Nether star','Elytra','Totem'],'One per world.'] ]},
+    { e:'🏰', t:'Structures', f:['Strongholds hold End portals.','Woodland mansions hold Evokers.','Ocean monuments are made of prismarine.'], q:[
+      ['🏰','Which structure holds the End portal?',['Stronghold','Village','Igloo','Shipwreck'],'Eyes of Ender lead there.'],
+      ['🏰','Where do Evokers live?',['Woodland mansion','Desert temple','Ocean monument','Village'],'Spooky mansion.'],
+      ['🏰','What are ocean monuments made of?',['Prismarine','Obsidian','Sandstone','Netherrack'],'Blue-green bricks.'],
+      ['🏰','What trap is under a desert temple?',['TNT','Lava','Arrows','Water'],'Step carefully!'],
+      ['🏰','Where do you find ancient cities?',['Deep Dark','Desert','Jungle','Snowy plains'],'Warden’s home.'],
+      ['🏰','What do you find in bastions?',['Piglins','Villagers','Witches','Creepers'],'Gold loving piglins.'],
+      ['🏰','What do you find in shipwrecks?',['Treasure maps','Diamonds only','Piglins','Evokers'],'X marks the spot!'],
+      ['🏰','Which structure has a bell?',['Village','Stronghold','Mansion','Monument'],'Ding dong!'],
+      ['🏰','What do you find in mineshafts?',['Cave spiders','Piglins','Evokers','Ender dragon'],'Watch for webs.'],
+      ['🏰','Where do you find End cities?',['Outer End islands','Overworld','Nether','Deep Dark'],'After the dragon.'] ]},
+    { e:'🧮', t:'Tricky Maths', f:['A double chest holds 54 stacks.','A full beacon pyramid needs 164 blocks.','A chunk is 16×16 blocks wide.'], q:[
+      ['🧮','3 full stacks of 64 + 20 extra = ?',['212','192','232','84'],'192+20=212.'],
+      ['🧮','1 coal smelts 8 items. Coal for 40?',['5','4','8','10'],'40÷8=5.'],
+      ['🧮','Blocks for a 4-layer beacon pyramid (9+25+49+81)?',['164','81','100','140'],'Sum = 164.'],
+      ['🧮','A full double chest of 64-stacks = ? items',['3456','1728','2048','5400'],'54×64=3456.'],
+      ['🧮','25 Nether blocks = ? Overworld blocks',['200','33','150','250'],'25×8=200.'],
+      ['🧮','36 inventory slots × 64 = ?',['2304','1728','2048','4096'],'36×64=2304.'],
+      ['🧮','Minecraft days in 2 hours?',['6','3','12','10'],'120÷20=6.'],
+      ['🧮','2 diamonds sword + 3 pickaxe + 3 axe = ?',['8','7','9','6'],'2+3+3=8.'],
+      ['🧮','16 ender pearls - 7 thrown = ?',['9','7','8','10'],'16−7=9.'],
+      ['🧮','Blocks in a 16×16 chunk layer?',['256','32','64','162'],'16×16=256.'] ]},
+    { e:'🔨', t:'Advanced Crafting', f:['A golden apple needs 8 gold ingots.','A shield needs 6 planks + 1 iron.','An enchanting table needs 4 obsidian + 2 diamonds + 1 book.'], q:[
+      ['🔨','Planks for a crafting table?',['4','2','6','9'],'2×2 square.'],
+      ['🔨','Sticks from 2 planks?',['4','2','1','8'],'2 planks → 4 sticks.'],
+      ['🔨','Iron ingots for a bucket?',['3','2','4','5'],'V shape.'],
+      ['🔨','What for a bed?',['3 wool + 3 planks','3 wool + 3 sticks','6 wool','3 planks + 3 stone'],'Sweet dreams.'],
+      ['🔨','Wheat for one bread?',['3','2','5','9'],'Three wheat.'],
+      ['🔨','Torch needs?',['Stick + coal','2 sticks','Coal + iron','Stick + redstone'],'Light up!'],
+      ['🔨','Enchanting table needs?',['4 obsidian + 2 diamonds + book','2 obsidian + 4 diamonds + book','4 obsidian + 4 diamonds','8 obsidian'],'Diamond pickaxe for obsidian.'],
+      ['🔨','Golden apple needs?',['Apple + 8 gold ingots','Apple + 8 nuggets','Carrot + 8 ingots','Apple + 4 ingots'],'Expensive snack.'],
+      ['🔨','Shield needs?',['6 planks + 1 iron','6 iron + 1 plank','4 planks + 2 iron','8 planks'],'Block those arrows.'],
+      ['🔨','Bow needs?',['3 sticks + 3 string','3 planks + 3 string','3 sticks + 3 feathers','3 iron + 3 sticks'],'Spider string!'] ]},
+    { e:'🌍', t:'World Secrets', f:['Mushroom fields have no hostile surface spawns.','Ancient debris is in the Nether.','The sun rises in the east.'], q:[
+      ['🌍','Where do hostile mobs NOT spawn on surface?',['Mushroom fields','Desert','Swamp','Dark forest'],'Safe strange island.'],
+      ['🌍','Which structure holds End portal?',['Stronghold','Village','Igloo','Shipwreck'],'Eyes of Ender.'],
+      ['🌍','Ancient cities are in?',['Deep Dark','Desert','Jungle','Snowy plains'],'Warden!'],
+      ['🌍','Desert temple trap?',['TNT','Lava','Arrows','Water'],'Step carefully.'],
+      ['🌍','Wild cat in jungle?',['Ocelot','Fox','Wolf','Panda'],'Feed fish to tame.'],
+      ['🌍','Sun rises in?',['East','West','North','South'],'Good morning east!'],
+      ['🌍','Lowest bedrock layer in modern Overworld?',['Y=-64','Y=0','Y=-32','Y=-128'],'Deeper world in 1.18.'],
+      ['🌍','Polar bears live in?',['Icy biomes','Desert','Jungle','Mushroom fields'],'Brrr!'],
+      ['🌍','Ocean monuments made of?',['Prismarine','Obsidian','Sandstone','Netherrack'],'Blue-green bricks.'],
+      ['🌍','Ancient debris dimension?',['Nether','Overworld','End','All'],'Netherite source.'] ]},
+    { e:'🧑‍🌾', t:'Master Trading', f:['Curing a zombie villager gives big discounts.','Each job has its own block.','Villagers trade emeralds.'], q:[
+      ['🧑‍🌾','Cure zombie villager with?',['Weakness + golden apple','Water + bread','Milk + carrot','Sword + bed'],'Doctor trick!'],
+      ['🧑‍🌾','Farmer job block?',['Composter','Barrel','Lectern','Furnace'],'Plant & trade.'],
+      ['🧑‍🌾','Librarian job block?',['Lectern','Composter','Anvil','Bell'],'Shhh!'],
+      ['🧑‍🌾','Fisherman job block?',['Barrel','Lectern','Anvil','Grindstone'],'Fish for emeralds.'],
+      ['🧑‍🌾','Cleric job block?',['Brewing stand','Barrel','Cauldron','Smoker'],'Potions & magic.'],
+      ['🧑‍🌾','Armorer job block?',['Blast furnace','Smoker','Loom','Stonecutter'],'Armor for sale.'],
+      ['🧑‍🌾','Weaponsmith job block?',['Grindstone','Anvil','Barrel','Bell'],'Swords for sale.'],
+      ['🧑‍🌾','Villagers trade with?',['Emeralds','Diamonds','Gold','Iron'],'Hrmm!'],
+      ['🧑‍🌾','Who attacks villages in raids?',['Pillagers','Cows','Sheep','Bees'],'Defend!'],
+      ['🧑‍🌾','Curing a zombie villager gives?',['Big trade discounts','Free armor','A pet','Diamonds'],'Cheaper trades forever.'] ]},
+    { e:'🧪', t:'Master Alchemy', f:['Water bottle + nether wart = Awkward potion.','Magma cream = Fire Resistance.','Golden carrot = Night Vision.'], q:[
+      ['🧪','Base potion?',['Awkward','Thick','Mundane','Watery'],'Nether wart + water.'],
+      ['🧪','Night Vision ingredient?',['Golden carrot','Apple','Bread','Fish'],'See in the dark.'],
+      ['🧪','Fire Resistance ingredient?',['Magma cream','Sugar','Gunpowder','Bone'],'Lava swim.'],
+      ['🧪','Swiftness ingredient?',['Sugar','Wheat','Coal','Seeds'],'Zoom zoom!'],
+      ['🧪','Max Sharpness level?',['V','III','X','II'],'Level 5 best.'],
+      ['🧪','Frost Walker does?',['Freezes water','Flies','Invisible','Heals'],'Walk on water!'],
+      ['🧪','Fortune does?',['More drops','Faster','Stronger','Swim'],'More diamonds!'],
+      ['🧪','Unbreaking does?',['Last longer','Shine','Fly','Heavy'],'Tools last longer.'],
+      ['🧪','Efficiency does?',['Mines faster','Fights','Light','Food'],'Dig dig!'],
+      ['🧪','Anvil does?',['Repair + rename','Potions','Smelt','Grow'],'Clang!'] ]},
+    { e:'🔥', t:'Nether Expert', f:['12 Eyes of Ender fill a portal.','Eyes of Ender = pearl + blaze powder.','Respawn anchor needs glowstone.'], q:[
+      ['🔥','Eyes for full End portal?',['12','9','8','16'],'12 frames.'],
+      ['🔥','Eye of Ender =?',['Pearl + blaze powder','Pearl + diamond','Blaze rod + gold','Eye + redstone'],'Find strongholds.'],
+      ['🔥','Charge respawn anchor with?',['Glowstone','Redstone','Gold','Coal'],'Nether bed!'],
+      ['🔥','Piglins accept?',['Gold ingots','Diamonds','Iron','Emeralds'],'Shiny gold!'],
+      ['🔥','Netherite ingot =?',['4 scrap + 4 gold','4 diamonds + 4 gold','9 debris','2+2'],'Smelt debris first.'],
+      ['🔥','End ship item?',['Elytra','Beacon','Trident','Totem'],'Glide!'],
+      ['🔥','Shulker bullet effect?',['Levitation','Speed','Blindness','Haste'],'Up up away!'],
+      ['🔥','Wither drops?',['Nether star','Dragon egg','Elytra','Totem'],'Beacon!'],
+      ['🔥','Outer End islands reach?',['Throw pearl into gateway','Dig down','Nether portal','Boat'],'After dragon.'],
+      ['🔥','Blazes spawn?',['Nether fortresses','Villages','Oceans','Deserts'],'Bring snowballs!'] ]},
+    { e:'🐾', t:'Animal Master', f:['Horses breed with golden apples/carrots.','Composter makes bone meal.','Baby turtles drop scutes.'], q:[
+      ['🐾','Breed horses with?',['Golden apples/carrots','Wheat','Bones','Fish'],'Fancy snacks.'],
+      ['🐾','Breed pandas with?',['Bamboo','Wheat','Seeds','Carrots'],'Panda candy.'],
+      ['🐾','Breed axolotls with?',['Bucket of tropical fish','Wheat','Bones','Seeds'],'Fishy snack.'],
+      ['🐾','Breed foxes with?',['Sweet berries','Carrots','Fish','Wheat'],'Yum berries.'],
+      ['🐾','Breed cows with?',['Wheat','Seeds','Carrots','Bones'],'Moo!'],
+      ['🐾','Breed chickens with?',['Seeds','Wheat','Bones','Fish'],'Cluck cluck.'],
+      ['🐾','Tame horse?',['Keep trying to ride','Feed carrots','Name tag','Bell'],'Hold tight!'],
+      ['🐾','Composter makes?',['Bone meal','Diamonds','Water','Glass'],'Compost plants.'],
+      ['🐾','Baby turtle drop?',['Scute','Shell','Pearl','Honey'],'Turtle helmet.'],
+      ['🐾','Steer with carrot on stick?',['Pig','Cow','Sheep','Chicken'],'Oink express!'] ]},
+    { e:'🏆', t:'Final Challenge', f:['The Wither drops a Nether star.','Ancient debris is Netherite source.','The Ender Dragon respawns with End crystals.'], q:[
+      ['🏆','Wither drop?',['Nether star','Dragon egg','Elytra','Totem'],'Beacon time!'],
+      ['🏆','Ancient debris location?',['Nether','Overworld','End','All'],'Netherite!'],
+      ['🏆','Respawn Ender Dragon with?',['End crystals','Golden apples','Milk','Bread'],'Four crystals.'],
+      ['🏆','Which mob drops shulker shells?',['Shulker','Endermite','Enderman','Dragon'],'Shulker boxes.'],
+      ['🏆','Which block pushes blocks?',['Piston','Chest','Bed','Furnace'],'Push!'],
+      ['🏆','Which mob picks up blocks?',['Enderman','Creeper','Skeleton','Spider'],'Block thief.'],
+      ['🏆','Best sword enchant?',['Sharpness','Efficiency','Fortune','Silk Touch'],'More damage.'],
+      ['🏆','Best pickaxe enchant for ores?',['Fortune','Sharpness','Protection','Mending'],'More drops.'],
+      ['🏆','What does a conduit do?',['Powers underwater','Flies','Cooks','Farms'],'Heart of the sea.'],
+      ['🏆','What does Mending do?',['Repairs with XP','Sharpens','Flies','Burns'],'XP repair!'] ]}
+  ];
+
+  const L4 = [
+    { e:'👻', t:'Myth or Fact? Mobs', f:['Herobrine is a myth and not in the game.','Creepers were born from a coding mistake.','Endermen take damage from water.'], q:[
+      ['👻','Is Herobrine real?',['No, just a myth','Yes, in Nether','Yes, snowy','Yes, Fridays'],'Mojang jokes: Removed Herobrine!'],
+      ['👻','Creeper from pig mistake?',['True','Myth','From cow','From spider'],'Notch mixed numbers.'],
+      ['👻','Can you tame a Creeper?',['Myth','True with TNT','True with gunpowder','True with fish'],'Creepers stay wild.'],
+      ['👻','Rain hurts Endermen?',['True','Myth','Only snow','Only lava'],'Water damages them.'],
+      ['👻','Zombie Pigman new name?',['Zombified Piglin','Piglin Brute','Hoglin','Zoglin'],'Grumpy new name.'],
+      ['👻','Which is a MYTH?',['Wolves tamed with pizza','Pandas love bamboo','Bees die after sting','Cats scare Creepers'],'Bones, not pizza.'],
+      ['👻','Skeletons burn in daylight?',['True','Myth','Only rain','Only Nether'],'Unless helmet.'],
+      ['👻','Spiders neutral in light?',['True','Myth','Turn to cows','Disappear'],'Ignore until hit.'],
+      ['👻','Wither skeletons in Overworld?',['Myth','True','True caves','True villages'],'Nether fortresses.'],
+      ['👻','Endermen teleport you?',['Myth','True','True snowball','True night'],'Only themselves.'] ]},
+    { e:'📖', t:'Myth or Fact? History', f:['Minecraft was first called Cave Game.','Microsoft bought Mojang in 2014.','Minecraft has sold over 300 million copies.'], q:[
+      ['📖','Who created Minecraft in 2009?',['Notch','Steve','Alex','Jeb'],'Markus Persson.'],
+      ['📖','First name of Minecraft?',['Cave Game','Block World','Mine World','Craft Land'],'Cave Game!'],
+      ['📖','Bought Mojang in 2014?',['Microsoft','Google','Sony','Nintendo'],'Part of Microsoft.'],
+      ['📖','Famous calm music composer?',['C418','Mozart','Hans Zimmer','Beethoven'],'Peaceful piano.'],
+      ['📖','Minecraft movie 2025?',['True','Myth','Short film','Cancelled'],'It happened!'],
+      ['📖','Ender Dragon added in?',['2011','2005','2020','Never'],'Full release.'],
+      ['📖','Phone version first called?',['Pocket Edition','Mini Edition','Phone Edition','Lite Edition'],'Now Bedrock.'],
+      ['📖','Best-selling game?',['Yes, hundreds of millions','No new','Only mobile','Unknown'],'300M+ sold!'],
+      ['📖','Education for classrooms?',['True','Myth','Only adults','Only Xbox'],'Teachers love it.'],
+      ['📖','Mojang started in?',['Sweden','Japan','Brazil','USA'],'Stockholm.'] ]},
+    { e:'⚔️', t:'Myth or Fact? Items', f:['Gold mines fast but breaks fast.','Netherite is stronger than diamond.','Totem of Undying saves you once.'], q:[
+      ['⚔️','Fastest but weak pickaxe?',['Gold','Diamond','Iron','Netherite'],'Fast but weak!'],
+      ['⚔️','Stronger than diamond?',['Netherite','Gold','Iron','Stone'],'Strongest tools.'],
+      ['⚔️','Netherite burns in lava?',['Myth, it survives','True','True 5 sec','True swords'],'Floats and survives.'],
+      ['⚔️','Golden tools last longer than iron?',['Myth','True','Gold strongest','Only axes'],'Gold breaks fast.'],
+      ['⚔️','Repair elytra with phantom membrane?',['True','Myth','Feathers','Diamonds'],'Membranes fix elytra.'],
+      ['⚔️','Can you craft a saddle?',['No, find/trade','Yes leather','Yes string','Yes iron'],'Look in chests.'],
+      ['⚔️','Totem of Undying does?',['Saves once','Flies','Food','Teleport'],'Hold in hand.'],
+      ['⚔️','Carved pumpkin calms Endermen?',['True','Myth','Melon','Sock'],'Can’t see eyes.'],
+      ['⚔️','Sponge soaks lava?',['Myth, water only','True','True Nether','True wet'],'Water only.'],
+      ['⚔️','Milk removes potion effects?',['True','Myth','Only good','Only bad'],'Clears all.'] ]},
+    { e:'🧱', t:'Myth or Fact? Blocks', f:['Obsidian forms when water touches still lava.','Bedrock cannot be blown up.','Lava flows faster in the Nether.'], q:[
+      ['🧱','Makes obsidian?',['Water + still lava','Lava + sand','Water + dirt','Fire + stone'],'Stand back!'],
+      ['🧱','TNT blows up bedrock?',['Myth','True','10 TNT','Nether only'],'Bedrock unbreakable.'],
+      ['🧱','Infinite water source?',['True','Myth','Nether only','Creative only'],'Two sources side by side.'],
+      ['🧱','Cobwebs do?',['Slow you','Jump','Heal','Burn'],'Shears or sword.'],
+      ['🧱','Lava faster in Nether?',['True','Myth','Same','Night'],'Spreads farther.'],
+      ['🧱','Glass drops by hand?',['Myth, Silk Touch','True','Shovel','Rain'],'Silk Touch saves glass.'],
+      ['🧱','Bookshelves drop books?',['True','Myth','Stone','Paper'],'Three books each.'],
+      ['🧱','Gravel often drops?',['Gravel + flint','Flint always','Coal','Sand'],'Flint is lucky.'],
+      ['🧱','Powder snow safe without boots?',['Myth, sink','True','Daylight','Pickaxe'],'Leather boots help.'],
+      ['🧱','Sponge soaks water?',['True','Myth','Only lava','Only milk'],'Sponges are sponges!'] ]},
+    { e:'🌍', t:'Myth or Fact? World', f:['A Minecraft day is 20 minutes.','The moon has 8 phases.','The world is about 60 million blocks wide.'], q:[
+      ['🌍','Minecraft day = 24 minutes?',['Myth, 20 minutes','True','60 minutes','10 minutes'],'20 real minutes.'],
+      ['🌍','Sun rises in?',['East','West','North','South'],'Good morning east!'],
+      ['🌍','Can it rain in a desert?',['Myth','True','Night only','Winter'],'Deserts stay dry.'],
+      ['🌍','Snow in cold biomes?',['True','Myth','End only','Caves only'],'Snowball time!'],
+      ['🌍','World size?',['60 million blocks','1000 blocks','Village size','100 blocks'],'Huge!'],
+      ['🌍','Lightning sets fires?',['True','Myth','Only wood','Only wool'],'Thunderstorms.'],
+      ['🌍','Moon has phases?',['True','Myth','Sun only','End only'],'8 phases.'],
+      ['🌍','Dig straight to center?',['Myth, bedrock stops','True','Netherite','Creative only'],'Bedrock bottom.'],
+      ['🌍','Water stops fall damage?',['True','Myth','Only lava','Only snow'],'Land in water.'],
+      ['🌍','Hostile mobs spawn in dark?',['True','Myth','Daylight','Water'],'Light up your base.'] ]},
+    { e:'🔥', t:'Myth or Fact? Nether & End', f:['Water evaporates in the Nether.','Fire charges can light portals.','Endermen live in warped forests.'], q:[
+      ['🔥','Place water in Nether?',['Myth, evaporates','True','Turns to lava','Lakes'],'Evaporates.'],
+      ['🔥','Only flint & steel lights portals?',['Myth, fire charge works','True','Only lava','Only lightning'],'Fire charges work.'],
+      ['🔥','Beds explode in Nether?',['True','Myth','Red beds only','Night only'],'Boom!'],
+      ['🔥','Ghasts live in Overworld?',['Myth, Nether','True','Caves','Oceans'],'Nether floaters.'],
+      ['🔥','Piglins like gold?',['True','Myth','Diamonds','Iron'],'Gold armor calms.'],
+      ['🔥','Dragon respawns alone?',['Myth, need crystals','True','After 1 day','Night'],'Summon again.'],
+      ['🔥','Villages in Nether?',['Myth, bastions/fortresses','True','Lava','End'],'Nether villages don’t exist.'],
+      ['🔥','Never rains in Nether?',['True','Myth','Lava rain','Fire rain'],'No weather.'],
+      ['🔥','Take dragon egg in Survival?',['True, it teleports','Myth','Creative only','Netherite'],'Piston to move.'],
+      ['🔥','Endermen in Nether?',['True, warped forests','Myth','Only lava','Fortresses'],'Surprise!'] ]},
+    { e:'🐾', t:'Myth or Fact? Animals', f:['Axolotls attack drowned and guardians.','Foxes can carry items.','Parrots dance to music.'], q:[
+      ['🐾','Ride a pig with saddle?',['True','Myth','Only bell','Creative'],'Carrot on stick.'],
+      ['🐾','Cats scare Creepers?',['True','Myth','Black cats only','Kittens'],'Cats are heroes.'],
+      ['🐾','Chickens lay golden eggs?',['Myth','True','Night','End'],'Normal eggs.'],
+      ['🐾','Pandas have personalities?',['True','Myth','Baby only','Jungle only'],'Lazy, playful, worried.'],
+      ['🐾','Bees die after sting?',['True','Myth','Baby bees','Rain'],'Be kind to bees.'],
+      ['🐾','Axolotls fight water mobs?',['True','Myth','Blue only','Lava'],'Tiny heroes.'],
+      ['🐾','Milk a pig?',['Myth','True','Bucket sugar','Nether'],'Cows, goats, mooshrooms only.'],
+      ['🐾','Foxes carry items?',['True','Myth','Winter','Night'],'Hold items.'],
+      ['🐾','Shears give milk?',['Myth, need bucket','True','Enchants','Night'],'Use bucket.'],
+      ['🐾','Parrots dance to music?',['True','Myth','Red parrots','Rain'],'Jukebox party!'] ]},
+    { e:'🎮', t:'Myth or Fact? Modes', f:['Hardcore ends your world on death.','Spectator passes through blocks.','Bedrock supports cross-play.'], q:[
+      ['🎮','Creative = unlimited blocks + fly?',['True','Myth','Only fly','Only blocks'],'Build anything!'],
+      ['🎮','Hardcore respawn forever?',['Myth, one life','True','Three lives','Daylight'],'One life only.'],
+      ['🎮','Peaceful has no hostiles?',['True','Myth','No creepers','No zombies'],'Peaceful and calm.'],
+      ['🎮','Spectator passes through blocks?',['True','Myth','Water only','Glass only'],'Become a ghost.'],
+      ['🎮','Adventure breaks any block?',['Myth, need right tool','True','Dirt only','Sand only'],'Limited mode.'],
+      ['🎮','F3 shows coords in Java?',['True','Myth','Bedrock','Creative'],'Handy exploring.'],
+      ['🎮','Commands in Survival without cheats?',['Myth, cheats on','True','Time only','Weather only'],'Turn on cheats.'],
+      ['🎮','Bedrock supports cross-play?',['True','Myth','Xbox only','PC only'],'Friends any device.'],
+      ['🎮','Java has many mods?',['True','Myth','Phones only','Xbox only'],'Mod edition.'],
+      ['🎮','Education used in schools?',['True','Myth','Home only','Adults only'],'Learning with blocks.'],
+      ['🎮','Hardcore world ends on death?',['True','Myth','Respawn 3','Daylight'],'One life.'] ]},
+    { e:'🏕️', t:'Myth or Fact? Survival', f:['Water stops fall damage.','Torches reduce mob spawns.','Never dig straight down!'], q:[
+      ['🏕️','Water below stops fall?',['True','Myth','Lava','Snow'],'Water bucket trick.'],
+      ['🏕️','Milk cures poison?',['True','Myth','Water','Bread'],'Clears effects.'],
+      ['🏕️','Cook food in furnace?',['True','Myth','Nether only','Water'],'Yummy steak!'],
+      ['🏕️','Dig straight down safe?',['Myth, lava below','True','Creative','Hat'],'Never dig straight down.'],
+      ['🏕️','Bed sets spawn?',['True','Myth','Night only','Red beds'],'Sleep sets spawn.'],
+      ['🏕️','Creepers explode in daylight alone?',['Myth','True','Noon','Grass'],'Only near you.'],
+      ['🏕️','Torches reduce spawns?',['True','Myth','Nether','Water'],'Light up base.'],
+      ['🏕️','Sleep through thunderstorm?',['True','Myth','End','Village'],'Bed skips storm.'],
+      ['🏕️','Fire spreads on wood/leaves?',['True','Myth','Stone','Water'],'Careful with flames.'],
+      ['🏕️','Drink lava from bucket?',['Myth','True','Fire Resistance','Nether'],'Never try.'] ]},
+    { e:'🎓', t:'Myth or Fact? Expert', f:['Goats can be milked.','Boats cannot sail on lava.','Cactus can be smelted into dye.'], q:[
+      ['🎓','Which is MYTH?',['Dirt smelts to diamonds','Raw gold smelts','Sand to glass','Cactus to dye'],'No dirt diamonds.'],
+      ['🎓','Which is MYTH?',['Chickens can be milked','Cows can','Mooshrooms can','Goats can'],'No chicken milk.'],
+      ['🎓','Which is MYTH?',['Lava creates diamonds','Lava burns items','Lava + water = obsidian','Lava lights fires'],'No lava diamonds.'],
+      ['🎓','Which is MYTH?',['Villagers sell bedrock','Trade emeralds','Sleep in beds','Farm crops'],'No bedrock trades.'],
+      ['🎓','Which is MYTH?',['Netherite from dirt','Ancient debris','Needs gold','Smithing table'],'No dirt Netherite.'],
+      ['🎓','Which is MYTH?',['Endermen love stares','Teleport','Carry blocks','Hate water'],'Never stare.'],
+      ['🎓','Which is MYTH?',['Sheep can fly','Sheared','Many colors','Eat grass'],'Sheep can’t fly.'],
+      ['🎓','Which is MYTH?',['Day is 24 minutes','Day is 20 min','Night after day','Beds skip night'],'20 minutes.'],
+      ['🎓','Which is MYTH?',['Zombies always drop diamonds','Drop iron','Burn in sun','Infect villagers'],'Not always!'],
+      ['🎓','Which is MYTH?',['Boats sail in lava','Boats sail water','Carry two players','Made from planks'],'Boats burn in lava.'] ]}
+  ];
+
+  const L5 = [
+    { e:'🌟', t:'Legendary Mobs', f:['The Warden is blind but hears everything.','Ender Dragon is the final boss.','Wither is a player-built boss.'], q:[
+      ['🌟','Which boss is built by players?',['Wither','Ender Dragon','Warden','Elder Guardian'],'Soul sand + skulls.'],
+      ['🌟','Who hears everything in Deep Dark?',['Warden','Creeper','Zombie','Skeleton'],'Shhh!'],
+      ['🌟','Which boss lives in the End?',['Ender Dragon','Wither','Warden','Giant'],'Final boss.'],
+      ['🌟','What does Elder Guardian give you?',['Mining Fatigue','Speed','Haste','Strength'],'Spooky curse!'],
+      ['🌟','Which mob can summon Evokers?',['Evoker','Vindicator','Pillager','Witch'],'Evil spellcaster.'],
+      ['🌟','Which mob can freeze you?',['Stray','Husk','Zombie','Creeper'],'Slowness arrows.'],
+      ['🌟','Which mob is blind?',['Warden','Enderman','Creeper','Skeleton'],'Hears everything.'],
+      ['🌟','Which mob can summon lightning?',['Evoker','Witch','Pillager','Warden'],'Spooky!'],
+      ['🌟','Which boss drops a Nether star?',['Wither','Ender Dragon','Warden','Giant'],'Beacon time.'],
+      ['🌟','Which boss drops a dragon egg?',['Ender Dragon','Wither','Warden','Giant'],'One per world.'] ]},
+    { e:'🏰', t:'Legendary Builds', f:['Beacons need a pyramid of iron, gold, diamond or netherite.','Conduits need a prismarine frame.','Redstone can make automatic farms.'], q:[
+      ['🏰','What block powers a beacon?',['Nether star','Dragon egg','Elytra','Totem'],'Wither drop.'],
+      ['🏰','What block makes a conduit work?',['Heart of the sea + nautilus shells','Prismarine + gold','Diamonds + emeralds','Pearls + lapis'],'Underwater power!'],
+      ['🏰','What can a piston push?',['Up to 12 blocks','6','4','20'],'Push limit.'],
+      ['🏰','What does a hopper do?',['Moves items','Grows trees','Cooks fish','Makes light'],'Item vacuum.'],
+      ['🏰','What is a redstone repeater for?',['Boosts signal','Lights up','Plays music','Pushes blocks'],'Signal booster.'],
+      ['🏰','What block can detect block changes?',['Observer','Piston','Dispenser','Hopper'],'Pulse!'],
+      ['🏰','What does a daylight detector sense?',['Sunlight','Mobs','Lava','Rain'],'Auto lights.'],
+      ['🏰','What does a comparator measure?',['Container fullness','Time','Health','Hunger'],'Fancy machines.'],
+      ['🏰','What rail makes minecarts fast?',['Powered rail','Wool','Sand','Glass'],'Choo choo!'],
+      ['🏰','What block cannot be pushed by a piston?',['Obsidian','Dirt','Sand','Wool'],'Too heavy.'] ]},
+    { e:'🧮', t:'Legendary Maths', f:['A full beacon pyramid needs 164 blocks.','54 stacks of 64 = 3456 items.','A Nether step = 8 Overworld blocks.'], q:[
+      ['🧮','A double chest holds 54 stacks. Total items?',['3456','1728','2048','5400'],'54×64=3456.'],
+      ['🧮','A full 4-layer beacon pyramid needs?',['164','81','100','140'],'9+25+49+81=164.'],
+      ['🧮','25 Nether blocks = Overworld?',['200','33','150','250'],'25×8=200.'],
+      ['🧮','3 stacks of 64 + 20 = ?',['212','192','232','84'],'192+20=212.'],
+      ['🧮','1 coal smelts 8 items. Coal for 40?',['5','4','8','10'],'40÷8=5.'],
+      ['🧮','36 inventory slots × 64 = ?',['2304','1728','2048','4096'],'36×64=2304.'],
+      ['🧮','Days in 2 hours?',['6','3','12','10'],'120÷20=6.'],
+      ['🧮','2 diamond sword + 3 pickaxe + 3 axe = ?',['8','7','9','6'],'2+3+3=8.'],
+      ['🧮','16 ender pearls − 7 thrown = ?',['9','7','8','10'],'16−7=9.'],
+      ['🧮','Blocks in 16×16 chunk layer?',['256','32','64','162'],'16×16=256.'] ]},
+    { e:'🧪', t:'Legendary Alchemy', f:['Sharpness goes up to V.','Fortune gives more drops.','An anvil repairs and renames.'], q:[
+      ['🧪','Base potion for many recipes?',['Awkward','Thick','Mundane','Watery'],'Nether wart + water.'],
+      ['🧪','Night Vision ingredient?',['Golden carrot','Apple','Bread','Fish'],'See in dark.'],
+      ['🧪','Fire Resistance ingredient?',['Magma cream','Sugar','Gunpowder','Bone'],'Lava swim.'],
+      ['🧪','Swiftness ingredient?',['Sugar','Wheat','Coal','Seeds'],'Zoom!'],
+      ['🧪','Max Sharpness level?',['V','III','X','II'],'Level 5.'],
+      ['🧪','Frost Walker does?',['Freezes water','Flies','Invisible','Heals'],'Walk on water.'],
+      ['🧪','Fortune does?',['More drops','Faster','Stronger','Swim'],'More diamonds.'],
+      ['🧪','Unbreaking does?',['Last longer','Shine','Fly','Heavy'],'Tools last.'],
+      ['🧪','Efficiency does?',['Mines faster','Fights','Light','Food'],'Dig dig.'],
+      ['🧪','Anvil does?',['Repair + rename','Potions','Smelt','Grow'],'Clang!'] ]},
+    { e:'🌌', t:'Legendary World', f:['The End is made of end stone and chorus plants.','The Nether has 5 biomes.','Mushroom fields have no hostile mobs.'], q:[
+      ['🌌','What dimension has chorus plants?',['The End','Overworld','Nether','Deep Dark'],'End plant.'],
+      ['🌌','How many Nether biomes?',['5','3','7','2'],'5 biomes.'],
+      ['🌌','Where do hostile mobs not spawn on surface?',['Mushroom fields','Desert','Swamp','Dark forest'],'Safe strange island.'],
+      ['🌌','Which structure holds End portal?',['Stronghold','Village','Igloo','Shipwreck'],'Eyes of Ender.'],
+      ['🌌','Ancient cities in?',['Deep Dark','Desert','Jungle','Snowy plains'],'Warden!'],
+      ['🌌','Desert temple trap?',['TNT','Lava','Arrows','Water'],'Step carefully.'],
+      ['🌌','Wild cat in jungle?',['Ocelot','Fox','Wolf','Panda'],'Feed fish.'],
+      ['🌌','Sun rises in?',['East','West','North','South'],'East.'],
+      ['🌌','Lowest bedrock layer modern Overworld?',['Y=-64','Y=0','Y=-32','Y=-128'],'Deeper 1.18.'],
+      ['🌌','Ancient debris dimension?',['Nether','Overworld','End','All'],'Netherite!'] ]},
+    { e:'🧑‍🌾', t:'Legendary Villagers', f:['Curing zombie villagers gives discounts.','Each job has its own block.','Villagers trade emeralds.'], q:[
+      ['🧑‍🌾','Cure zombie villager with?',['Weakness + golden apple','Water + bread','Milk + carrot','Sword + bed'],'Doctor trick.'],
+      ['🧑‍🌾','Farmer job block?',['Composter','Barrel','Lectern','Furnace'],'Plant & trade.'],
+      ['🧑‍🌾','Librarian job block?',['Lectern','Composter','Anvil','Bell'],'Shhh!'],
+      ['🧑‍🌾','Fisherman job block?',['Barrel','Lectern','Anvil','Grindstone'],'Fish for emeralds.'],
+      ['🧑‍🌾','Cleric job block?',['Brewing stand','Barrel','Cauldron','Smoker'],'Potions & magic.'],
+      ['🧑‍🌾','Armorer job block?',['Blast furnace','Smoker','Loom','Stonecutter'],'Armor for sale.'],
+      ['🧑‍🌾','Weaponsmith job block?',['Grindstone','Anvil','Barrel','Bell'],'Swords for sale.'],
+      ['🧑‍🌾','Villagers trade with?',['Emeralds','Diamonds','Gold','Iron'],'Hrmm!'],
+      ['🧑‍🌾','Who attacks villages in raids?',['Pillagers','Cows','Sheep','Bees'],'Defend!'],
+      ['🧑‍🌾','Curing a zombie villager gives?',['Big trade discounts','Free armor','A pet','Diamonds'],'Cheaper trades forever.'] ]},
+    { e:'🔴', t:'Legendary Redstone', f:['A redstone signal travels 15 blocks.','Pistons push 12 blocks max.','Observers detect block updates.'], q:[
+      ['🔴','How far does redstone signal travel?',['15 blocks','5','30','64'],'Use repeater.'],
+      ['🔴','What does a repeater do?',['Boosts + delays','Light','Pushes','Music'],'Signal booster.'],
+      ['🔴','What does an observer detect?',['Block changes','Mobs','Daylight','Water level'],'Pulse!'],
+      ['🔴','What can a sticky piston do?',['Pull blocks back','Fly','Light','Break bedrock'],'Sticky pulls!'],
+      ['🔴','Piston push limit?',['12','6','4','20'],'12 max.'],
+      ['🔴','What does a daylight detector sense?',['Sunlight','Rain','Lava','Mobs'],'Auto lights.'],
+      ['🔴','Tripwire hooks connect with?',['String','Wool','Redstone','Vines'],'Step and click.'],
+      ['🔴','Dispenser does?',['Shoots/places items','Eats','Sleeps','Grows'],'Arrow traps.'],
+      ['🔴','Redstone torch when block powered?',['Turns off','Explodes','Brighter','Floats'],'Inverter.'],
+      ['🔴','Comparator measures?',['Container fullness','Time','Mob health','Hunger'],'Fancy machines.'] ]},
+    { e:'🐾', t:'Legendary Animals', f:['Horses breed with golden apples/carrots.','Composter makes bone meal.','Baby turtles drop scutes.'], q:[
+      ['🐾','Breed horses with?',['Golden apples/carrots','Wheat','Bones','Fish'],'Fancy snacks.'],
+      ['🐾','Breed pandas with?',['Bamboo','Wheat','Seeds','Carrots'],'Panda candy.'],
+      ['🐾','Breed axolotls with?',['Bucket of tropical fish','Wheat','Bones','Seeds'],'Fishy snack.'],
+      ['🐾','Breed foxes with?',['Sweet berries','Carrots','Fish','Wheat'],'Yum berries.'],
+      ['🐾','Breed cows with?',['Wheat','Seeds','Carrots','Bones'],'Moo!'],
+      ['🐾','Breed chickens with?',['Seeds','Wheat','Bones','Fish'],'Cluck.'],
+      ['🐾','Tame horse?',['Keep trying to ride','Feed carrots','Name tag','Bell'],'Hold tight!'],
+      ['🐾','Composter makes?',['Bone meal','Diamonds','Water','Glass'],'Compost plants.'],
+      ['🐾','Baby turtle drop?',['Scute','Shell','Pearl','Honey'],'Turtle helmet.'],
+      ['🐾','Steer with carrot on stick?',['Pig','Cow','Sheep','Chicken'],'Oink express!'] ]},
+    { e:'🔥', t:'Legendary Nether', f:['12 Eyes of Ender fill a portal.','Respawn anchor needs glowstone.','Netherite is stronger than diamond.'], q:[
+      ['🔥','Eyes for full End portal?',['12','9','8','16'],'12 frames.'],
+      ['🔥','Eye of Ender =?',['Pearl + blaze powder','Pearl + diamond','Blaze rod + gold','Eye + redstone'],'Find strongholds.'],
+      ['🔥','Charge respawn anchor with?',['Glowstone','Redstone','Gold','Coal'],'Nether bed!'],
+      ['🔥','Piglins accept?',['Gold ingots','Diamonds','Iron','Emeralds'],'Shiny gold.'],
+      ['🔥','Netherite ingot =?',['4 scrap + 4 gold','4 diamonds + 4 gold','9 debris','2+2'],'Smelt debris.'],
+      ['🔥','End ship item?',['Elytra','Beacon','Trident','Totem'],'Glide!'],
+      ['🔥','Shulker bullet effect?',['Levitation','Speed','Blindness','Haste'],'Up up away!'],
+      ['🔥','Wither drops?',['Nether star','Dragon egg','Elytra','Totem'],'Beacon!'],
+      ['🔥','Outer End islands reach?',['Throw pearl into gateway','Dig down','Nether portal','Boat'],'After dragon.'],
+      ['🔥','Blazes spawn?',['Nether fortresses','Villages','Oceans','Deserts'],'Bring snowballs.'] ]},
+    { e:'🏆', t:'Legendary Finale', f:['The Wither drops a Nether star.','Ancient debris is Netherite source.','Ender Dragon respawns with End crystals.'], q:[
+      ['🏆','Wither drop?',['Nether star','Dragon egg','Elytra','Totem'],'Beacon time!'],
+      ['🏆','Ancient debris location?',['Nether','Overworld','End','All'],'Netherite!'],
+      ['🏆','Respawn dragon with?',['End crystals','Golden apples','Milk','Bread'],'Four crystals.'],
+      ['🏆','Which mob drops shulker shells?',['Shulker','Endermite','Enderman','Dragon'],'Shulker boxes.'],
+      ['🏆','Which block pushes blocks?',['Piston','Chest','Bed','Furnace'],'Push!'],
+      ['🏆','Which mob picks up blocks?',['Enderman','Creeper','Skeleton','Spider'],'Block thief.'],
+      ['🏆','Best sword enchant?',['Sharpness','Efficiency','Fortune','Silk Touch'],'More damage.'],
+      ['🏆','Best pickaxe enchant for ores?',['Fortune','Sharpness','Protection','Mending'],'More drops.'],
+      ['🏆','Conduit does?',['Powers underwater','Flies','Cooks','Farms'],'Heart of the sea.'],
+      ['🏆','Mending does?',['Repairs with XP','Sharpens','Flies','Burns'],'XP repair!'] ]}
+  ];
+
+  const LVS = { 1: L1, 2: L2, 3: L3, 4: L4, 5: L5 };
+  let LV = 1, MODS = LVS[LV];
+  let cur = null, SND = true, AC = null;
+  const SECOND = 1; // 1 = full point, 0.5 = half
+
+  // ---------- SOUND (Web Audio) ----------
+  function toggleSnd() { SND = !SND; document.querySelector('#snd').textContent = SND ? '🔊' : '🔇'; }
+  function ac() {
+    if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+    if (AC.state === 'suspended') AC.resume();
+    return AC;
+  }
+  function tone(f1, f2, t0, dur, type, vol) {
+    const c = ac(), o = c.createOscillator(), g = c.createGain(), t = c.currentTime + t0;
+    o.type = type; o.frequency.setValueAtTime(f1, t);
+    o.frequency.linearRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g); g.connect(c.destination);
+    o.start(t); o.stop(t + dur);
+  }
+  function rightSound() { if (!SND) return; tone(523, 523, 0, .15, 'triangle', .2); tone(659, 659, .15, .15, 'triangle', .2); tone(784, 784, .3, .35, 'triangle', .2); }
+  function wrongSound() { if (!SND) return; tone(300, 200, 0, .25, 'sawtooth', .25); tone(220, 120, .25, .45, 'sawtooth', .25); }
+
+  const $ = s => document.querySelector(s);
+  const sh = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(x => x[1]);
+
+  // ---------- PAGES ----------
+  function cover() {
+    cur = null;
+    const ff = sh(MODS.flatMap(m => m.f))[0];
+    $('#app').innerHTML = `<div class="card cover">
+      <img src="family.jpg" alt="Our Minecraft family" onerror="this.outerHTML='<p class=note>Put your photo in the same folder and name it family.jpg</p>'">
+      <h2>Lionforge Academy · 5 Levels</h2>
+      <p>Lionel Version 🦁</p>
+      <div class="fact" style="text-align:left">💡 <b>Fun fact:</b> ${ff}</div>
+      <button class="big" onclick="home()">▶ Start Adventure</button></div>`;
+  }
+
+  function home() {
+    cur = null;
+    const total = MODS.reduce((a, m) => a + m.q.length, 0);
+    const lvlColors = ['', '', ' l2', ' l3', ' l4', ' l5'];
+    const lvlEmoji = ['', '🌱', '🔥', '🧩', '👻', '🌟'];
+    const lvlNames = ['', 'Level 1 · Easy', 'Level 2 · Harder', 'Level 3 · Tricky', 'Level 4 · Myth/Fact', 'Level 5 · Legendary'];
+    $('#app').innerHTML = `<div class="card"><h2>Main Menu 🗺️</h2>
+      ${[1,2,3,4,5].map(n => `<button class="big${LV === n ? lvlColors[n] : ' g'}" onclick="setLV(${n})">${lvlEmoji[n]} ${lvlNames[n]}</button>`).join(' ')}<br>
+      <small>Level ${LV} · ${MODS.length} modules · ${total} questions</small></div>`
+      + MODS.map((m, i) => `<div class="card mod"><div><b>${m.e} ${m.t}</b><br><small>${m.q.length} questions + fun facts</small></div><button class="big" onclick="start(${i})">Play!</button></div>`).join('')
+      + `<div class="card mod"><div><b>🏆 Final Boss Exam</b><br><small>10 random questions from Level ${LV}</small></div><button class="big" onclick="start('f')">Fight!</button></div>
+      <button class="big g" onclick="cover()">🏠 Back to cover</button>`;
+  }
+
+  function setLV(v) { LV = v; MODS = LVS[v]; home(); }
+
+  function start(k) {
+    ac();
+    const m = k === 'f' ? { e: '🏆', t: 'Final Boss Exam (Level ' + LV + ')', q: sh(MODS.flatMap(x => x.q)).slice(0, 10) } : MODS[k];
+    cur = { k, m, n: 0, s: 0 };
+    if (m.f) facts(); else ask();
+  }
+
+  function facts() {
+    const m = cur.m;
+    $('#app').innerHTML = `<div class="card"><h2>${m.e} ${m.t}</h2><h3>📚 Fun Facts! Read these first</h3>${m.f.map(x => `<div class="fact">💡 ${x}</div>`).join('')}<button class="big" onclick="ask()">Start Quiz ▶</button> <button class="big g" onclick="home()">Menu</button></div>`;
+  }
+
+  function ask() {
+    const m = cur.m;
+    if (cur.n >= m.q.length) return end();
+    const [pic, q, o] = m.q[cur.n];
+    cur.o = sh(o.map((t, k) => ({ t, c: k === 0 })));
+    cur.lock = false;
+    cur.tries = 0;
+    // Removed the picture: no .pic / .emo div
+    $('#app').innerHTML = `<div class="card"><div class="bar"><i style="width:${cur.n / m.q.length * 100}%"></i></div><small>${m.e} ${m.t} · Question ${cur.n + 1} of ${m.q.length} · ⭐ ${cur.s}</small><h2>${q}</h2>${cur.o.map((x, k) => `<button class="opt" onclick="pick(${k})">${"ABCD"[k]}. ${x.t}</button>`).join('')}<div id="fb"></div></div>`;
+  }
+
+  function pick(k) {
+    if (cur.lock) return;
+    const o = cur.o, fx = cur.m.q[cur.n][3], btn = document.querySelectorAll('.opt');
+    const next = `<button class="big" onclick="cur.n++;ask()">Next ➜</button>`;
+    if (o[k].c) {
+      cur.lock = true;
+      cur.s += cur.tries == 0 ? 1 : SECOND;
+      btn[k].classList.add('ok');
+      rightSound();
+      $('#fb').innerHTML = `<p class="fx">${cur.tries ? '👏 Great second try! ' : '🎉 Yes! '}${fx}</p>${next}`;
+    } else {
+      cur.tries++;
+      btn[k].classList.add('bad', 'shake');
+      btn[k].disabled = true;
+      wrongSound();
+      if (cur.tries == 1) {
+        $('#fb').innerHTML = `<p class="fx">😅 Oops! Try again, you have 1 more chance! 💪</p>`;
+      } else {
+        cur.lock = true;
+        btn.forEach((b, j) => { if (o[j].c) b.classList.add('ok'); });
+        $('#fb').innerHTML = `<p class="fx">😅 Oops! ${fx}</p>${next}`;
+      }
+    }
+  }
+
+  function end() {
+    const m = cur.m, s = cur.s, t = m.q.length, fl = Math.floor(s);
+    const r = s == t ? 'Diamond Master 💎' : s >= t * .7 ? 'Iron Hero ⚔️' : s >= t * .4 ? 'Wood Builder 🪵' : 'Baby Zombie 🧟 (try again!)';
+    if (s >= t * .7) rightSound();
+    let nextBtn = '';
+    if (typeof cur.k === 'number') {
+      nextBtn = cur.k < MODS.length - 1
+        ? `<button class="big n" onclick="start(${cur.k + 1})">Next Module ➜</button>`
+        : `<button class="big n" onclick="start('f')">Final Boss Exam 🏆</button>`;
+    }
+    const up = (LV < 5 && cur.k === 'f' && s >= t * .7) ? `<button class="big l${LV + 1}" onclick="setLV(${LV + 1})">${['', '', '🔥', '🧩', '👻', '🌟'][LV + 1]} Try Level ${LV + 1}</button>` : '';
+    $('#app').innerHTML = `<div class="card end" style="text-align:center">
+      <h1>${"⭐".repeat(fl)}${"☆".repeat(t - fl)}</h1>
+      <h2>${s} / ${t}</h2>
+      <h2>${r}</h2>
+      ${nextBtn}${up}
+      <button class="big" onclick="start(${typeof cur.k === 'number' ? cur.k : "'f'"})">Play again 🔁</button>
+      <button class="big g" onclick="home()">Menu</button>
+    </div>`;
+  }
+
+  // boot
+  cover();
+</script>
+</body>
+</html>

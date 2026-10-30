@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Multi-Format Cognitive Assessment Suite</title>
+<style>
+:root{--bg:#f3f5fa;--paper:#fff;--ink:#182238;--muted:#65718a;--line:#dfe5ef;--blue:#4259d8;--pale:#eef1ff;--green:#137b55;--red:#b33b45}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+header{background:linear-gradient(125deg,#17264b,#4259d8);color:#fff;padding:30px 18px} .wrap{max-width:1050px;margin:auto;padding:0 18px}
+header h1{font-size:clamp(25px,4vw,36px);margin:0}header p{color:#dce3ff;margin:7px 0 0}
+main{padding:26px 0 60px}.panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:23px;margin:0 0 17px;box-shadow:0 10px 30px #1b2d5410}
+h2{margin:0 0 12px;font-size:21px}h3{margin:0 0 8px;font-size:17px}.muted,.small{color:var(--muted)}.small{font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.tests{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.testcard{border:1px solid var(--line);border-radius:13px;padding:17px;background:#fff;display:flex;flex-direction:column;gap:8px}
+.tag{display:inline-block;background:var(--pale);color:#3449bd;border-radius:99px;padding:4px 9px;font-size:12px;font-weight:700;width:max-content}
+button{border:0;background:var(--blue);color:white;padding:11px 16px;border-radius:9px;font-weight:700;cursor:pointer}button:hover{filter:brightness(.96)}button.secondary{background:#edf0f6;color:#25324a}button:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.between{justify-content:space-between}
+.progress{height:8px;background:#e9edf5;border-radius:99px;overflow:hidden;margin:12px 0}.progress span{height:100%;display:block;background:var(--blue);width:0}
+.qtitle{font-size:20px;font-weight:700;margin:20px 0 14px}.answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.answer{padding:12px;border:1px solid var(--line);border-radius:10px;display:flex;gap:9px;align-items:center;cursor:pointer;background:white}.answer:hover{border-color:#8d9af0}.answer.sel{border:2px solid var(--blue);padding:11px;background:#f5f6ff}.answer input{accent-color:var(--blue)}
+.visual{display:flex;justify-content:center;align-items:center;min-height:130px;margin:15px auto;padding:12px;background:#f8f9fc;border:1px solid var(--line);border-radius:12px;max-width:560px}
+.matrix{display:grid;grid-template-columns:repeat(3,74px);gap:5px}.cell{height:66px;border:1px solid #bfc8d8;background:#fff;display:flex;align-items:center;justify-content:center;font-size:29px;font-weight:700}.cell.missing{background:#edf0ff;color:var(--blue);font-size:24px}
+.barline{display:grid;grid-template-columns:160px 1fr 42px;gap:10px;align-items:center;margin:13px 0}.bar{height:10px;background:#edf0f6;border-radius:99px;overflow:hidden}.bar span{display:block;height:100%;background:linear-gradient(90deg,#7381ee,#4259d8)}
+.notice{padding:12px 14px;border-left:3px solid var(--blue);background:#f5f6ff;border-radius:0 9px 9px 0;margin:10px 0}
+.hidden{display:none!important}.score{font-size:54px;line-height:1.1;color:var(--blue);font-weight:800}.nav{display:flex;justify-content:space-between;gap:10px;margin-top:20px}
+input[type=text]{padding:10px;border:1px solid var(--line);border-radius:8px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:22px}
+@media(max-width:700px){.tests,.grid{grid-template-columns:1fr}.answers{grid-template-columns:1fr}.panel{padding:17px}.barline{grid-template-columns:112px 1fr 35px}.matrix{grid-template-columns:repeat(3,64px)}.cell{height:58px}}
+@media print{header,#home,#test,.noprint,footer{display:none!important}body{background:white}.panel{box-shadow:none;break-inside:avoid}}
+</style></head>
+<body>
+<header><div class="wrap"><h1>Multi-Format Cognitive Assessment Suite</h1><p>Five independent test programmes, each with four assessment formats and a unique question bank.</p></div></header>
+<main class="wrap">
+<section id="home">
+ <div id="welcomeStep" class="panel">
+  <span class="tag">Welcome</span>
+  <h2 style="margin-top:12px">Let’s get started</h2>
+  <p class="muted">Enter your name if you’d like it shown on your report. You can continue without a name.</p>
+  <label for="candidate">Name (optional)</label>
+  <input id="candidate" type="text" placeholder="Enter your name" autocomplete="name">
+  <div class="nav"><span></span><button id="nameNext">Next</button></div>
+ </div>
+ <div id="packStep" class="hidden">
+   <div class="panel">
+    <div class="row between"><div><span class="tag">Assessment programmes</span><h2 style="margin-top:12px">Choose a test</h2></div><button class="secondary" id="backToWelcome" type="button">Back</button></div>
+    <p class="small">Choose one of five independent test programmes. Each programme has its own questions and results.</p>
+    <div class="notice"><b>Same assessment standard:</b> Every programme uses the same four assessment formats, domain coverage, item counts, time limits and scoring approach, with a different question bank.</div>
+   </div>
+   <div class="tests" id="packCards"></div>
+ </div>
+ <div id="libraryStep" class="hidden">
+  <div class="panel">
+   <div class="row between"><div><span class="tag" id="libraryPackTag">Test 1</span><h2 style="margin-top:12px">Choose an assessment</h2></div><button class="secondary" id="backToName" type="button">Back to tests</button></div>
+   <p class="small">Choose one format from this test programme. Your answers will not be marked or explained until you finish.</p>
+   <div class="notice"><b>About these assessments:</b> These are original practice items, not official test forms. Results show raw performance and domain profiles only; they are not a valid IQ score, diagnosis or clinical assessment.</div>
+  </div>
+  <div class="tests" id="testCards"></div>
+ </div>
+</section>
+<section id="test" class="hidden">
+ <div class="panel">
+  <div class="row between"><span class="tag" id="formatTag"></span><b id="clock">--:--</b></div>
+  <div class="progress"><span id="progress"></span></div>
+  <div class="row between small"><span id="position"></span><span id="doneCount"></span></div>
+  <div id="instruction" class="small" style="margin-top:8px"></div>
+  <div id="qbody"></div>
+  <div class="nav"><button class="secondary" id="back">Previous</button><div class="row"><button class="secondary" id="forward">Next</button><button id="submit">Finish assessment</button></div></div>
+ </div>
+</section>
+<section id="results" class="hidden">
+ <div class="panel">
+  <span class="tag">Completed</span><h2 id="reportTitle" style="margin-top:12px"></h2>
+  <div class="score" id="rawScore"></div><p id="summary" class="muted"></p>
+  <div class="grid"><div class="testcard"><b id="correct"></b><span class="small">Correct answers</span></div><div class="testcard"><b id="duration"></b><span class="small">Time used</span></div></div>
+  <p class="small">This is a raw practice result for this item set, not an IQ score, percentile, diagnosis or comparison with the general population.</p>
+ </div>
+ <div class="panel"><h2>Domain profile</h2><div id="domainBars"></div></div>
+ <div class="panel"><h2>Answer review and explanations</h2><div id="answerReview"></div></div>
+ <div class="panel"><h2>Suggested next steps</h2><div id="recommendations"></div></div>
+ <div class="row noprint"><button id="again">Back to assessment library</button><button class="secondary" onclick="window.print()">Print / save report</button></div>
+</section>
+</main><footer>Original educational practice material · Not affiliated with test publishers · Not a substitute for professional assessment</footer>
+<script>
+const bank = {
+adult:{
+title:"Adult multi-domain profile",label:"WAIS-inspired format",time:24,
+desc:"A mixed-format adult cognitive battery simulation: verbal reasoning, quantitative reasoning, working-memory-style items, visual reasoning and timed symbol scanning.",
+domains:{
+"Verbal comprehension":[
+["Which pair has the closest relationship: thermometer : temperature?","Compass : direction","Clock : distance","Scale : volume","Map : weight",0,"A thermometer measures temperature; a compass indicates direction."],
+["What does 'reluctant' most nearly mean?","Eager","Unwilling","Certain","Careless",1,"Reluctant means hesitant or unwilling."],
+["How are a map and a timetable alike?","Both are types of fiction","Both organize information to guide decisions","Both measure temperature","Both are tools for cutting",1,"Both present structured information that helps someone plan or navigate."],
+["All orchids are plants. No plants are made of metal. Which must be true?","Some orchids are metal","No orchids are made of metal","All plants are orchids","Some metal objects are orchids",1,"If all orchids are plants, and no plants are metal, orchids cannot be metal."]
+],
+"Quantitative reasoning":[
+["Complete the sequence: 4, 9, 19, 39, 79, ?","119","149","159","169",2,"Each term is doubled and then 1 is added."],
+["A quantity is reduced by 25% to become 90. What was it before the reduction?","100","110","120","125",2,"90 represents 75% of the original; 90 ÷ 0.75 = 120."],
+["If 3 workers complete a task in 12 hours at the same rate, how long would 6 workers take?","3 hours","6 hours","9 hours","24 hours",1,"Twice as many workers take half as long: 6 hours."],
+["What is the next number? 2, 5, 10, 17, 26, ?","35","36","37","39",2,"The differences are 3, 5, 7, 9; next difference is 11."]
+],
+"Working-memory-style reasoning":[
+["Remember these digits: 7 - 2 - 9 - 4. What is the sequence in reverse order?","4 - 9 - 2 - 7","4 - 2 - 9 - 7","7 - 9 - 2 - 4","9 - 4 - 2 - 7",0,"Reverse the order without changing the digits."],
+["Start at 18. Subtract 3, double the result, then add 4. What is the answer?","30","32","34","36",2,"18 − 3 = 15; 15 × 2 = 30; 30 + 4 = 34."],
+["Which letter is two places after the letter that comes immediately before M?","L","M","N","O",2,"The letter before M is L; two places after L is N? Count forward: M (one), N (two). Correct answer is N."],
+["Remember: 5, 1, 8, 3, 6. Which number was third?","1","3","6","8",3,"The third number in the original sequence is 8."]
+],
+"Visual / fluid reasoning":[
+["Which completes the pattern? ▲ ■ ▲ ■ ▲ ?","▲","■","●","◆",1,"The symbols alternate triangle, square."],
+["A shape turns 90° clockwise four times. Its final orientation is:","90° clockwise","180°","270° clockwise","Same as the start",3,"Four quarter-turns make a full 360° rotation."],
+["Find the missing value: 2, 3, 5 / 4, 6, 10 / 7, 8, ?","13","14","15","16",2,"In each row, the third number is the sum of the first two: 7 + 8 = 15."],
+["Which one is different?","Cube","Sphere","Pyramid","Triangle",3,"The first three are three-dimensional solids; a triangle is a two-dimensional shape."]
+],
+"Processing-speed-style scan":[
+["In this row, how many pairs are identical? AB7 / AB7 / A87 / AB7 / A87","1","2","3","4",2,"There are three AB7 entries, giving three identical pairs if compared as repeated entries? The repeated target AB7 appears three times; three entries make three matching pairs? For a single count, count occurrences: 3."],
+["Select the exact match for code K4P9.","K4P9","K4R9","K4P6","K4P8",0,"Only the first option matches every character."],
+["Which sequence is in alphabetical order?","B D A C","A B C D","A C B D","D C B A",1,"A, B, C, D is alphabetical order."],
+["How many times does digit 6 appear? 6 8 6 3 9 6 1 6 4","3","4","5","6",1,"The digit 6 appears four times."]
+]}
+},
+raven:{
+title:"Abstract matrix reasoning",label:"Raven-style format",time:18,
+desc:"Nonverbal-style matrix and rule-induction practice. Look for changes in shape, count, shading, direction and combinations.",
+domains:{"Matrix reasoning":[
+["Which symbol completes the alternating matrix?","▲","■","●","◆",1,"Rows alternate triangle and square; the missing cell is a square."],
+["Sequence: ○, ◐, ●, ○, ◐, ?","○","◐","●","□",2,"The fill pattern cycles empty, half-filled, filled."],
+["Complete: ↑, →, ↓, ?","↑","→","←","↓",2,"The arrow rotates 90° clockwise each step; after down comes left."],
+["What comes next? △, △△, △△△, ?","△","△△","△△△△","□□",2,"The number of triangles increases by one each time."],
+["Rule: 2 circles become 4 circles; 3 squares become 6 squares. 5 triangles become:","5 triangles","7 triangles","10 triangles","15 triangles",2,"The number of shapes doubles."],
+["Which is the odd one out?","○","□","△","◇",0,"The circle has no straight sides; the others are polygons."],
+["Complete the sequence: ◆, ◇, ◆, ◇, ?","◆","◇","○","□",0,"The filled and unfilled diamond alternate."],
+["If each step adds one side, what follows triangle, square, pentagon?","Hexagon","Octagon","Circle","Rectangle",0,"The number of sides increases 3, 4, 5, then 6."],
+["A pattern flips left-right at each step: ◀, ▶, ◀, ?","◀","▶","▲","▼",1,"The orientation alternates left and right."],
+["Complete: 1 dot, 2 dots, 4 dots, 8 dots, ?","10","12","14","16",3,"The number of dots doubles each time."],
+["A symbol rotates 180° at every step. Starting ↑, then ↓, then ?","↑","→","←","↓",0,"A second 180° turn returns the arrow to its original upward direction."],
+["Which rule fits 3, 6, 12, 24?","Add 3","Multiply by 2","Add 6","Square each term",1,"Each term is twice the previous one."]
+]}
+},
+stanford:{
+title:"Broad cognitive domains",label:"Stanford–Binet-inspired format",time:22,
+desc:"A broad sampling across fluid reasoning, acquired knowledge, quantitative reasoning, visual-spatial reasoning and working-memory-style tasks.",
+domains:{
+"Fluid reasoning":[
+["All Nems are Vals. No Vals are Tors. Can a Nem be a Tor?","Yes, always","No","Only sometimes","Cannot interpret",1,"A Nem is a Val, and no Val is a Tor."],
+["Find the next number: 1, 4, 9, 16, 25, ?","30","32","36","49",2,"These are square numbers: 1² through 6²."],
+["If A is heavier than B, and C is lighter than B, which is heaviest?","A","B","C","Cannot tell",0,"A is heavier than B, while C is lighter than B."]
+],
+"Knowledge / verbal concepts":[
+["Which word means 'to make less severe'?","Intensify","Alleviate","Duplicate","Predict",1,"Alleviate means to make a problem or suffering less severe."],
+["Which is a mammal?","Trout","Frog","Dolphin","Eagle",2,"Dolphins are mammals: they breathe air and nurse their young."],
+["A reliable source is one that is generally:","Consistent and trustworthy","The most entertaining","Always brief","Anonymous",0,"Reliability concerns trustworthiness and consistency."]
+],
+"Quantitative reasoning":[
+["What is 15% of 240?","24","30","36","42",2,"0.15 × 240 = 36."],
+["A recipe uses 2 cups for 5 servings. How many cups for 15 servings at the same ratio?","4","5","6","8",2,"15 servings is three times 5, so 2 × 3 = 6 cups."],
+["What is the median of 3, 8, 10, 12, 17?","8","10","12","17",1,"The middle value in the ordered list is 10."]
+],
+"Visual-spatial reasoning":[
+["A cube has opposite faces that sum to 7. What is opposite 4?","1","2","3","5",2,"7 − 4 = 3."],
+["You face east, turn left, then turn left again. Which way do you face?","North","South","East","West",3,"East → north → west."],
+["A rectangle is 8 cm long and 3 cm wide. What is its perimeter?","11 cm","16 cm","22 cm","24 cm",2,"Perimeter = 2 × (8 + 3) = 22 cm."]
+],
+"Working-memory-style reasoning":[
+["Hold the sequence 4, 9, 2, 7. Add the first and last numbers.","9","10","11","12",2,"4 + 7 = 11."],
+["Start at 5. Multiply by 3, subtract 4, then divide by 2.","5.5","6","6.5","7",0,"5 × 3 = 15; 15 − 4 = 11; 11 ÷ 2 = 5.5. Correct option is 5.5."],
+["Which item was second in this list: red, blue, green, yellow?","Red","Blue","Green","Yellow",1,"The second item is blue."]
+]}
+},
+culture:{
+title:"Nonverbal reasoning practice",label:"Culture-fair-inspired format",time:16,
+desc:"A low-language practice set emphasizing series, classification, spatial relations and rule discovery. It is not a culture-fair standardized instrument.",
+domains:{
+"Series completion":[
+["5, 10, 20, 40, ?","50","60","80","100",2,"Multiply by two."],
+["2, 5, 9, 14, 20, ?","25","26","27","28",2,"Add 3, 4, 5, 6, then 7."],
+["A, C, F, J, O, ?","S","T","U","V",2,"Letter jumps increase by one: +2, +3, +4, +5, then +6 gives U."]
+],
+"Classification":[
+["Which shape has the fewest sides?","Triangle","Square","Pentagon","Hexagon",0,"A triangle has three sides, fewer than the other options."],
+["Which number is not like the others?","8","27","64","100",3,"8, 27 and 64 are cubes; 100 is not a perfect cube."],
+["Which item is different?","North","South","East","Up",3,"North, south and east are compass directions; up is vertical."]
+],
+"Spatial relations":[
+["A point moves 2 units right and 2 units left. Net horizontal movement?","0","2 right","2 left","4 right",0,"The movements cancel each other."],
+["A square is rotated 45°. How many corners does it still have?","3","4","5","8",1,"Rotation changes orientation, not the number of corners."],
+["A paper is folded once, then unfolded. How many crease lines from that fold?","0","1","2","4",1,"One fold creates one crease."]
+],
+"Rule discovery":[
+["If 2→6, 3→9, 4→12, then 7→?","14","18","21","28",2,"Multiply the input by 3."],
+["If ○ means +2 and □ means ×3, what is 4 ○ □? Apply left to right.","14","18","20","24",1,"4 + 2 = 6; then 6 × 3 = 18."],
+["Which completes the pattern? 10, 8, 6, 4, ?","0","1","2","3",2,"Subtract 2 each time."]
+]}
+}
+};
+// Test 2–5 use independent, generated item banks. The item counts, domains,
+// formats and time limits match Test 1; only the questions and answer options differ.
+function makeVariant(seed){
+ const q=(prompt,correct,wrong,why)=>{const k=(seed+prompt.length)%4;const opts=wrong.slice();opts.splice(k,0,correct);return [prompt,...opts,k,why]};
+ const adult={
+  title:"Adult multi-domain profile",label:"WAIS-inspired format",time:24,
+  desc:"A mixed-format adult cognitive battery simulation: verbal reasoning, quantitative reasoning, working-memory-style items, visual reasoning and timed symbol scanning.",
+  domains:{
+   "Verbal comprehension":[
+    q(`Key : lock :: password : ?`,"Access",["Distance","Temperature","Weight"],"A key and a password both provide access when used correctly."),
+    q(`What does '${['meticulous','scarce','vivid','ample'][seed-2]}' most nearly mean?`,["Very careful","Uncommon","Clear and lively","Plentiful"][seed-2],[["Careless","Hasty","Indifferent"],["Abundant","Ordinary","Frequent"],["Dull","Unclear","Faint"],["Limited","Tiny","Insufficient"]][seed-2],"Choose the closest meaning of the target word."),
+    q("How are a recipe and an instruction manual alike?","Both give organized steps for completing a task",["Both are works of fiction","Both measure distance","Both list historical dates"],"Both organize information into steps that guide an activity."),
+    q(`All ${['Lems','Ravs','Tovs','Mips'][seed-2]} are ${['Nors','Pels','Daks','Sivs'][seed-2]}. No ${['Nors','Pels','Daks','Sivs'][seed-2]} are ${['Jeks','Wums','Fars','Beks'][seed-2]}. Which must be true?`,`No ${['Lems','Ravs','Tovs','Mips'][seed-2]} are ${['Jeks','Wums','Fars','Beks'][seed-2]}`,[`All ${['Jeks','Wums','Fars','Beks'][seed-2]} are ${['Lems','Ravs','Tovs','Mips'][seed-2]}`,`Some ${['Lems','Ravs','Tovs','Mips'][seed-2]} are ${['Jeks','Wums','Fars','Beks'][seed-2]}`,`No ${['Lems','Ravs','Tovs','Mips'][seed-2]} are ${['Nors','Pels','Daks','Sivs'][seed-2]}`],"If every member of the first group belongs to the second, and the second group excludes the third, the first group also excludes the third.")
+   ],
+   "Quantitative reasoning":[
+    q(`Complete the sequence: ${seed+2}, ${2*(seed+2)+1}, ${4*(seed+2)+3}, ${8*(seed+2)+7}, ?`,String(16*(seed+2)+15),[String(16*(seed+2)+14),String(16*(seed+2)+16),String(8*(seed+2)+15)],"Each term is doubled and then the added amount increases according to the same pattern."),
+    q(`A price is reduced by ${[20,30,15,25][seed-2]}% to become ${[96,140,170,150][seed-2]}. What was the original price?`,String([96/.8,140/.7,170/.85,150/.75][seed-2]),[String([96/.8+10,140/.7+10,170/.85+10,150/.75+10][seed-2]),String([96/.8-10,140/.7-10,170/.85-10,150/.75-10][seed-2]),String([96,140,170,150][seed-2]*1.1)],"The final price is the stated percentage of the original; divide by that remaining proportion."),
+    q(`${seed+2} machines produce ${[48,60,72,84][seed-2]} units in one hour. At the same rate, how many units do ${2*(seed+2)} machines produce in one hour?`,String(2*[48,60,72,84][seed-2]),[String([48,60,72,84][seed-2]+12),String([48,60,72,84][seed-2]*3),String([48,60,72,84][seed-2]/2)],"Doubling the number of identical machines doubles the hourly output."),
+    q(`Find the next number: ${seed+1}, ${seed+4}, ${seed+9}, ${seed+16}, ?`,String(seed+25),[String(seed+21),String(seed+24),String(seed+27)],"The added differences are 3, 5, 7, then 9; the next difference is 11.")
+   ],
+   "Working-memory-style reasoning":[
+    q(`Remember these digits: ${[3,6,1,8][seed-2]} - ${[8,2,7,4][seed-2]} - ${[5,9,3,6][seed-2]} - ${[2,4,8,1][seed-2]}. What is the sequence in reverse order?`,`${[2,4,8,1][seed-2]} - ${[5,9,3,6][seed-2]} - ${[8,2,7,4][seed-2]} - ${[3,6,1,8][seed-2]}`,["Reverse only the first two digits","Keep the original order","Sort the digits from lowest to highest"],"Reverse the complete sequence while preserving each digit."),
+    q(`Start at ${10+seed}. Add 7, multiply by 2, then subtract ${seed+3}. What is the answer?`,String((10+seed+7)*2-(seed+3)),[String((10+seed+7)*2),String((10+seed+7)-(seed+3)),String((10+seed)*2+7-(seed+3))],"Apply each operation in the order given."),
+    q(`Which letter is three places after the letter immediately before ${['N','P','R','T'][seed-2]}?`,String.fromCharCode(65+('NPRT'[seed-2].charCodeAt(0)-65)-1+3),["A","M","Q","Z"].filter(x=>x!==String.fromCharCode(65+('NPRT'[seed-2].charCodeAt(0)-65)-1+3)).slice(0,3),"Move one place backward from the named letter, then three places forward."),
+    q(`Remember: ${[4,7,2,9,5][seed-2]}, ${[8,3,6,1,7][seed-2]}, ${[1,9,4,8,2][seed-2]}, ${[6,2,8,3,9][seed-2]}. Which number was third?`,String([1,9,4,8,2][seed-2]),[String([4,7,2,9,5][seed-2]),String([8,3,6,1,7][seed-2]),String([6,2,8,3,9][seed-2])],"Recall the third value in the original sequence.")
+   ],
+   "Visual / fluid reasoning":[
+    q(`Which completes the pattern? ${seed%2?'◆ ○ ◆ ○ ◆ ?':'▲ ● ▲ ● ▲ ?'}`,seed%2?"○":"●",["■","▲","□"],"The two symbols alternate throughout the sequence."),
+    q(`A shape turns 90° clockwise ${seed+1} times. What is its final orientation relative to its start?`,["Same as the start","90° clockwise","180°","270° clockwise"][(seed+1)%4],["45°","A full 720° turn","It cannot be determined"],"Each quarter-turn is 90°; reduce the total rotation modulo 360°."),
+    q(`Find the missing value: ${seed+1}, ${seed+3}, ${2*seed+4} / ${seed+3}, ${seed+5}, ${2*seed+8} / ${seed+5}, ${seed+7}, ?`,String(2*seed+12),[String(2*seed+10),String(2*seed+14),String(seed+12)],"In each row, the third value is the sum of the first two."),
+    q("Which one is different?","Rectangle",["Cube","Pyramid","Sphere"],"Three choices are three-dimensional solids; the rectangle is a two-dimensional shape.")
+   ],
+   "Processing-speed-style scan":[
+    q(`In this row, how many exact copies of code ${['LM4','Q7B','R2K','T5P'][seed-2]} appear? ${[['LM4 / LM4 / L M4 / LM4 / LN4'],['Q7B / Q78 / Q7B / QTB / Q7B'],['R2K / R2X / R2K / RZK / R2K'],['T5P / TSP / T5P / T5R / T5P']][seed-2][0]}`,"3",["1","2","4"],"Count only entries that match every character exactly."),
+    q(`Select the exact match for code ${['H8M3','P6R2','D4V9','C7N5'][seed-2]}.`,['H8M3','P6R2','D4V9','C7N5'][seed-2],[['H8N3','H8M8','H6M3'],['P6B2','PGR2','P6R7'],['D4V6','DAV9','D4Y9'],['C7M5','C7N8','G7N5']][seed-2],"Only the exact sequence matches every letter and digit."),
+    q(`Which sequence is in alphabetical order?`,"A C E G",["Z X Y W","B D A C","A C B D"],"The correct sequence progresses forward alphabetically without reversals."),
+    q(`How many times does digit ${seed+3} appear? ${[`${seed+3} 8 ${seed+3} 2 9 ${seed+3} 1 6`,`${seed+3} 4 7 ${seed+3} 3 ${seed+3} 8 2`, `5 ${seed+3} 1 ${seed+3} 9 4 ${seed+3} 7`, `2 8 ${seed+3} 6 ${seed+3} 1 3 ${seed+3}`][seed-2]}`,"3",["1","2","4"],"Count each occurrence of the target digit in the row.")
+   ]
+  }
+ };
+ const ravenQs=[
+  q(`Which symbol completes the alternating pattern? ${seed%2?'□ ○ □ ○ ?':'△ ◆ △ ◆ ?'}`,seed%2?"□":"△",["○","◆","●"],"The two symbols alternate."),
+  q(`Sequence: ${seed%2?'□, ◧, ■':'○, ◐, ●'}, then repeat. What is the next symbol?`,seed%2?"□":"○",["■","◧","△"],"The fill pattern cycles through empty, partial and filled before restarting."),
+  q(`Complete the direction sequence: ${['→, ↓, ←, ?','↓, ←, ↑, ?','←, ↑, →, ?','↑, →, ↓, ?'][seed-2]}`,["↑","→","↓","←"][seed-2],["↗","↙","↖"],"The arrow rotates 90 degrees clockwise at each step."),
+  q(`What comes next? ${seed+1} dots, ${seed+2} dots, ${seed+3} dots, ?`,`${seed+4} dots`,[`${seed+3} dots`,`${seed+5} dots`,`${2*(seed+3)} dots`],"The number of dots increases by one each time."),
+  q(`Rule: ${seed+1} circles become ${2*(seed+1)} circles; ${seed+2} squares become ${2*(seed+2)} squares. ${seed+4} triangles become:`,`${2*(seed+4)} triangles`,[`${seed+4} triangles`,`${seed+5} triangles`,`${3*(seed+4)} triangles`],"The number of shapes doubles."),
+  q("Which is the odd one out?",["Circle","Pentagon","Hexagon","Octagon"][seed-2],["Square","Triangle","Hexagon"],"The circle has no straight sides; the other choices are polygons."),
+  q(`Complete the sequence: ${seed%2?'●, ○, ●, ○, ?':'◇, ◆, ◇, ◆, ?'}`,seed%2?"●":"◇",["○","◆","□"],"Filled and unfilled versions alternate."),
+  q(`If a polygon gains one side at each step, what follows a ${seed+2}-sided polygon?`,`${seed+3}-sided polygon`,[`${seed+1}-sided polygon`,`${seed+4}-sided polygon`,`A circle`],"The next polygon has one additional side."),
+  q(`A symbol flips horizontally at every step: ${seed%2?'↑, ↑':'◀, ▶'}, then ?`,seed%2?"↑":"◀",["▶","▼","○"],"A horizontal flip changes left to right; a vertical arrow remains unchanged."),
+  q(`Complete the doubling sequence: ${seed+1}, ${2*(seed+1)}, ${4*(seed+1)}, ?`,String(8*(seed+1)),[String(6*(seed+1)),String(7*(seed+1)),String(9*(seed+1))],"Each term is twice the previous term."),
+  q(`A symbol rotates 180° each step. Starting ${['→','↓','←','↑'][seed-2]}, then its opposite, then ?`,["→","↓","←","↑"][seed-2],["↗","↙","↖"],"A second 180-degree rotation returns it to its starting orientation."),
+  q(`Which rule fits ${seed+2}, ${2*(seed+2)}, ${4*(seed+2)}, ${8*(seed+2)}?`,"Multiply by 2",["Add 2","Multiply by 3","Add the previous term twice"],"Each term is twice the preceding term.")
+ ];
+ const raven={title:"Abstract matrix reasoning",label:"Raven-style format",time:18,desc:"Nonverbal-style matrix and rule-induction practice. Look for changes in shape, count, shading, direction and combinations.",domains:{"Matrix reasoning":ravenQs}};
+ const stanford={title:"Broad cognitive domains",label:"Stanford–Binet-inspired format",time:22,desc:"A broad sampling across fluid reasoning, acquired knowledge, quantitative reasoning, visual-spatial reasoning and working-memory-style tasks.",domains:{
+  "Fluid reasoning":[
+   q(`All ${['Peks','Luns','Davs','Mors'][seed-2]} are ${['Rins','Tels','Voks','Nems'][seed-2]}. No ${['Rins','Tels','Voks','Nems'][seed-2]} are ${['Gats','Fens','Jups','Kels'][seed-2]}. Can a ${['Pek','Lun','Dav','Mor'][seed-2]} be a ${['Gat','Fen','Jup','Kel'][seed-2]}?`,"No",["Yes, always","Only sometimes","There is not enough information"],"The first group is entirely inside a group that excludes the third group."),
+   q(`Find the next number: ${seed+1}, ${seed+4}, ${seed+9}, ${seed+16}, ${seed+25}, ?`,String(seed+36),[String(seed+30),String(seed+34),String(seed+49)],"The values follow consecutive square-number offsets."),
+   q(`If A is ${seed+3} units heavier than B, and C is ${seed+2} units lighter than B, which is heaviest?`,"A",["B","C","Cannot tell"],"A is heavier than B, while C is lighter than B.")
+  ],
+  "Knowledge / verbal concepts":[
+   q(`Which word means 'to examine something closely'?`,["Inspect","Ignore","Predict","Decorate"][seed-2],["Forget","Invent","Replace"],"Inspect means to look at something carefully."),
+   q(`Which of these is a reptile?`,"Lizard",["Salmon","Robin","Dolphin"],"A lizard is a reptile; the other listed animals belong to different groups."),
+   q("A dependable measurement is one that is generally:","Consistent when repeated under the same conditions",["Always the largest","Chosen at random","Impossible to reproduce"],"Dependability is associated with consistency and repeatability.")
+  ],
+  "Quantitative reasoning":[
+   q(`What is ${[12,18,14,16][seed-2]}% of ${[250,300,350,400][seed-2]}?`,String([30,54,49,64][seed-2]),[String([30,54,49,64][seed-2]+5),String([30,54,49,64][seed-2]-5),String([30,54,49,64][seed-2]*2)],"Convert the percentage to a decimal and multiply by the quantity."),
+   q(`A plan costs ${[3,4,5,6][seed-2]} units for ${[4,5,6,7][seed-2]} users. At the same rate, what is the cost for ${2*[4,5,6,7][seed-2]} users?`,String(2*[3,4,5,6][seed-2]),[String([3,4,5,6][seed-2]+1),String(3*[3,4,5,6][seed-2]),String([3,4,5,6][seed-2]/2)],"Doubling the number of users doubles the cost at a fixed rate."),
+   q(`What is the median of ${[2,7,11,15,19][seed-2]}, ${[4,8,12,16,20][seed-2]}, ${[6,9,13,17,21][seed-2]}, ${[8,10,14,18,22][seed-2]}, ${[10,11,15,19,23][seed-2]}?`,String([6,9,13,17,21][seed-2]),[String([4,8,12,16,20][seed-2]),String([8,10,14,18,22][seed-2]),String([10,11,15,19,23][seed-2])],"The median is the middle value after arranging the five values in order.")
+  ],
+  "Visual-spatial reasoning":[
+   q(`A cube has opposite faces that sum to ${seed+7}. What number is opposite ${seed+2}?`,String(5),[String(4),String(6),String(7)],"Subtract the given face value from the stated opposite-face total."),
+   q(`You face ${['north','south','west','east'][seed-2]}, turn right, then turn right again. Which way do you face?`,["South","North","East","West"][seed-2],["North","South","East","West"].filter(x=>x!==["South","North","East","West"][seed-2]),"Two right turns make a 180-degree turn to the opposite direction."),
+   q(`A rectangle is ${6+seed} cm long and ${2+seed} cm wide. What is its perimeter?`,String(2*((6+seed)+(2+seed)))+" cm",[String((6+seed)+(2+seed))+" cm",String((6+seed)*(2+seed))+" cm",String(2*(6+seed))+" cm"],"Perimeter equals twice the sum of length and width.")
+  ],
+  "Working-memory-style reasoning":[
+   q(`Hold the sequence ${seed+1}, ${seed+4}, ${seed+2}, ${seed+6}. Add the first and last numbers.`,String(2*seed+7),[String(2*seed+5),String(2*seed+6),String(2*seed+8)],"Add the first value to the final value."),
+   q(`Start at ${seed+4}. Multiply by 2, subtract ${seed+1}, then divide by 2.`,String(((seed+4)*2-(seed+1))/2),[String((seed+4)*2-(seed+1)),String((seed+4)-(seed+1)/2),String((seed+4)*2)],"Perform the operations in the given order."),
+   q(`Which item was third in this list: ${['amber','silver','coral','indigo'][seed-2]}, ${['cedar','maple','birch','willow'][seed-2]}, ${['copper','bronze','tin','iron'][seed-2]}, ${['north','south','east','west'][seed-2]}?`,["Copper","Bronze","Tin","Iron"][seed-2],["Amber","Silver","Coral","Indigo"].filter(x=>x!==["Amber","Silver","Coral","Indigo"][seed-2]).slice(0,3),"Recall the third item in the presented list.")
+  ]
+ }};
+ const culture={title:"Nonverbal reasoning practice",label:"Culture-fair-inspired format",time:16,desc:"A low-language practice set emphasizing series, classification, spatial relations and rule discovery. It is not a culture-fair standardized instrument.",domains:{
+  "Series completion":[
+   q(`Complete: ${seed+2}, ${2*(seed+2)}, ${4*(seed+2)}, ${8*(seed+2)}, ?`,String(16*(seed+2)),[String(12*(seed+2)),String(14*(seed+2)),String(18*(seed+2))],"Each term is double the previous term."),
+   q(`Find the next number: ${seed+1}, ${seed+4}, ${seed+8}, ${seed+13}, ${seed+19}, ?`,String(seed+26),[String(seed+24),String(seed+25),String(seed+27)],"The increments increase by one: +3, +4, +5, +6, then +7."),
+   q(`Letter series: ${['B, D, G, K, P, ?','C, E, H, L, Q, ?','D, F, I, M, R, ?','E, G, J, N, S, ?'][seed-2]}`,["V","W","X","Y"][seed-2],["T","U","Z"],"The forward jumps increase by one each time: +2, +3, +4, +5, then +6.")
+  ],
+  "Classification":[
+   q("Which shape has the greatest number of sides?","Hexagon",["Triangle","Square","Pentagon"],"A hexagon has six sides, more than the other listed polygons."),
+   q(`Which number is not a perfect square?`,["50","72","90","110"][seed-2],["36","49","64"],"72 is not the square of an integer; the other choices are perfect squares."),
+   q("Which item does not belong with the others?","Down",["South","North","East"],"Down is a vertical direction; the others are compass directions.")
+  ],
+  "Spatial relations":[
+   q(`A point moves ${seed+1} units left and ${seed+1} units right. What is the net horizontal movement?`,"0 units",[`${seed+1} units left`,`${seed+1} units right`,`${2*(seed+1)} units right`],"Equal movements in opposite directions cancel out."),
+   q(`A regular ${['triangle','pentagon','hexagon','octagon'][seed-2]} is rotated 90°. How many sides does it still have?`,["3","5","6","8"][seed-2],["4","7","9"],"Rotation changes orientation, not the number of sides."),
+   q(`A sheet is folded ${seed%2?"twice":"once"} and then unfolded. How many crease lines are made by the folds?`,seed%2?"2":"1",["0","3","4"],"Each separate fold creates one crease line in this simple folding task.")
+  ],
+  "Rule discovery":[
+   q(`If ${seed+1} maps to ${3*(seed+1)}, ${seed+2} maps to ${3*(seed+2)}, then ${seed+4} maps to:`,String(3*(seed+4)),[String(2*(seed+4)),String(3*(seed+4)+1),String(4*(seed+4))],"Multiply each input by three."),
+   q(`If ○ means +${seed+1} and □ means ×2, what is ${seed+2} ○ □? Apply left to right.`,String(2*(seed+2+seed+1)),[String(seed+2+2*(seed+1)),String(2*(seed+2)),String(seed+2+seed+1)],"First add the stated amount, then multiply the result by two."),
+   q(`Which completes the pattern: ${2*seed+10}, ${2*seed+8}, ${2*seed+6}, ${2*seed+4}, ?`,String(2*seed+2),[String(2*seed),String(2*seed+3),String(2*seed+1)],"Subtract two at each step.")
+  ]
+ }};
+ return {adult,raven,stanford,culture};
+}
+const assessmentPacks={"Test 1":bank,"Test 2":makeVariant(2),"Test 3":makeVariant(3),"Test 4":makeVariant(4),"Test 5":makeVariant(5)};
+let activePack="Test 1",activeBank=bank;
+
+let current=null,items=[],answers=[],at=0,remaining=0,tick=null,startTime=0,finished=false;
+const el=id=>document.getElementById(id);
+function show(which){["home","test","results"].forEach(id=>el(id).classList.toggle("hidden",id!==which));window.scrollTo({top:0,behavior:"smooth"})}
+function buildPackCards(){el("packCards").innerHTML=Object.keys(assessmentPacks).map((name,i)=>`<article class="testcard"><span class="tag">Assessment programme ${i+1}</span><h3>${name}</h3><p class="small">Four assessment formats with an independent question bank. Same structure and timing as the other programmes.</p><div class="row between small"><span>4 assessment formats</span><span>Independent questions</span></div><button onclick="openPack('${name}')">Open ${name}</button></article>`).join("")}
+function openPack(name){activePack=name;activeBank=assessmentPacks[name];el("libraryPackTag").textContent=name;buildCards();el("packStep").classList.add("hidden");el("libraryStep").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"})}
+function buildCards(){el("testCards").innerHTML=Object.entries(activeBank).map(([key,t])=>`<article class="testcard"><span class="tag">${t.label}</span><h3>${t.title}</h3><p class="small">${t.desc}</p><div class="row between small"><span>${Object.values(t.domains).flat().length} items</span><span>${t.time} minutes</span></div><button onclick="begin('${key}')">Start this assessment</button></article>`).join("")}
+function begin(key){current=activeBank[key];items=[];Object.entries(current.domains).forEach(([domain,qs])=>qs.forEach(q=>items.push({domain,q:q[0],opts:q.slice(1,5),correct:q[5],why:q[6]})));answers=Array(items.length).fill(null);at=0;remaining=current.time*60;finished=false;startTime=Date.now();el("formatTag").textContent=current.label;el("instruction").textContent=current.desc+" Choose one answer per question. Your selections are saved privately and no correctness feedback is shown until you finish.";show("test");render();clearInterval(tick);tick=setInterval(()=>{remaining--;clock();if(remaining<=0)complete(true)},1000)}
+function clock(){el("clock").textContent=String(Math.floor(remaining/60)).padStart(2,"0")+":"+String(remaining%60).padStart(2,"0")}
+function render(){let x=items[at];el("position").textContent=`Item ${at+1} of ${items.length} · ${x.domain}`;el("doneCount").textContent=answers.filter(a=>a!==null).length+" answered";el("progress").style.width=((at+1)/items.length*100)+"%";el("back").disabled=at===0;el("forward").disabled=at===items.length-1;
+let options=x.opts.map((o,i)=>`<label class="answer ${answers[at]===i?'sel':''}"><input type="radio" name="pick" ${answers[at]===i?'checked':''} onchange="choose(${i})"><span><b>${String.fromCharCode(65+i)}.</b> ${o}</span></label>`).join("");
+el("qbody").innerHTML=`<div class="qtitle">${x.q}</div><div class="answers">${options}</div>`}
+function choose(i){answers[at]=i;render()}
+function complete(auto=false){if(finished)return;finished=true;clearInterval(tick);let used=Math.round((Date.now()-startTime)/1000);let correct=0,by={};Object.keys(current.domains).forEach(d=>by[d]={n:0,c:0});items.forEach((x,i)=>{by[x.domain].n++;if(answers[i]===x.correct){correct++;by[x.domain].c++}});let pct=Math.round(correct/items.length*100),name=el("candidate").value.trim();el("reportTitle").textContent=(name?name+"'s ":"")+current.title+" report";el("rawScore").textContent=`${correct} / ${items.length}`;el("correct").textContent=`${correct} of ${items.length} (${pct}%)`;el("duration").textContent=`${Math.floor(used/60)}m ${used%60}s`;el("summary").textContent=(pct>=80?"You answered a high proportion of this practice set correctly.":pct>=60?"You showed a mixed-to-solid performance across this practice set.":"This set highlights several areas where deliberate practice may be useful.")+(auto?" The time limit was reached.":"");
+el("domainBars").innerHTML=Object.entries(by).map(([d,v])=>{let p=Math.round(v.c/v.n*100);return `<div class="barline"><span>${d}</span><div class="bar"><span style="width:${p}%"></span></div><b>${p}%</b></div>`}).join("");
+el("answerReview").innerHTML=items.map((x,i)=>`<div style="padding:12px 0;border-bottom:1px solid var(--line)"><b>${i+1}. ${x.q}</b><p class="small">Your answer: ${answers[i]===null?"Not answered":x.opts[answers[i]]} · Keyed answer: ${x.opts[x.correct]}</p><p>${answers[i]===x.correct?'<b style="color:var(--green)">Correct</b>':'<b style="color:var(--red)">Review</b>'} · ${x.why}</p></div>`).join("");
+const tips={
+ "Verbal comprehension":"Practise explaining word relationships, defining unfamiliar words in context, and identifying what conclusions must follow from short statements.",
+ "Quantitative reasoning":"Work through number patterns, percentages, ratios and multi-step calculations. Write down each step and check the result using the original question.",
+ "Working-memory-style reasoning":"Practise holding short sequences in mind, reversing or reordering information, and completing mental steps without rushing.",
+ "Visual / fluid reasoning":"Study repeating patterns, rotations, shape properties and number relationships. State the rule before choosing an answer.",
+ "Processing-speed-style scan":"Use short timed symbol- and letter-matching exercises. Prioritise accuracy first, then gradually increase speed.",
+ "Matrix reasoning":"Practise identifying one rule at a time, including rotation, reflection, shading, quantity and shape changes.",
+ "Fluid reasoning":"Practise conditional logic, number sequences and comparisons. Separate what the information proves from what it merely suggests.",
+ "Knowledge / verbal concepts":"Build vocabulary and review general concepts. Focus on understanding meanings and explaining them in your own words.",
+ "Visual-spatial reasoning":"Practise rotations, directions, perimeter and mental shape manipulation. Sketch difficult problems when practising.",
+ "Series completion":"Look for changes between consecutive terms, including alternating rules and increasing or decreasing steps.",
+ "Classification":"Compare items by one clear property at a time, such as category, shape, number pattern or function.",
+ "Spatial relations":"Practise direction changes, movement, folding and rotation. Track each transformation in sequence.",
+ "Rule discovery":"Test simple operations and combinations systematically, then verify the rule against every example."
+};
+let ranked=Object.entries(by).map(([d,v])=>({d,p:Math.round(v.c/v.n*100),c:v.c,n:v.n})).sort((a,b)=>a.p-b.p);
+let weakest=ranked[0];
+let focus=ranked.slice(0,Math.min(2,ranked.length));
+el("recommendations").innerHTML=`<p><b>Best area to focus on first: ${weakest.d} (${weakest.p}%).</b></p><p>${tips[weakest.d]||"Review the explanations for this domain and practise similar questions in short, focused sessions."}</p>${focus.length>1?`<h3>Another area to develop</h3><p><b>${focus[1].d} (${focus[1].p}%).</b> ${tips[focus[1].d]||"Review the explanations and practise similar questions."}</p>`:""}<h3>Suggested practice routine</h3><ul><li>Spend 15–20 minutes on one focus area at a time.</li><li>Review every explanation after the assessment and write down the rule or method.</li><li>Try a fresh set later and compare domain percentages, not just the overall score.</li></ul><p class="small">Suggestions are based only on this practice attempt. Domain percentages are not norm-referenced cognitive scores.</p>`;
+show("results")}
+el("nameNext").onclick=()=>{el("welcomeStep").classList.add("hidden");el("packStep").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"})};el("backToWelcome").onclick=()=>{el("packStep").classList.add("hidden");el("welcomeStep").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"})};el("backToName").onclick=()=>{el("libraryStep").classList.add("hidden");el("packStep").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"})};el("back").onclick=()=>{if(at>0){at--;render()}};el("forward").onclick=()=>{if(at<items.length-1){at++;render()}};el("submit").onclick=()=>{let n=answers.filter(a=>a===null).length;if(n&&!confirm(`You have ${n} unanswered question(s). Finish the assessment now?`))return;complete()};el("again").onclick=()=>{show("home");el("libraryStep").classList.add("hidden");el("packStep").classList.remove("hidden")};buildPackCards();
+</script></body></html>

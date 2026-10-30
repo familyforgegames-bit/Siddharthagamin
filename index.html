@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Forge Family | Siddharthagamin - Familyforge</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config={theme:{extend:{colors:{brand:{cyan:'#00f2fe',blue:'#4facfe',purple:'#7f00ff',pink:'#ff007f',gold:'#fbbf24',dark:'#0a0d14',card:'#121824'}},fontFamily:{orbitron:['Orbitron','sans-serif'],sans:['Plus Jakarta Sans','sans-serif']}}}}
+</script>
+<style>
+body{background:#080b11;color:#f3f4f6;font-family:'Plus Jakarta Sans',sans-serif;overflow-x:hidden}
+.view{display:none}.view.active{display:block;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#home.active{display:block;padding-top:1.5rem;padding-bottom:3rem;}
+.nav-btn.on{background:rgba(0,242,254,.12);color:#fff}
+@media (prefers-reduced-motion:reduce){.view.active{animation:none}}
+a:focus-visible,button:focus-visible{outline:2px solid #00f2fe;outline-offset:2px}
+iframe{border:none;overflow:hidden;}
+</style>
+</head>
+<body>
+<div class="fixed inset-0 pointer-events-none z-0 overflow-hidden"><div class="absolute -top-40 -left-40 w-96 h-96 bg-brand-cyan/20 rounded-full blur-3xl"></div><div class="absolute top-1/3 -right-40 w-96 h-96 bg-brand-purple/20 rounded-full blur-3xl"></div><div class="absolute bottom-10 left-1/4 w-96 h-96 bg-brand-pink/15 rounded-full blur-3xl"></div></div>
+
+<header class="sticky top-0 z-50 backdrop-blur-xl bg-brand-dark/90 border-b border-gray-800">
+  <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+    <a href="#home" class="flex items-center gap-2">
+      <span class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-cyan via-brand-purple to-brand-pink p-[2px] shrink-0"><span class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center"><i class="fa-solid fa-shield-halved text-brand-cyan"></i></span></span>
+      <span class="font-orbitron font-bold text-xs sm:text-sm tracking-tight text-white">Siddharthagamin <span class="text-brand-cyan">-</span> Familyforge</span>
+    </a>
+    <nav class="hidden lg:flex gap-1" id="nav"></nav>
+    <button id="menuBtn" class="lg:hidden w-10 h-10 rounded-xl bg-gray-800 text-gray-300" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+  </div>
+  <div id="mobileNav" class="hidden lg:hidden px-4 pb-4 grid grid-cols-2 gap-2"></div>
+</header>
+
+<main class="relative z-10 max-w-6xl mx-auto px-4 py-6">
+
+<!-- HOME SECTION -->
+<section id="home" class="view">
+  <div class="grid lg:grid-cols-12 gap-8 items-center py-6">
+    <div class="lg:col-span-3 shrink-0 flex justify-center">
+      <div class="w-48 sm:w-60 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl shadow-brand-purple/20 bg-brand-card">
+        <img src="banner.jpg" alt="Siddharthagamin - Familyforge" class="block w-full h-auto">
+      </div>
+    </div>
+    
+    <div class="lg:col-span-5 text-center lg:text-left">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-purple/20 border border-brand-purple/40 text-brand-cyan text-xs font-mono font-semibold tracking-wider mb-4"><i class="fa-solid fa-gamepad text-brand-pink"></i> THE FORGE FAMILY</div>
+      <h1 class="font-orbitron font-black text-3xl sm:text-4xl lg:text-5xl tracking-tight text-white leading-tight">One Family.<br>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan via-brand-purple to-brand-pink">Endless Adventures.</span></h1>
+      <p class="text-gray-400 text-xs sm:text-sm leading-relaxed mt-3">Welcome to the official home of Fatherforge, Motherforge, Lionforge &amp; Luanforge! A family that plays, laughs and learns together, one block at a time.</p>
+      
+      <div class="flex flex-wrap justify-center lg:justify-start gap-3 mt-5">
+        <a class="yt-link px-4 py-2.5 rounded-xl bg-red-600 text-white font-orbitron text-xs font-bold" target="_blank" rel="noopener"><i class="fa-brands fa-youtube mr-1"></i> YouTube</a>
+        <a class="tt-link px-4 py-2.5 rounded-xl bg-brand-pink text-white font-orbitron text-xs font-bold" target="_blank" rel="noopener"><i class="fa-brands fa-tiktok mr-1"></i> TikTok</a>
+      </div>
+    </div>
+
+    <!-- TOP RIGHT LIVE ANNOUNCEMENT BOX -->
+    <div class="lg:col-span-4">
+      <div class="p-5 rounded-3xl bg-brand-card/90 border border-brand-purple/50 shadow-xl backdrop-blur-md" id="homeLiveCard">
+        <!-- Dynamically filled by JS -->
+      </div>
+    </div>
+  </div>
+
+  <div class="w-full mt-8 pt-8 border-t border-gray-800">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-brand-card/80 border border-gray-800">
+      <div class="text-center sm:border-r border-gray-800"><span class="block font-orbitron font-bold text-2xl text-brand-cyan">4</span><span class="text-[10px] text-gray-400 uppercase font-mono">Family Gamers</span></div>
+      <div class="text-center sm:border-r border-gray-800"><span class="block font-orbitron font-bold text-xl text-brand-purple leading-8">Minecraft</span><span class="text-[10px] text-gray-400 uppercase font-mono">Our Main Game</span></div>
+      <div class="text-center sm:border-r border-gray-800"><span class="block font-orbitron font-bold text-2xl text-brand-pink">Daily</span><span class="text-[10px] text-gray-400 uppercase font-mono">Family News</span></div>
+      <div class="text-center"><span class="block font-orbitron font-bold text-2xl text-brand-gold">LIVE</span><span class="text-[10px] text-gray-400 uppercase font-mono">On TikTok</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT SECTION -->
+<section id="about" class="view">
+  <h2 class="font-orbitron font-black text-3xl text-white">About the Forge Family</h2>
+  <p class="text-gray-400 text-sm mt-1 mb-8">Family-friendly gaming, made by a real family at home.</p>
+  <div class="grid lg:grid-cols-12 gap-8">
+    <div class="lg:col-span-7 space-y-4 text-gray-300 leading-relaxed max-w-prose">
+      <p>The Forge Family is a family of four who play, laugh and learn together. Our channel, Siddharthagamin - Familyforge, is where we share our games, our stories and our everyday fun.</p>
+      <p>It all started with Lionforge, or Lio. His love of Minecraft began at the age of 5 and grew so big that it pulled the whole family into the blocky world. Little brother Luanforge followed his Kuka. Dad, Fatherforge, added Minecraft to his PUBG and football. Mum, Motherforge, loves her Hay Day farm and joins us in Minecraft now and then for family bonding time.</p>
+      <p>We keep everything family-friendly, so kids and parents can enjoy it together. Come for the games, stay for the family.</p>
+    </div>
+    <div class="lg:col-span-5 grid grid-cols-2 gap-3 content-start">
+      <div class="p-4 rounded-xl bg-brand-card border border-gray-800"><div class="text-[11px] text-gray-500">Family gamers</div><div class="text-white font-semibold">4</div></div>
+      <div class="p-4 rounded-xl bg-brand-card border border-gray-800"><div class="text-[11px] text-gray-500">Main game</div><div class="text-white font-semibold">Minecraft</div></div>
+      <div class="p-4 rounded-xl bg-brand-card border border-gray-800"><div class="text-[11px] text-gray-500">Also play</div><div class="text-white font-semibold">PUBG, Hay Day, football</div></div>
+      <div class="p-4 rounded-xl bg-brand-card border border-gray-800"><div class="text-[11px] text-gray-500">Live on</div><div class="text-white font-semibold">TikTok</div></div>
+      <div class="p-4 rounded-xl bg-brand-card border border-gray-800 col-span-2"><div class="text-[11px] text-gray-500">Videos on</div><div class="text-white font-semibold">YouTube, Siddharthagamin - Familyforge</div></div>
+    </div>
+  </div>
+  <h3 class="font-orbitron font-bold text-xl text-white mt-12 mb-5">What you will find on our channel</h3>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4" id="aboutContent"></div>
+  <div class="mt-10 p-6 rounded-2xl bg-gradient-to-br from-brand-purple/25 via-brand-card to-brand-cyan/10 border border-brand-purple/40 text-center">
+    <h3 class="font-orbitron font-bold text-xl text-white">Join the Forge Family</h3>
+    <p class="text-gray-300 text-sm mt-1 mb-5">Subscribe on YouTube and follow on TikTok so you never miss a video or a live stream.</p>
+    <div class="flex flex-wrap justify-center gap-3">
+      <a class="yt-link px-5 py-3 rounded-xl bg-red-600 text-white font-orbitron text-xs font-bold" target="_blank" rel="noopener"><i class="fa-brands fa-youtube mr-1"></i> Subscribe on YouTube</a>
+      <a class="tt-link px-5 py-3 rounded-xl bg-brand-pink text-white font-orbitron text-xs font-bold" target="_blank" rel="noopener"><i class="fa-brands fa-tiktok mr-1"></i> Follow on TikTok</a>
+    </div>
+  </div>
+</section>
+
+<!-- MEMBERS SECTION -->
+<section id="members" class="view">
+  <h2 class="font-orbitron font-black text-3xl text-white">Meet the family</h2>
+  <p class="text-gray-400 text-sm mt-1 mb-8">Tap a member to open their profile.</p>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5" id="memberGrid"></div>
+</section>
+
+<section id="member" class="view"><div id="memberBody"></div></section>
+
+<!-- STORY SECTION -->
+<section id="story" class="view">
+  <h2 class="font-orbitron font-black text-3xl text-white">Our Love &amp; Life Story</h2>
+  <p class="text-gray-400 max-w-2xl mt-2 mb-8">When it is written in destiny, it is bound to happen. Discover the romantic and inspiring journey of how Ananda and Aiza crossed continents to find each other in the UAE.</p>
+  
+  <div class="grid md:grid-cols-2 gap-6" id="storyGrid"></div>
+
+  <!-- Family Story Picture Showcase -->
+  <div class="mt-12 p-6 rounded-3xl bg-brand-card border border-brand-cyan/30 text-center">
+    <h3 class="font-orbitron font-bold text-xl text-white mb-2">Our Blessed Family Today</h3>
+    <p class="text-gray-300 text-sm max-w-xl mx-auto mb-6">Celebrating 8 years of happy marriage with our two wonderful boys (aged 7 and 3). We are forever thankful to the UAE for giving us career opportunities that turned out to be the absolute best gift of our lives.</p>
+    <div class="max-w-2xl mx-auto aspect-video rounded-2xl bg-black/40 border border-gray-800 flex flex-col items-center justify-center relative overflow-hidden group">
+      <img src="family-story.jpg" alt="The Forge Family" class="absolute inset-0 w-full h-full object-contain" onerror="this.style.display='none'">
+      <i class="fa-solid fa-image text-5xl text-gray-700 mb-2"></i>
+      <span class="text-xs font-mono text-gray-500 uppercase tracking-widest">[ Family Story Picture Placeholder ]</span>
+      <span class="text-[11px] text-brand-cyan mt-1">Add your family photo as `family-story.jpg`</span>
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ SECTION -->
+<section id="quiz" class="view">
+  <div id="quizPicker">
+    <h2 class="font-orbitron font-black text-3xl text-white">Minecraft trivia and quiz</h2>
+    <p class="text-gray-400 mt-2 mb-8">Think you know Minecraft? Choose a quiz to start.</p>
+    <div class="grid sm:grid-cols-2 gap-5 max-w-3xl" id="quizCards"></div>
+  </div>
+  <div id="quizPlayer" class="hidden">
+    <div class="flex flex-wrap items-center gap-3 mb-4">
+      <button onclick="showQuizPicker()" class="px-4 py-2.5 rounded-xl bg-gray-800 text-gray-200 text-sm font-semibold hover:bg-gray-700"><i class="fa-solid fa-arrow-left mr-1"></i> Choose another quiz</button>
+      <a id="quizFull" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-cyan to-brand-blue text-brand-dark font-orbitron font-bold text-xs" target="_blank" rel="noopener"><i class="fa-solid fa-expand mr-1"></i> Open full screen</a>
+      <span id="quizName" class="font-orbitron font-bold text-white text-sm"></span>
+    </div>
+    <div class="rounded-2xl overflow-hidden border border-gray-800 bg-brand-card">
+      <iframe id="quizFrame" title="Quiz" allowfullscreen allow="fullscreen" class="w-full h-[800px] bg-white"></iframe>
+    </div>
+  </div>
+</section>
+
+<!-- IQ TEST SECTION -->
+<section id="iq" class="view">
+  <div id="iqPicker">
+    <h2 class="font-orbitron font-black text-3xl text-white">IQ test</h2>
+    <p class="text-gray-400 mt-2 mb-8">Ready to challenge your brain? Choose a test to start.</p>
+    <div class="grid sm:grid-cols-2 gap-5 max-w-3xl" id="iqCards"></div>
+  </div>
+  <div id="iqPlayer" class="hidden">
+    <div class="flex flex-wrap items-center gap-3 mb-4">
+      <button onclick="showIqPicker()" class="px-4 py-2.5 rounded-xl bg-gray-800 text-gray-200 text-sm font-semibold hover:bg-gray-700"><i class="fa-solid fa-arrow-left mr-1"></i> Choose another test</button>
+      <a id="iqFull" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-cyan to-brand-blue text-brand-dark font-orbitron font-bold text-xs" target="_blank" rel="noopener"><i class="fa-solid fa-expand mr-1"></i> Open full screen</a>
+      <span id="iqName" class="font-orbitron font-bold text-white text-sm"></span>
+    </div>
+    <div class="rounded-2xl overflow-hidden border border-gray-800 bg-brand-card">
+      <iframe id="iqFrame" title="IQ test" class="w-full h-[850px] bg-white"></iframe>
+    </div>
+  </div>
+</section>
+
+<!-- GAMES SECTION -->
+<section id="games" class="view">
+  <h2 class="font-orbitron font-black text-3xl text-white">Games</h2>
+  <p class="text-gray-400 text-sm mt-1">Pick a category and start playing.</p>
+  <div class="mt-6 flex flex-col lg:flex-row gap-6">
+    <aside class="lg:w-64 shrink-0">
+      <div id="gameNav" class="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto lg:max-h-[75vh] pb-2 lg:pr-2"></div>
+    </aside>
+    <div class="flex-1 min-w-0">
+      <div id="gameWelcome" class="p-8 rounded-2xl bg-brand-card border border-gray-800 text-center">
+        <i class="fa-solid fa-gamepad text-4xl text-brand-pink mb-3"></i>
+        <h3 class="font-orbitron font-bold text-white text-lg">Welcome to the game zone</h3>
+        <p class="text-gray-400 text-sm mt-2">Choose a category from the list to see its games.</p>
+      </div>
+      <div id="gameSoon" class="hidden p-8 rounded-2xl bg-brand-card border border-gray-800 text-center">
+        <i class="fa-solid fa-hourglass-half text-4xl text-brand-gold mb-3"></i>
+        <h3 class="font-orbitron font-bold text-white text-lg" id="soonTitle"></h3>
+        <p class="text-gray-400 text-sm mt-2">New games are coming soon. Check back later.</p>
+      </div>
+      <div id="gamePlayer" class="hidden">
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+          <span id="gameName" class="font-orbitron font-bold text-white"></span>
+          <a id="gameFull" class="ml-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-cyan to-brand-blue text-brand-dark font-orbitron font-bold text-xs" target="_blank" rel="noopener"><i class="fa-solid fa-expand mr-1"></i> Open full screen</a>
+        </div>
+        <div class="rounded-2xl overflow-hidden border border-gray-800 bg-brand-card">
+          <iframe id="gameFrame" title="Games" class="w-full h-[800px] bg-white"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWS & COMMUNITY HALL OF FAME SECTION -->
+<section id="news" class="view">
+  <div class="mb-8">
+    <h2 class="font-orbitron font-black text-3xl text-white mb-2">Family News &amp; Wall of Fame</h2>
+    <p class="text-gray-400 text-sm">Honoring our top TikTok supporters, daily achievements, and channel news.</p>
+  </div>
+
+  <!-- GIFTER HALL OF FAME -->
+  <div class="mb-12 p-6 rounded-3xl bg-brand-card border border-brand-purple/40 shadow-xl">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-gray-800">
+      <div>
+        <h3 class="font-orbitron font-bold text-xl text-white flex items-center gap-2">
+          <i class="fa-solid fa-crown text-brand-gold"></i> Gifter Hall of Fame
+        </h3>
+        <p class="text-xs text-gray-400 mt-1">Our permanent record honoring top TikTok live supporters!</p>
+      </div>
+      <span class="text-xs font-mono text-brand-cyan bg-brand-cyan/10 border border-brand-cyan/30 px-3 py-1 rounded-full">Updated Daily</span>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-5">
+      <!-- Top 1: Gold MVP -->
+      <div class="p-5 rounded-2xl bg-gradient-to-b from-amber-500/10 via-brand-card to-brand-card border border-amber-500/40 text-center relative overflow-hidden">
+        <div class="absolute -top-3 -right-3 w-12 h-12 bg-amber-500/20 rounded-full blur-xl"></div>
+        <span class="w-10 h-10 mx-auto rounded-full bg-brand-gold text-brand-dark font-orbitron font-black flex items-center justify-center text-lg mb-3 shadow-lg">1</span>
+        <h4 class="font-orbitron font-bold text-white text-base">@TopSupporter1</h4>
+        <span class="inline-block text-[11px] font-mono text-brand-gold bg-amber-500/10 px-2.5 py-0.5 rounded-full mt-1">MVP Gifter</span>
+        <p class="text-xs text-gray-400 mt-3">Special thanks for supporting our daily 5 PM Minecraft streams!</p>
+      </div>
+
+      <!-- Top 2: Silver -->
+      <div class="p-5 rounded-2xl bg-gradient-to-b from-gray-400/10 via-brand-card to-brand-card border border-gray-500/40 text-center">
+        <span class="w-10 h-10 mx-auto rounded-full bg-gray-300 text-brand-dark font-orbitron font-black flex items-center justify-center text-lg mb-3 shadow-lg">2</span>
+        <h4 class="font-orbitron font-bold text-white text-base">@AwesomeGifter</h4>
+        <span class="inline-block text-[11px] font-mono text-gray-300 bg-gray-500/10 px-2.5 py-0.5 rounded-full mt-1">Legend Gifter</span>
+        <p class="text-xs text-gray-400 mt-3">Thank you for always bringing high energy to the TikTok live chat!</p>
+      </div>
+
+      <!-- Top 3: Bronze -->
+      <div class="p-5 rounded-2xl bg-gradient-to-b from-amber-700/10 via-brand-card to-brand-card border border-amber-700/40 text-center">
+        <span class="w-10 h-10 mx-auto rounded-full bg-amber-700 text-white font-orbitron font-black flex items-center justify-center text-lg mb-3 shadow-lg">3</span>
+        <h4 class="font-orbitron font-bold text-white text-base">@LoyalForgeFan</h4>
+        <span class="inline-block text-[11px] font-mono text-amber-500 bg-amber-700/10 px-2.5 py-0.5 rounded-full mt-1">Super Gifter</span>
+        <p class="text-xs text-gray-400 mt-3">Always supporting Lionforge and Luanforge during stream battles!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHANNEL MILESTONES -->
+  <div class="mb-12">
+    <h3 class="font-orbitron font-bold text-xl text-white mb-4 flex items-center gap-2">
+      <i class="fa-solid fa-trophy text-brand-cyan"></i> Channel Milestones
+    </h3>
+    <div class="grid sm:grid-cols-3 gap-4">
+      <div class="p-4 rounded-xl bg-brand-card border border-gray-800 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-lg bg-brand-cyan/15 text-brand-cyan flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-users"></i></span>
+        <div>
+          <div class="font-orbitron font-bold text-white text-sm">TikTok Family Growth</div>
+          <div class="text-xs text-gray-400">Growing strong everyday @familyforge22</div>
+        </div>
+      </div>
+      <div class="p-4 rounded-xl bg-brand-card border border-gray-800 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-lg bg-brand-pink/15 text-brand-pink flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-clock"></i></span>
+        <div>
+          <div class="font-orbitron font-bold text-white text-sm">Daily 5 PM Routine</div>
+          <div class="text-xs text-gray-400">Consistent family Minecraft live sessions</div>
+        </div>
+      </div>
+      <div class="p-4 rounded-xl bg-brand-card border border-gray-800 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-lg bg-brand-purple/15 text-brand-purple flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-star"></i></span>
+        <div>
+          <div class="font-orbitron font-bold text-white text-sm">Community Unity</div>
+          <div class="text-xs text-gray-400">100% family-friendly vibes always</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LATEST NEWS GRID -->
+  <h3 class="font-orbitron font-bold text-xl text-white mb-4">Latest News</h3>
+  <div class="grid md:grid-cols-3 gap-5" id="newsGrid"></div>
+</section>
+
+<!-- VIDEOS SECTION -->
+<section id="videos" class="view">
+  <h2 class="font-orbitron font-black text-3xl text-white mb-8">Videos and streams</h2>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" id="videoGrid"></div>
+</section>
+
+<!-- CONNECT SECTION -->
+<section id="connect" class="view">
+  <h2 class="font-orbitron font-black text-3xl text-white">Connect with us</h2>
+  <p class="text-gray-400 text-sm mt-1 mb-8">Follow, message and join us on all our official pages.</p>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4" id="connectGrid"></div>
+</section>
+
+</main>
+
+<footer id="foot" class="border-t border-gray-800 py-8 text-center text-xs text-gray-500">
+  <p>&copy; 2026 The Forge Family. Made with love for gaming and family.</p>
+</footer>
+
+<div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] hidden px-5 py-3 rounded-xl bg-brand-card border border-brand-cyan/50 text-sm text-white shadow-2xl"></div>
+
+<script>
+const DISCORD_USERNAME='familyforge_39128';
+const WHATSAPP_NUMBER='971567752421';
+const TIKTOK_LINK='https://www.tiktok.com/@familyforge22';
+const YOUTUBE_LINK='https://www.youtube.com/@SiddharthaGamin-f8h';
+const FACEBOOK_LINK='https://www.facebook.com/DKLionelMjn/';
+const TELEGRAM_LINK='https://web.telegram.org/k/?account=2';
+
+const IQ_TESTS=[
+ {title:'IQ Test 1',desc:'Challenge your brain with our classic IQ test',file:'iqtest.html'},
+ {title:'IQ Test 2',desc:'Try our extended cognitive assessment suite',file:'iqtest1.html'}
+];
+
+const GAME_GROUPS=[
+ {label:'Categories',items:[
+ {title:'Action',file:'games-action.html',icon:'fa-bolt'},
+ {title:'Adventure',file:'games-adventure.html',icon:'fa-compass'},
+ {title:'Arcade',file:'games-arcade.html',icon:'fa-gamepad',soon:true},
+ {title:'Board',file:'games-board.html',icon:'fa-chess-knight',soon:true},
+ {title:'Brain',file:'games-brain.html',icon:'fa-brain',soon:true},
+ {title:'Card',file:'games-card.html',icon:'fa-clone',soon:true},
+ {title:'Clicker',file:'games-clicker.html',icon:'fa-hand-pointer',soon:true},
+ {title:'Driving',file:'games-driving.html',icon:'fa-car',soon:true},
+ {title:'Educational',file:'games-educational.html',icon:'fa-graduation-cap',soon:true},
+ {title:'Fighting',file:'games-fighting.html',icon:'fa-hand-fist',soon:true},
+ {title:'.io',file:'games-io.html',icon:'fa-circle-notch',soon:true},
+ {title:'Memory',file:'games-memory.html',icon:'fa-layer-group',soon:true},
+ {title:'Music',file:'games-music.html',icon:'fa-music',soon:true},
+ {title:'Platformer',file:'games-platformer.html',icon:'fa-person-running',soon:true},
+ {title:'Puzzle',file:'games-puzzle.html',icon:'fa-puzzle-piece',soon:true},
+ {title:'Racing',file:'games-racing.html',icon:'fa-flag-checkered',soon:true},
+ {title:'Role-Playing',file:'games-rpg.html',icon:'fa-wand-sparkles',soon:true},
+ {title:'Shooting',file:'games-shooting.html',icon:'fa-crosshairs',soon:true},
+ {title:'Simulation',file:'games-simulation.html',icon:'fa-tractor',soon:true},
+ {title:'Sports',file:'games-sports.html',icon:'fa-futbol',soon:true},
+ {title:'Strategy',file:'games-strategy.html',icon:'fa-chess-rook',soon:true},
+ {title:'Survival',file:'games-survival.html',icon:'fa-campground',soon:true},
+ {title:'Trivia',file:'games-trivia.html',icon:'fa-circle-question',soon:true},
+ {title:'Word',file:'games-word.html',icon:'fa-spell-check',soon:true},
+ ]}
+];
+const GAME_ALL=GAME_GROUPS.flatMap(g=>g.items);
+
+const QUIZZES=[
+ {title:'Lionforge Academy',desc:'',file:'quiz.html'},
+ {title:"Lionel's Academy",desc:'',file:'quizz.html'}
+];
+
+function getNext5PMUAE() {
+  const now = new Date();
+  const uaeNow = new Date(now.getTime() + (4 * 60 + now.getTimezoneOffset()) * 60000);
+  const target = new Date(uaeNow);
+  target.setHours(17, 0, 0, 0);
+  if (uaeNow >= target) {
+    target.setDate(target.getDate() + 1);
+  }
+  const yyyy = target.getFullYear();
+  const mm = String(target.getMonth() + 1).padStart(2, '0');
+  const dd = String(target.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}T17:00:00+04:00`;
+}
+
+const LIVE = {
+  mode: 'scheduled',
+  title: 'Daily Minecraft Live Session!',
+  description: '5:00 PM UAE Time is our official Minecraft stream! Other games (PUBG, Hay Day) can happen anytime live on TikTok.',
+  startTime: getNext5PMUAE(),
+  watchLink: TIKTOK_LINK
+};
+
+const VIDEOS=[
+ {title:'Our YouTube channel',tag:'YouTube',desc:'BedWars, SkyWars, survival worlds and epic boss fights. Subscribe and join the family.',link:YOUTUBE_LINK,thumb:'banner.jpg',bg:'from-red-950 to-amber-900'},
+ {title:'Live and clips on TikTok',tag:'TikTok',desc:'Catch us live and watch short clips on @familyforge22.',link:TIKTOK_LINK,bg:'from-purple-900 to-indigo-950'}
+];
+function ytThumb(u){const m=String(u).match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([\w-]{11})/);return m?`https://img.youtube.com/vi/${m[1]}/hqdefault.jpg`:''}
+
+const CONTENT=[
+ {icon:'fa-cube',color:'text-brand-gold',title:'Minecraft family adventures',text:'Building, exploring and surviving together. Lionforge and Luanforge lead the way, with Dad joining in and Mum dropping in for family time.'},
+ {icon:'fa-parachute-box',color:'text-brand-cyan',title:'PUBG and football with Dad',text:'Fatherforge drops in for squad matches, and football moments and match talk show up in our content too.'},
+ {icon:'fa-wheat-awn',color:'text-emerald-400',title:'Hay Day with Mum',text:'Motherforge loves her Hay Day farm, and sometimes the whole family cheers her on.'},
+ {icon:'fa-tower-broadcast',color:'text-brand-pink',title:'Live on TikTok',text:'We go live at different times as a family. Follow @familyforge22 to get notified the moment we start.'},
+ {icon:'fa-graduation-cap',color:'text-brand-purple',title:'Quizzes and IQ test',text:'Test your Minecraft knowledge with our family quizzes, then challenge your brain with the IQ test.'},
+ {icon:'fa-heart',color:'text-brand-pink',title:'Real family stories',text:'Ananda from Nepal in hospitality, Aiza from the Philippines as a nurse, and our romantic journey in the UAE.'},
+ {icon:'fa-newspaper',color:'text-brand-gold',title:'Daily updates',text:'Stream times, new videos and family news, all in one place, updated every day.'},
+ {icon:'fa-shield-heart',color:'text-brand-cyan',title:'Family-friendly always',text:'Fun for kids and parents. We play, laugh and learn together, one block at a time.'}
+];
+
+const NEWS=[
+ {date:'2026-10-31',tag:'Live Stream',title:'Whole-Day Live Stream Session!',summary:'Join us tomorrow for a full-day live session! Lionforge will go on epic gaming adventures with his friends. Do not miss it!',link:TIKTOK_LINK},
+ {date:'2026-10-30',tag:'Announcement',title:'Welcome to the new Forge Family website',summary:'Our new home online. We will share family news, stream times and Minecraft fun here.',link:''},
+ {date:'2026-10-30',tag:'Announcement',title:'The Minecraft quiz is here',summary:'Test your Minecraft knowledge with the Lionforge Academy quiz. How many can you get right?',link:''},
+ {date:'2026-10-30',tag:'Live update',title:'Find us on TikTok',summary:'Follow @familyforge22 so you get notified when we go live.',link:TIKTOK_LINK}
+];
+
+const MEMBERS=[
+ {id:'lionforge',name:'Lionforge',photo:'lionforge.jpg',closeup:'lionforge-closeup.jpg',dob:'2019-05-17',badge:'Big brother',role:'Minecraft pro (Lio)',fav:'Minecraft on PC',bg:'from-amber-500 to-red-800',icon:'fa-bolt',
+  bio:'Lio is the Minecraft pro of the family. He plays on PC with tons of Minecraft knowledge, and he is the one who started it all.',
+  specs:{Nickname:'Lio',Started:'Age 5','Plays on':'PC',Level:'Pro by age 7'},storyTitle:'Where it all began',
+  story:['Every great adventure has a first block. For the Forge Family, it was placed by Lio when he was just five years old.',
+   'He started with free and copycat versions of Minecraft, building and exploring for the pure joy of it. The more he played, the more he knew: this was the game for him, and his passion grew bigger every day.',
+   'For his 6th birthday, Mum and Dad surprised him with a tablet and the real Minecraft. That was the day his world got a whole lot bigger.',
+   'By the age of 7, Lio was a true pro. Today he plays on PC with tons of Minecraft knowledge, and he is the one who lit the spark for the whole family.']},
+ {id:'luanforge',name:'Luanforge',photo:'luanforge.jpg',closeup:'luanforge-closeup.jpg',dob:'2023-07-14',badge:'Little brother',role:"Little pro and Kuka's sidekick",fav:'Minecraft',bg:'from-teal-500 to-emerald-900',icon:'fa-wand-magic-sparkles',
+  bio:'The little pro who learned by watching his Kuka. Curious about Minecraft at 2 years old and already a pro by 3.',
+  specs:{Nickname:'Babu','Curious at':'Age 2','Pro by':'Age 3',Game:'Minecraft'},storyTitle:'Following Kuka',
+  story:['Luan grew up with Minecraft all around him, and the best seat in the house was right beside his Kuka.',
+   'He watched, he giggled, and at just 2 years old a big question grew in his mind: what is this amazing world?',
+   'By 3, he was already a pro. Wherever Kuka goes in the game, little Luan is right behind him.',
+   'Two brothers, one blocky world, and an adventure that gets better every day.']},
+ {id:'fatherforge',name:'Fatherforge (Ananda)',photo:'fatherforge.jpg',closeup:'fatherforge-closeup.jpg',badge:'Dad',role:'Squad leader & Hospitality Professional',fav:'PUBG, football and Minecraft',bg:'from-blue-600 to-indigo-900',icon:'fa-shield-halved',
+  bio:'Ananda came from Nepal to the UAE for a better career, working in hospitality and hotels before building our wonderful family.',
+  specs:{Name:'Ananda',From:'Nepal',Background:'Hospitality & Hotel',Role:'Dad and squad leader'},storyTitle:'Ananda’s Journey: From Nepal to the UAE',
+  story:[
+   'With dreams as vast as the Himalayas, Ananda left his home in Nepal to chase a brighter future in the United Arab Emirates. Immersed in the vibrant world of hospitality, he worked diligently in hotel management, building a solid foundation of hard work and dedication.',
+   'Little did he know, destiny was quietly orchestrating a masterclass in romance, paving the way for a chapter that would change his life forever.'
+  ]},
+ {id:'motherforge',name:'Motherforge (Aiza)',photo:'motherforge.jpg',closeup:'motherforge-closeup.jpg',dob:'1992-12-22',badge:'Mum',role:'Nurse & Healthcare Professional',fav:'Hay Day',bg:'from-pink-600 to-purple-900',icon:'fa-heart',
+  bio:'Aiza came from the Philippines to the UAE for a better career, working dedicatedly as a nurse while filling our home with love.',
+  specs:{Name:'Aiza',From:'Philippines',Birthday:'22 December',Background:'Medical & Nursing',Role:'Mum and healthcare hero'},storyTitle:'Aiza’s Journey: From the Philippines to the UAE',
+  story:[
+   'Driven by a compassionate calling to heal and care for others, Aiza journeyed from the beautiful islands of the Philippines to the UAE, stepping forward with courage to build a meaningful career as a dedicated nurse.',
+   'With grace, resilience, and a heart full of gold, she stepped into a new land—unaware that her true soulmate was living just a heartbeat away.'
+  ]}
+];
+
+function ageText(dob){const b=new Date(dob+'T00:00:00'),n=new Date();let y=n.getFullYear()-b.getFullYear(),m=n.getMonth()-b.getMonth();if(n.getDate()<b.getDate())m--;if(m<0){y--;m+=12}
+ return y+(y===1?' year':' years')+(m?', '+m+(m===1?' month':' months'):'')}
+function specsOf(m){const o={};if(m.dob){o.Age=ageText(m.dob);if(!m.specs.Birthday)o.Birthday=new Date(m.dob+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long'})}return Object.assign(o,m.specs)}
+const paras=m=>m.story.map(p=>`<p>${p}</p>`).join('');
+
+const MENU=[
+ ['home','Home','fa-house','text-brand-cyan','Back to the start'],
+ ['members','Family','fa-users','text-brand-cyan','Meet the four of us'],
+ ['story','Our story','fa-book-open','text-brand-pink','How it all began'],
+ ['games','Games','fa-gamepad','text-brand-pink','Play with us'],
+ ['quiz','Mine-quiz','fa-cube','text-brand-gold','Minecraft trivia'],
+ ['iq','IQ test','fa-brain','text-brand-purple','Test your brain'],
+ ['news','News','fa-newspaper','text-brand-gold','Family announcements'],
+ ['videos','Videos','fa-play','text-brand-pink','YouTube and TikTok'],
+ ['connect','Connect','fa-link','text-emerald-400','All our pages'],
+ ['about','About','fa-circle-info','text-brand-cyan','Who we are']
+];
+
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $=id=>document.getElementById(id);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.remove('hidden');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.add('hidden'),2500)}
+function copyDiscord(){const ok=()=>toast('Discord username copied: '+DISCORD_USERNAME);
+ (navigator.clipboard?navigator.clipboard.writeText(DISCORD_USERNAME).then(ok):Promise.reject()).catch(()=>toast('Discord: '+DISCORD_USERNAME))}
+function imgFail(el,fb,icon,sz){if(fb&&el.dataset.t!=='1'){el.dataset.t='1';el.src=fb;return}el.replaceWith(Object.assign(document.createElement('i'),{className:'fa-solid '+icon+' '+sz+' text-white opacity-80'}))}
+const photo=(m,sz,src)=>`<img src="${src||m.photo}" alt="${esc(m.name)}" class="w-full h-full object-cover object-top" onerror="imgFail(this,'${src?m.photo:''}','${m.icon}','${sz}')">`;
+
+/* ----- RENDER FUNCTIONS ----- */
+function renderNav(){
+ const items=MENU.map(([id,l,ic,c])=>`<a href="#${id}" data-v="${id}" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800/60"><i class="fa-solid ${ic} ${c} mr-1.5"></i>${l}</a>`).join('');
+ $('nav').innerHTML=items;$('mobileNav').innerHTML=items.replace(/px-3 py-2/g,'px-3 py-3');
+}
+function renderHome(){
+ renderHomeLiveCard();
+ document.querySelectorAll('.yt-link').forEach(a=>a.href=YOUTUBE_LINK);
+ document.querySelectorAll('.tt-link').forEach(a=>a.href=TIKTOK_LINK);
+}
+function renderHomeLiveCard(){
+ const card = $('homeLiveCard');
+ if(!card) return;
+ const pill=(c,t)=>`<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-${c}-500/10 border border-${c}-500/30 text-${c}-400 text-xs font-mono font-bold mb-2"><span class="w-2 h-2 rounded-full bg-${c}-500 animate-pulse"></span>${t}</div>`;
+ const box=(id,l,c)=>`<div class="p-2.5 bg-brand-dark/90 border border-gray-800 rounded-xl text-center"><span class="block text-xl font-bold ${c}" id="${id}">00</span><span class="text-[9px] text-gray-500 uppercase tracking-wider">${l}</span></div>`;
+ const cdGrid = `<div class="grid grid-cols-4 gap-2 font-orbitron my-3">${box('homeCdD','Days','text-brand-cyan')}${box('homeCdH','Hours','text-brand-purple')}${box('homeCdM','Mins','text-brand-pink')}${box('homeCdS','Secs','text-brand-gold')}</div>`;
+ const btns = `<a href="${TIKTOK_LINK}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-brand-pink text-white font-orbitron text-xs font-bold hover:opacity-90 transition-opacity"><i class="fa-brands fa-tiktok"></i> Follow on TikTok</a>`;
+
+ card.innerHTML = pill('gold','DAILY 5 PM MINECRAFT STREAM') + 
+   `<h3 class="font-orbitron font-bold text-white text-base mt-1">${esc(LIVE.title)}</h3>` +
+   `<p class="text-xs text-gray-300 mt-1 leading-relaxed">${esc(LIVE.description)}</p>` + 
+   cdGrid + btns;
+}
+function renderMembers(){
+ $('memberGrid').innerHTML=MEMBERS.map(m=>`<a href="#member-${m.id}" class="group p-5 rounded-3xl bg-brand-card border border-gray-800 hover:border-brand-cyan/50 transition-colors block">
+  <div class="text-xs text-gray-400 mb-3">${m.badge}</div>
+  <div class="w-36 h-44 mx-auto rounded-2xl bg-gradient-to-tr ${m.bg} p-1"><div class="w-full h-full bg-brand-dark rounded-xl flex items-center justify-center overflow-hidden">${photo(m,'text-4xl')}</div></div>
+  <h3 class="font-orbitron font-bold text-xl text-white text-center mt-4">${m.name}</h3>
+  <p class="text-xs text-brand-purple text-center mt-1">${m.role}</p>
+  <p class="text-xs text-gray-400 text-center mt-4 pt-3 border-t border-gray-800">Open profile</p></a>`).join('');
+}
+function renderMember(id){
+ const m=MEMBERS.find(x=>x.id===id);if(!m){location.hash='#members';return}
+ $('memberBody').innerHTML=`<a href="#members" class="text-sm text-brand-cyan"><i class="fa-solid fa-arrow-left mr-1"></i>All family</a>
+ <div class="grid md:grid-cols-12 gap-8 mt-6">
+  <div class="md:col-span-4"><div class="w-56 h-72 mx-auto rounded-3xl bg-gradient-to-tr ${m.bg} p-1.5 shadow-xl"><div class="w-full h-full bg-brand-dark rounded-[20px] flex items-center justify-center overflow-hidden">${photo(m,'text-6xl',m.closeup)}</div></div></div>
+  <div class="md:col-span-8">
+   <div class="text-xs text-gray-400">${m.badge}</div>
+   <h2 class="font-orbitron font-black text-4xl text-white">${m.name}</h2>
+   <p class="text-brand-cyan text-sm mt-1">${m.role}</p>
+   <p class="text-gray-300 mt-5 max-w-prose">${m.bio}</p>
+   <div class="grid grid-cols-2 gap-3 mt-6">${Object.entries(specsOf(m)).map(([k,v])=>`<div class="p-3 rounded-xl bg-brand-card border border-gray-800"><div class="text-[11px] text-gray-500">${k}</div><div class="text-white font-semibold text-sm">${v}</div></div>`).join('')}</div>
+   <div class="mt-6 p-5 rounded-2xl bg-brand-card border border-gray-800"><h3 class="font-orbitron font-bold text-white mb-2">${m.storyTitle}</h3><div class="space-y-3 text-gray-400 text-sm leading-relaxed max-w-prose">${paras(m)}</div></div>
+  </div></div>`;
+}
+function renderStory(){
+ const storyCards = [
+  {
+   title: "Ananda's Journey (Father)",
+   subtitle: "From Nepal to UAE Hospitality",
+   bg: "from-blue-600 to-indigo-900",
+   icon: "fa-plane-departure",
+   text: "With dreams as vast as the Himalayas, Ananda left his home in Nepal to chase a brighter future in the United Arab Emirates. Immersed in the vibrant world of hospitality, he worked diligently in hotel management, crafting an inspiring path of hard work and dedication.",
+   imgPlaceholder: "ananda-story.jpg",
+   label: "[ Ananda Story Picture Placeholder ]"
+  },
+  {
+   title: "Aiza's Journey (Mother)",
+   subtitle: "From the Philippines to UAE Healthcare",
+   bg: "from-pink-600 to-purple-900",
+   icon: "fa-user-nurse",
+   text: "Driven by a compassionate calling to heal and care for others, Aiza journeyed from the beautiful islands of the Philippines to the UAE, stepping forward with courage to build a meaningful career as a dedicated nurse.",
+   imgPlaceholder: "aiza-story.jpg",
+   label: "[ Aiza Story Picture Placeholder ]"
+  },
+  {
+   title: "When Destiny Intervenes",
+   subtitle: "The Same Building, Right Next Door",
+   bg: "from-amber-500 to-red-800",
+   icon: "fa-house-chimney",
+   text: "When it is written in the stars, it is bound to happen. Ananda moved into a new accommodation, and by a breathtaking stroke of fate, Aiza moved into the exact same building—right next door in the very same flat area. They locked eyes for the very first time in the shared kitchen, turning casual chats into a true love story.",
+   imgPlaceholder: "love-story.jpg",
+   label: "[ Love Story Picture Placeholder ]"
+  },
+  {
+   title: "From Love to Marriage",
+   subtitle: "A Promise of Forever",
+   bg: "from-purple-600 to-pink-800",
+   icon: "fa-ring",
+   text: "That casual spark in the kitchen grew into an unwavering friendship and a passionate love story. Within just one year, they stood together hand-in-hand and vowed to spend the rest of their lives together in a beautiful wedding ceremony.",
+   imgPlaceholder: "wedding-story.jpg",
+   label: "[ Wedding Picture Placeholder ]"
+  },
+  {
+   title: "Standing Together Through Every Storm",
+   subtitle: "Sacrifice, Teamwork, and Devotion",
+   bg: "from-teal-600 to-emerald-900",
+   icon: "fa-shield-heart",
+   text: "Life is a journey of highs and lows, but Ananda and Aiza proved that true partners stand shoulder-to-shoulder through every single challenge. From navigating the delicate challenges of both boys being born via C-section deliveries to balancing the demands of growing a family, they became each other's absolute rock. When the demands of raising a young family required a bold choice, Ananda stepped back from his job to care full-time for their children at home, while Aiza continued working with steadfast dedication to support and provide for the family. Through every sacrifice, late night, and triumph, their bond grew unbreakable.",
+   imgPlaceholder: null,
+   label: null
+  }
+ ];
+
+ $('storyGrid').innerHTML=storyCards.map(s=>`
+  <div class="p-6 rounded-3xl bg-brand-card border border-gray-800 flex flex-col justify-between ${s.imgPlaceholder ? '' : 'md:col-span-2'}">
+   <div>
+    <div class="flex items-center gap-3 mb-4">
+     <span class="w-10 h-10 rounded-xl bg-gradient-to-tr ${s.bg} flex items-center justify-center text-white text-lg"><i class="fa-solid ${s.icon}"></i></span>
+     <div>
+      <h3 class="font-orbitron font-bold text-white text-base">${s.title}</h3>
+      <span class="text-xs text-brand-cyan">${s.subtitle}</span>
+     </div>
+    </div>
+    <p class="text-sm text-gray-300 leading-relaxed mb-5">${s.text}</p>
+   </div>
+   ${s.imgPlaceholder ? `
+   <div class="aspect-video rounded-2xl bg-black/40 border border-gray-800 flex flex-col items-center justify-center relative overflow-hidden">
+    <img src="${s.imgPlaceholder}" alt="${s.title}" class="absolute inset-0 w-full h-full object-contain" onerror="this.style.display='none'">
+    <i class="fa-solid fa-image text-3xl text-gray-700 mb-1"></i>
+    <span class="text-[10px] font-mono text-gray-500 uppercase tracking-widest">${s.label}</span>
+   </div>` : ''}
+  </div>`).join('');
+}
+function startCountdown(){
+ const set=(i,v)=>{document.querySelectorAll('#'+i).forEach(e=>e.textContent=String(v).padStart(2,'0'))};
+ const tick=()=>{
+  const tg=new Date(LIVE.startTime).getTime();
+  const d=tg-Date.now();
+  if(d<=0){
+   LIVE.startTime = getNext5PMUAE();
+  }
+  set('homeCdD',Math.floor(d/864e5));set('homeCdH',Math.floor(d%864e5/36e5));set('homeCdM',Math.floor(d%36e5/6e4));set('homeCdS',Math.floor(d%6e4/1e3));
+ };
+ tick();setInterval(tick,1000);
+}
+function renderVideos(){
+ $('videoGrid').innerHTML=VIDEOS.map(v=>{
+  const t=v.thumb||ytThumb(v.link);
+  return `<a href="${v.link}" target="_blank" rel="noopener" class="group bg-brand-card border border-gray-800 rounded-2xl overflow-hidden hover:border-brand-pink/50 block">
+  <div class="aspect-video bg-gradient-to-br ${v.bg||'from-purple-900 to-indigo-950'} relative flex items-center justify-center overflow-hidden">
+   ${t?`<img src="${t}" alt="${esc(v.title)}" loading="lazy" class="absolute inset-0 w-full h-full object-contain" onerror="this.remove()">`:''}
+   <span class="relative w-14 h-14 rounded-full bg-brand-pink/90 text-white flex items-center justify-center text-xl shadow-lg group-hover:scale-110 transition-transform"><i class="fa-solid fa-play ml-1"></i></span>
+  </div>
+  <div class="p-4"><div class="text-xs text-brand-cyan mb-1">${esc(v.tag)}</div><h3 class="font-orbitron font-bold text-white text-sm mb-1">${esc(v.title)}</h3><p class="text-xs text-gray-400">${esc(v.desc)}</p></div></a>`}).join('');
+}
+function renderNews(){
+ $('newsGrid').innerHTML=[...NEWS].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,9).map(p=>{
+  const d=new Date(p.date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  return `<div class="p-6 rounded-2xl bg-brand-card border border-gray-800 flex flex-col justify-between"><div>
+   <div class="flex justify-between text-xs mb-3"><span class="text-emerald-400">${esc(p.tag)}</span><span class="text-gray-500 font-mono">${d}</span></div>
+   <h3 class="font-orbitron font-bold text-white text-base mb-2">${esc(p.title)}</h3><p class="text-xs text-gray-400 leading-relaxed">${esc(p.summary)}</p></div>
+   ${p.link?`<a href="${p.link}" target="_blank" rel="noopener" class="text-brand-cyan text-xs mt-4 self-end">Read more</a>`:''}</div>`}).join('');
+}
+function renderConnect(){
+ const L=[['fa-tiktok','TikTok LIVE','@familyforge22',TIKTOK_LINK,'pink'],['fa-youtube','YouTube','@SiddharthaGamin-f8h',YOUTUBE_LINK,'red'],['fa-facebook-f','Facebook','DKLionelMjn',FACEBOOK_LINK,'blue'],['fa-whatsapp','WhatsApp','Message us','https://wa.me/'+WHATSAPP_NUMBER+'?text=Hello%20Forge%20Family!','green'],['fa-telegram','Telegram','Message us',TELEGRAM_LINK,'sky']];
+ $('connectGrid').innerHTML=L.map(([i,t,s,u,c])=>`<a href="${u}" target="_blank" rel="noopener" class="p-5 rounded-2xl bg-brand-card border border-gray-800 hover:border-${c}-500/60 flex items-center gap-4"><span class="w-14 h-14 rounded-xl bg-${c}-500/15 text-${c}-400 flex items-center justify-center text-2xl"><i class="fa-brands ${i}"></i></span><span><span class="block font-orbitron font-bold text-white text-sm">${t}</span><span class="text-xs text-gray-400 font-mono">${s}</span></span></a>`).join('')+
+ `<button onclick="copyDiscord()" class="text-left p-5 rounded-2xl bg-brand-card border border-gray-800 hover:border-indigo-500/60 flex items-center gap-4"><span class="w-14 h-14 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center text-2xl"><i class="fa-brands fa-discord"></i></span><span><span class="block font-orbitron font-bold text-white text-sm">Discord</span><span class="text-xs text-gray-400 font-mono">${DISCORD_USERNAME}</span></span><span class="ml-auto text-xs text-gray-500">Copy</span></button>`;
+}
+
+function showQuizPicker(){
+ $('quizPlayer').classList.add('hidden');$('quizFrame').removeAttribute('src');
+ $('quizPicker').classList.remove('hidden');
+ $('quizCards').innerHTML=QUIZZES.map((q,n)=>`<button onclick="openQuiz(${n})" class="text-left p-6 rounded-3xl bg-brand-card border border-gray-800 hover:border-brand-cyan/60 transition-colors"><span class="w-12 h-12 rounded-xl bg-brand-gold/15 text-brand-gold flex items-center justify-center text-2xl mb-4"><i class="fa-solid fa-cube"></i></span><span class="block font-orbitron font-bold text-lg text-white">${esc(q.title)}</span><span class="block text-xs text-brand-cyan font-orbitron font-bold mt-4">START <i class="fa-solid fa-play ml-1"></i></span></button>`).join('');
+}
+function openQuiz(i){
+ const q=QUIZZES[i];$('quizFrame').src=q.file;$('quizFull').href=q.file;$('quizName').textContent=q.title;
+ $('quizPicker').classList.add('hidden');$('quizPlayer').classList.remove('hidden');
+ window.scrollTo(0,0);
+}
+function showIqPicker(){
+ $('iqPlayer').classList.add('hidden');$('iqFrame').removeAttribute('src');
+ $('iqPicker').classList.remove('hidden');
+ $('iqCards').innerHTML=IQ_TESTS.map((q,n)=>`<button onclick="openIq(${n})" class="text-left p-6 rounded-3xl bg-brand-card border border-gray-800 hover:border-brand-purple/60 transition-colors"><span class="w-12 h-12 rounded-xl bg-brand-purple/20 text-brand-purple flex items-center justify-center text-2xl mb-4"><i class="fa-solid fa-brain"></i></span><span class="block font-orbitron font-bold text-lg text-white">${esc(q.title)}</span><span class="block text-sm text-gray-400 mt-1">${esc(q.desc)}</span><span class="block text-xs text-brand-cyan font-orbitron font-bold mt-4">START <i class="fa-solid fa-play ml-1"></i></span></button>`).join('');
+}
+function openIq(i){
+ const q=IQ_TESTS[i];$('iqFrame').src=q.file;$('iqFull').href=q.file;$('iqName').textContent=q.title;
+ $('iqPicker').classList.add('hidden');$('iqPlayer').classList.remove('hidden');
+ window.scrollTo(0,0);
+}
+function renderGameNav(sel){
+ let n=0;
+ $('gameNav').innerHTML=GAME_GROUPS.map(g=>g.items.map(it=>{const i=n++;const on=i===sel;
+  return `<button onclick="openGame(${i})" class="w-full shrink-0 flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap text-left ${on?'bg-brand-pink/15 text-white border border-brand-pink/50':'text-gray-300 border border-transparent hover:bg-gray-800/60 hover:text-white'}"><i class="fa-solid ${it.icon||'fa-gamepad'} w-5 text-center ${on?'text-brand-pink':'text-brand-purple'}"></i><span>${esc(it.title)}</span>${it.soon?'<span class="ml-auto text-[10px] text-gray-500">Soon</span>':''}</button>`}).join('')).join('');
+}
+function showGamePicker(){
+ $('gameFrame').removeAttribute('src');
+ $('gamePlayer').classList.add('hidden');$('gameSoon').classList.add('hidden');$('gameWelcome').classList.remove('hidden');
+ renderGameNav(-1);
+}
+function openGame(i){
+ const g=GAME_ALL[i];renderGameNav(i);$('gameWelcome').classList.add('hidden');
+ if(g.soon){$('gameFrame').removeAttribute('src');$('gamePlayer').classList.add('hidden');$('soonTitle').textContent=g.title+' games';$('gameSoon').classList.remove('hidden');return}
+ $('gameSoon').classList.add('hidden');$('gameName').textContent=g.title;$('gameFull').href=g.file;$('gameFrame').src=g.file;$('gamePlayer').classList.remove('hidden');
+}
+
+function route(){
+ let h=(location.hash||'#home').slice(1),sub=null;
+ if(h.startsWith('member-')){sub=h.slice(7);h='member'}
+ if(!$(h))h='home';
+ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===h));
+ if(h==='member')renderMember(sub);
+ if(h==='quiz')showQuizPicker();
+ if(h==='iq')showIqPicker();
+ if(h==='games')showGamePicker();
+ if(h==='news')renderNews();
+ const on=h==='member'?'members':h;
+ document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('on',b.dataset.v===on));
+ $('mobileNav').classList.add('hidden');
+ $('foot').classList.toggle('hidden',h==='home');
+ window.scrollTo(0,0);
+}
+document.addEventListener('DOMContentLoaded',()=>{
+ renderNav();renderHome();renderMembers();renderStory();renderVideos();renderNews();renderConnect();startCountdown();
+ $('menuBtn').onclick=()=>$('mobileNav').classList.toggle('hidden');
+ window.addEventListener('hashchange',route);route();
+});
+</script>
+</body>
+</html>

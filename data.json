@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Forge Family | Siddhartha Gamin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config={theme:{extend:{colors:{brand:{cyan:'#00f2fe',blue:'#4facfe',purple:'#7f00ff',pink:'#ff007f',gold:'#fbbf24',dark:'#0a0d14',card:'#121824'}},fontFamily:{orbitron:['Orbitron','sans-serif'],sans:['Plus Jakarta Sans','sans-serif']}}}}
+</script>
+<style>
+body{background:#080b11;color:#f3f4f6;font-family:'Plus Jakarta Sans',sans-serif;overflow-x:hidden}
+.view{display:none}.view.active{display:block;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#home.active{display:flex;align-items:center;justify-content:center;gap:2.5rem;flex-direction:column;min-height:calc(100dvh - 8rem)}
+@media(min-width:1024px){#home.active{flex-direction:row;height:calc(100dvh - 8rem);min-height:0}}
+.nav-btn.on{background:rgba(0,242,254,.12);color:#fff}
+@media (prefers-reduced-motion:reduce){.view.active{animation:none}}
+a:focus-visible,button:focus-visible{outline:2px solid #00f2fe;outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="fixed inset-0 pointer-events-none z-0 overflow-hidden"><div class="absolute -top-40 -left-40 w-96 h-96 bg-brand-cyan/20 rounded-full blur-3xl"></div><div class="absolute top-1/3 -right-40 w-96 h-96 bg-brand-purple/20 rounded-full blur-3xl"></div><div class="absolute bottom-10 left-1/4 w-96 h-96 bg-brand-pink/15 rounded-full blur-3xl"></div></div>
+
+<header class="sticky top-0 z-50 backdrop-blur-xl bg-brand-dark/90 border-b border-gray-800">
+  <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+    <a href="#home" class="flex items-center gap-2">
+      <span class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-cyan via-brand-purple to-brand-pink p-[2px]"><span class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center"><i class="fa-solid fa-shield-halved text-brand-cyan"></i></span></span>
+      <span class="font-orbitron font-black text-lg text-white">FORGE<span class="text-brand-cyan">FAMILY</span></span>
+    </a>
+    <nav class="hidden lg:flex gap-1" id="nav"></nav>
+    <button id="menuBtn" class="lg:hidden w-10 h-10 rounded-xl bg-gray-800 text-gray-300" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+  </div>
+  <div id="mobileNav" class="hidden lg:hidden px-4 pb-4 grid grid-cols-2 gap-2"></div>
+</header>
+
+<main class="relative z-10 max-w-6xl mx-auto px-4 py-6">
+
+<!-- HOME (one screen) -->
+<section id="home" class="view">
+  <div class="shrink-0 w-44 sm:w-56 lg:w-64 rounded-2xl overflow-hidden border border-gray-700 shadow-2xl shadow-brand-purple/20 bg-brand-card">
+    <img src="banner.jpg" alt="Siddhartha Gamin - FamilyForge Clan" class="block w-full h-auto">
+  </div>
+  <div class="text-center max-w-2xl">
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-purple/20 border border-brand-purple/40 text-brand-cyan text-xs font-mono font-semibold tracking-wider mb-4"><i class="fa-solid fa-gamepad text-brand-pink"></i> THE FORGE FAMILY</div>
+    <h1 class="font-orbitron font-black text-4xl sm:text-5xl lg:text-6xl tracking-tight text-white leading-tight">One Family.<br>
+      <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan via-brand-purple to-brand-pink">Endless Adventures.</span></h1>
+    <p class="text-gray-400 text-sm sm:text-base leading-relaxed mt-4">Welcome to the official home of Fatherforge, Motherforge, Lionforge &amp; Luanforge! A family that plays, laughs and learns together, one block at a time.</p>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 mt-6 rounded-2xl bg-brand-card/80 border border-gray-800">
+      <div class="text-center sm:border-r border-gray-800"><span class="block font-orbitron font-bold text-2xl text-brand-cyan">4</span><span class="text-[10px] text-gray-400 uppercase font-mono">Family Gamers</span></div>
+      <div class="text-center sm:border-r border-gray-800"><span class="block font-orbitron font-bold text-xl text-brand-purple leading-8">Minecraft</span><span class="text-[10px] text-gray-400 uppercase font-mono">Our Main Game</span></div>
+      <div class="text-center sm:border-r border-gray-800"><span class="block font-orbitron font-bold text-2xl text-brand-pink">Daily</span><span class="text-[10px] text-gray-400 uppercase font-mono">Family News</span></div>
+      <div class="text-center"><span class="block font-orbitron font-bold text-2xl text-brand-gold">LIVE</span><span class="text-[10px] text-gray-400 uppercase font-mono">On TikTok</span></div>
+    </div>
+    <div class="flex flex-wrap justify-center gap-3 mt-5">
+      <a class="yt-link px-5 py-3 rounded-xl bg-red-600 text-white font-orbitron text-xs font-bold" target="_blank" rel="noopener"><i class="fa-brands fa-youtube mr-1"></i> YouTube</a>
+      <a class="tt-link px-5 py-3 rounded-xl bg-brand-pink text-white font-orbitron text-xs font-bold" target="_blank" rel="noopener"><i class="fa-brands fa-tiktok mr-1"></i> TikTok</a>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="view">
+  <h2 class="font-orbitron font-black text-3xl text-white">About our channel</h2>
+  <p class="text-gray-400 text-sm mt-1 mb-8 max-w-2xl">Family-friendly gaming, made by a real family at home.</p>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4" id="aboutContent"></div>
+  <div class="mt-10 p-6 rounded-2xl bg-gradient-to-br from-brand-purple/25 via-brand-card to-brand-cyan/10 border border-brand-purple/40 text-center">
+    <h3 class="font-orbitron font-bold text-xl text-white">Join the Forge Family</h3>
+    <p class="text-gray-300 text-sm mt-1 mb-5">Subscribe on YouTube and follow on TikTok so you never miss a video or a live stream.</p>
+    <div class="flex flex-wrap justify-center gap-3">
+      <a class="yt-link px-5 py-3 rounded-xl bg-red-600 text-white font-orbitron text-xs font-bold" target="_blank" rel="noopener"><i class="fa-brands fa-youtube mr-1"></i> Subscribe on YouTube</a>
+      <a class="tt-link px-5 py-3 rounded-xl bg-brand-pink text-white font-orbitron text-xs font-bold" target="_blank" rel="noopener"><i class="fa-brands fa-tiktok mr-1"></i> Follow on TikTok</a>
+    </div>
+  </div>
+</section>
+
+<!-- MEMBERS -->
+<section id="members" class="view">
+  <h2 class="font-orbitron font-black text-3xl text-white">Meet the family</h2>
+  <p class="text-gray-400 text-sm mt-1 mb-8">Tap a member to open their profile.</p>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5" id="memberGrid"></div>
+</section>
+
+<!-- MEMBER PROFILE -->
+<section id="member" class="view"><div id="memberBody"></div></section>
+
+<!-- STORY -->
+<section id="story" class="view">
+  <h2 class="font-orbitron font-black text-3xl text-white">Our story</h2>
+  <p class="text-gray-400 max-w-2xl mt-2 mb-8">Every family has a game they will always remember. For us it is Minecraft. One little boy's big passion became a whole family building, exploring and laughing together.</p>
+  <div class="grid md:grid-cols-2 gap-5" id="storyGrid"></div>
+  <p class="text-center text-gray-300 max-w-xl mx-auto mt-10">Today we play, laugh and learn together as one family, and we love sharing the adventure with you. Thank you for being part of it.</p>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz" class="view">
+  <h2 class="font-orbitron font-black text-3xl text-white">Minecraft trivia and quiz</h2>
+  <p class="text-gray-400 mt-2 mb-6">Lionforge Academy. Think you know Minecraft? Play right here or open it full screen.</p>
+  <a class="quiz-link inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-brand-cyan to-brand-blue text-brand-dark font-orbitron font-bold text-sm mb-5" target="_blank" rel="noopener"><i class="fa-solid fa-expand"></i> Open full screen</a>
+  <div class="rounded-2xl overflow-hidden border border-gray-800 bg-brand-card">
+    <iframe id="quizFrame" title="Minecraft quiz" class="w-full h-[78vh] bg-white" loading="lazy"></iframe>
+  </div>
+</section>
+
+<!-- LIVE -->
+<section id="live" class="view">
+  <h2 class="font-orbitron font-black text-3xl text-white mb-8">Live streams</h2>
+  <div class="grid lg:grid-cols-12 gap-6">
+    <div class="lg:col-span-5 space-y-4" id="liveBox"></div>
+    <div class="lg:col-span-7 p-6 rounded-2xl bg-brand-card border border-gray-800">
+      <div class="flex justify-between mb-4 pb-3 border-b border-gray-800"><h3 class="font-orbitron font-bold text-white">Upcoming streams</h3><span class="text-xs text-gray-400 font-mono">GMT+4</span></div>
+      <div class="space-y-3" id="schedule"></div>
+    </div>
+  </div>
+</section>
+
+<!-- VIDEOS -->
+<section id="videos" class="view">
+  <h2 class="font-orbitron font-black text-3xl text-white mb-8">Videos and streams</h2>
+  <div class="grid sm:grid-cols-2 gap-5" id="videoGrid"></div>
+</section>
+
+<!-- NEWS -->
+<section id="news" class="view">
+  <h2 class="font-orbitron font-black text-3xl text-white">Family news and updates</h2>
+  <p class="text-gray-400 text-sm mt-1 mb-8">The latest from our family, our streams and our Minecraft world.</p>
+  <div class="grid md:grid-cols-3 gap-5" id="newsGrid"></div>
+</section>
+
+<!-- CONNECT -->
+<section id="connect" class="view">
+  <h2 class="font-orbitron font-black text-3xl text-white">Connect with us</h2>
+  <p class="text-gray-400 text-sm mt-1 mb-8">Follow, message and join us on all our official pages.</p>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4" id="connectGrid"></div>
+</section>
+
+</main>
+
+<footer id="foot" class="border-t border-gray-800 py-8 text-center text-xs text-gray-500">
+  <p>&copy; 2026 The Forge Family. Made with love for gaming and family.</p>
+</footer>
+
+<div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] hidden px-5 py-3 rounded-xl bg-brand-card border border-brand-cyan/50 text-sm text-white shadow-2xl"></div>
+
+<script>
+/* ===== CONFIGURATION ===== */
+const DISCORD_USERNAME='familyforge_39128';
+const WHATSAPP_NUMBER='971567752421';
+const TIKTOK_LINK='https://www.tiktok.com/@familyforge22';
+const YOUTUBE_LINK='https://www.youtube.com/@SiddharthaGamin-f8h';
+const FACEBOOK_LINK='https://www.facebook.com/DKLionelMjn/';
+const TELEGRAM_LINK='https://web.telegram.org/k/?account=2';
+const QUIZ_LINK='quiz.html';
+
+/* Global variables loaded dynamically from data.json */
+let LIVE = { mode: 'tba', title: 'Next family live stream', description: 'We go live at different times, so follow us on TikTok to get notified the moment we start.', startTime: '', watchLink: TIKTOK_LINK };
+let SCHEDULE = [];
+let VIDEOS = [];
+let NEWS = [];
+
+const CONTENT=[
+ {icon:'fa-cube',color:'text-brand-gold',title:'Minecraft family adventures',text:'Building, exploring and surviving together. Lionforge and Luanforge lead the way, with Mum and Dad joining in.'},
+ {icon:'fa-parachute-box',color:'text-brand-cyan',title:'PUBG with Dad',text:'Fatherforge drops in for squad matches, the game he loved long before Minecraft pulled him in.'},
+ {icon:'fa-futbol',color:'text-emerald-400',title:'Football fun',text:'Dad is a football fan at heart, so football moments and match talk show up in our content too.'},
+ {icon:'fa-tower-broadcast',color:'text-brand-pink',title:'Live on TikTok',text:'We go live at different times as a family. Follow @familyforge22 to get notified the moment we start.'},
+ {icon:'fa-graduation-cap',color:'text-brand-purple',title:'Lionforge Academy quiz',text:'Test your Minecraft knowledge with trivia made by our family. See how many you can get right.'},
+ {icon:'fa-heart',color:'text-brand-pink',title:'Real family stories',text:'A full-time nurse mum, a hospital-background dad and two little pros. Learn how each of us got hooked.'},
+ {icon:'fa-newspaper',color:'text-brand-gold',title:'Daily updates',text:'Stream times, new videos and family news, all in one place, updated every day.'},
+ {icon:'fa-shield-heart',color:'text-brand-cyan',title:'Family-friendly always',text:'Fun for kids and parents. We play, laugh and learn together, one block at a time.'}
+];
+
+const MEMBERS=[
+ {id:'lionforge',name:'Lionforge',photo:'lionforge.jpg',badge:'Big brother',role:'Minecraft pro (Lio)',fav:'Minecraft on PC',bg:'from-amber-500 to-red-800',icon:'fa-bolt',
+  bio:'Lio is the Minecraft pro of the family. He plays on PC with tons of Minecraft knowledge, and he is the one who started it all.',
+  specs:{Nickname:'Lio',Started:'Age 5','Plays on':'PC',Level:'Pro by age 7'},storyTitle:'The one who started it all',
+  story:"Lio's Minecraft journey began at 5, playing free and copycat versions of the game. Soon he knew this was the game for him, and his passion kept growing. For his 6th birthday his parents surprised him with a tablet and the real Minecraft. By 7 he was a pro, now playing on PC with tons of Minecraft knowledge."},
+ {id:'luanforge',name:'Luanforge',photo:'luanforge.jpg',badge:'Little brother',role:"Little pro and Kuka's sidekick",fav:'Minecraft',bg:'from-teal-500 to-emerald-900',icon:'fa-wand-magic-sparkles',
+  bio:'The little pro who learned by watching his Kuka. Curious about Minecraft at 2 years old and already a pro by 3.',
+  specs:{'Big brother':'Kuka (Lio)','Curious at':'Age 2','Pro by':'Age 3',Game:'Minecraft'},storyTitle:'The little pro',
+  story:'Luanforge grew up watching his Kuka (big brother) play. Seeing that Minecraft obsession sparked his own curiosity at just 2 years old, and by 3 he was already a pro. Where Kuka goes in the game, little Luan follows.'},
+ {id:'fatherforge',name:'Fatherforge',photo:'fatherforge.jpg',badge:'Dad',role:'Squad leader',fav:'PUBG, football and Minecraft',bg:'from-blue-600 to-indigo-900',icon:'fa-shield-halved',
+  bio:'Dad and squad leader. A PUBG and football fan at heart who got pulled into the blocky world of Minecraft by his son.',
+  specs:{Role:'Dad and squad leader',Background:'Hospital',Loves:'PUBG and football','Minecraft thanks to':'Lionforge'},storyTitle:'Dad joins the game',
+  story:"Fatherforge comes from a hospital background, and his own gaming time used to be mostly PUBG and football. Then Lionforge's love of Minecraft pulled him in too. Now he explores the blocky world side by side with his boys, proving that the best player two is always your kid."},
+ {id:'motherforge',name:'Motherforge',photo:'mummyforge.jpg',badge:'Mum',role:'Full-time nurse and gamer mum',fav:'Minecraft',bg:'from-pink-600 to-purple-900',icon:'fa-heart',
+  bio:"A full-time nurse with a big heart. Her kids' gaming obsession dragged her into this world, and now she is part of every adventure.",
+  specs:{Role:'Mum',Job:'Full-time nurse',Game:'Minecraft','Dragged in by':'Her kids'},storyTitle:'Mum gets dragged in (happily)',
+  story:"\"I'm a full-time nurse, but my kids' gaming obsession dragged me into this world.\" Motherforge never planned to become a Minecraft player, yet here she is, part of the adventure and the heart of the Forge Family."}
+];
+
+const MENU=[
+ ['home','Home','fa-house','text-brand-cyan','Back to the start'],
+ ['about','About','fa-circle-info','text-brand-cyan','Our channel'],
+ ['members','Family','fa-users','text-brand-cyan','Meet the four of us'],
+ ['story','Our story','fa-book-open','text-brand-pink','How it all began'],
+ ['quiz','Quiz','fa-cube','text-brand-gold','Minecraft trivia'],
+ ['live','Live','fa-calendar-days','text-brand-purple','Next stream and times'],
+ ['videos','Videos','fa-play','text-brand-pink','YouTube and TikTok'],
+ ['news','News','fa-newspaper','text-brand-gold','Daily updates'],
+ ['connect','Connect','fa-link','text-emerald-400','All our pages']
+];
+
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $=id=>document.getElementById(id);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.remove('hidden');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.add('hidden'),2500)}
+function copyDiscord(){const ok=()=>toast('Discord username copied: '+DISCORD_USERNAME);
+ (navigator.clipboard?navigator.clipboard.writeText(DISCORD_USERNAME).then(ok):Promise.reject()).catch(()=>toast('Discord: '+DISCORD_USERNAME))}
+const photo=(m,sz)=>`<img src="${m.photo}" alt="${esc(m.name)}" class="w-full h-full object-cover object-top" onerror="this.replaceWith(Object.assign(document.createElement('i'),{className:'fa-solid ${m.icon} ${sz} text-white opacity-80'}))">`;
+
+/* ----- render functions ----- */
+function renderNav(){
+ const items=MENU.map(([id,l,ic,c])=>`<a href="#${id}" data-v="${id}" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800/60"><i class="fa-solid ${ic} ${c} mr-1.5"></i>${l}</a>`).join('');
+ $('nav').innerHTML=items;$('mobileNav').innerHTML=items.replace(/px-3 py-2/g,'px-3 py-3');
+}
+function renderHome(){
+ $('aboutContent').innerHTML=CONTENT.map(c=>`<div class="p-5 rounded-2xl bg-brand-card border border-gray-800"><i class="fa-solid ${c.icon} ${c.color} text-2xl mb-3"></i><h3 class="font-orbitron font-bold text-white text-sm mb-1">${c.title}</h3><p class="text-xs text-gray-400 leading-relaxed">${c.text}</p></div>`).join('');
+ document.querySelectorAll('.yt-link').forEach(a=>a.href=YOUTUBE_LINK);
+ document.querySelectorAll('.tt-link').forEach(a=>a.href=TIKTOK_LINK);
+}
+function renderMembers(){
+ $('memberGrid').innerHTML=MEMBERS.map(m=>`<a href="#member-${m.id}" class="group p-5 rounded-3xl bg-brand-card border border-gray-800 hover:border-brand-cyan/50 transition-colors block">
+  <div class="text-xs text-gray-400 mb-3">${m.badge}</div>
+  <div class="w-36 h-44 mx-auto rounded-2xl bg-gradient-to-tr ${m.bg} p-1"><div class="w-full h-full bg-brand-dark rounded-xl flex items-center justify-center overflow-hidden">${photo(m,'text-4xl')}</div></div>
+  <h3 class="font-orbitron font-bold text-xl text-white text-center mt-4">${m.name}</h3>
+  <p class="text-xs text-brand-purple text-center mt-1">${m.role}</p>
+  <p class="text-xs text-gray-400 text-center mt-4 pt-3 border-t border-gray-800">Open profile</p></a>`).join('');
+}
+function renderMember(id){
+ const m=MEMBERS.find(x=>x.id===id);if(!m){location.hash='#members';return}
+ $('memberBody').innerHTML=`<a href="#members" class="text-sm text-brand-cyan"><i class="fa-solid fa-arrow-left mr-1"></i>All family</a>
+ <div class="grid md:grid-cols-12 gap-8 mt-6">
+  <div class="md:col-span-4"><div class="w-56 h-72 mx-auto rounded-3xl bg-gradient-to-tr ${m.bg} p-1.5 shadow-xl"><div class="w-full h-full bg-brand-dark rounded-[20px] flex items-center justify-center overflow-hidden">${photo(m,'text-6xl')}</div></div></div>
+  <div class="md:col-span-8">
+   <div class="text-xs text-gray-400">${m.badge}</div>
+   <h2 class="font-orbitron font-black text-4xl text-white">${m.name}</h2>
+   <p class="text-brand-cyan text-sm mt-1">${m.role}</p>
+   <p class="text-gray-300 mt-5 max-w-prose">${m.bio}</p>
+   <div class="grid grid-cols-2 gap-3 mt-6">${Object.entries(m.specs).map(([k,v])=>`<div class="p-3 rounded-xl bg-brand-card border border-gray-800"><div class="text-[11px] text-gray-500">${k}</div><div class="text-white font-semibold text-sm">${v}</div></div>`).join('')}</div>
+   <div class="mt-6 p-5 rounded-2xl bg-brand-card border border-gray-800"><h3 class="font-orbitron font-bold text-white mb-2">${m.storyTitle}</h3><p class="text-gray-400 text-sm leading-relaxed max-w-prose">${m.story}</p></div>
+  </div></div>`;
+}
+function renderStory(){
+ $('storyGrid').innerHTML=MEMBERS.map(m=>`<a href="#member-${m.id}" class="p-5 rounded-3xl bg-brand-card border border-gray-800 hover:border-gray-700 flex gap-4">
+  <div class="shrink-0 w-24 h-32 rounded-2xl bg-gradient-to-tr ${m.bg} p-[3px]"><div class="w-full h-full bg-brand-dark rounded-[13px] flex items-center justify-center overflow-hidden">${photo(m,'text-3xl')}</div></div>
+  <div><div class="text-xs text-gray-500">${m.storyTitle}</div><h3 class="font-orbitron font-bold text-lg text-white mb-1">${m.name}</h3><p class="text-sm text-gray-400 leading-relaxed">${m.story}</p></div></a>`).join('');
+}
+function renderLive(){
+ const head=b=>`${b}<h3 class="font-orbitron font-black text-2xl text-white">${esc(LIVE.title)}</h3><p class="text-gray-400 text-sm">${esc(LIVE.description)}</p>`;
+ const btns=`<div class="flex flex-wrap gap-3 pt-2"><a href="${TIKTOK_LINK}" target="_blank" rel="noopener" class="px-5 py-3 rounded-xl bg-brand-purple text-white font-orbitron text-xs font-bold"><i class="fa-brands fa-tiktok mr-1"></i> Follow on TikTok</a><a href="https://wa.me/${WHATSAPP_NUMBER}" target="_blank" rel="noopener" class="px-5 py-3 rounded-xl bg-gray-800 text-gray-200 font-orbitron text-xs font-bold"><i class="fa-brands fa-whatsapp mr-1"></i> WhatsApp</a></div>`;
+ const pill=(c,t)=>`<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-${c}-500/10 border border-${c}-500/30 text-${c}-400 text-xs font-mono">${t}</div>`;
+ let h;
+ if(LIVE.mode==='live')h=head(pill('red','We are live now'))+`<a href="${LIVE.watchLink||TIKTOK_LINK}" target="_blank" rel="noopener" class="inline-block px-6 py-3 rounded-xl bg-red-600 text-white font-orbitron text-xs font-bold"><i class="fa-solid fa-circle-play mr-1"></i> Watch live</a>`;
+ else if(LIVE.mode==='tba')h=head(`<div class="inline-flex px-3 py-1 rounded-full bg-gray-700/30 border border-gray-600 text-gray-300 text-xs font-mono">Next stream: time to be announced</div>`)+btns;
+ else{
+  const t=new Date(LIVE.startTime).toLocaleString([],{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  const box=(id,l,c)=>`<div class="p-3 bg-brand-dark border border-gray-800 rounded-xl text-center"><span class="block text-2xl font-bold ${c}" id="${id}">00</span><span class="text-[10px] text-gray-500">${l}</span></div>`;
+  h=head(pill('red','Next broadcast countdown'))+`<p class="text-xs font-mono text-brand-cyan">${t} (your local time)</p><div class="grid grid-cols-4 gap-3 font-orbitron">${box('cdD','Days','text-brand-cyan')}${box('cdH','Hours','text-brand-purple')}${box('cdM','Mins','text-brand-pink')}${box('cdS','Secs','text-brand-gold')}</div>`+btns;
+ }
+ $('liveBox').innerHTML=h;
+ $('schedule').innerHTML=SCHEDULE.length?SCHEDULE.map(i=>`<div class="p-3.5 rounded-xl bg-brand-dark/60 border ${i.live?'border-brand-cyan/60':'border-gray-800'} flex justify-between flex-wrap gap-3"><div><div class="font-orbitron font-bold text-sm text-white">${esc(i.title)}</div><div class="text-xs text-gray-400">${esc(i.day)}, ${esc(i.time)}. Host: ${esc(i.host)}</div></div><span class="text-[11px] px-2.5 py-1 rounded-lg bg-gray-900 border border-gray-800 text-gray-300">${esc(i.tag)}</span></div>`).join(''):'<p class="text-sm text-gray-400 text-center py-8">No streams are scheduled yet. Follow us on TikTok to get notified when we go live.</p>';
+}
+let cd=null;
+function startCountdown(){
+ if(LIVE.mode!=='scheduled'||!LIVE.startTime)return;
+ const tg=new Date(LIVE.startTime).getTime();
+ if(isNaN(tg)){LIVE.mode='tba';renderLive();return}
+ const set=(i,v)=>{const e=$(i);if(e)e.textContent=String(v).padStart(2,'0')};
+ const tick=()=>{const d=tg-Date.now();if(d<=0){clearInterval(cd);LIVE.mode='live';renderLive();return}
+  set('cdD',Math.floor(d/864e5));set('cdH',Math.floor(d%864e5/36e5));set('cdM',Math.floor(d%36e5/6e4));set('cdS',Math.floor(d%6e4/1e3))};
+ tick();cd=setInterval(tick,1000);
+}
+function renderVideos(){
+ $('videoGrid').innerHTML=VIDEOS.map(v=>`<a href="${v.link}" target="_blank" rel="noopener" class="group bg-brand-card border border-gray-800 rounded-2xl overflow-hidden hover:border-brand-pink/50 block">
+  <div class="aspect-video bg-gradient-to-br ${v.bg||'from-purple-900 to-indigo-950'} flex items-center justify-center"><span class="w-14 h-14 rounded-full bg-brand-pink/90 text-white flex items-center justify-center text-xl"><i class="fa-solid fa-play ml-1"></i></span></div>
+  <div class="p-4"><div class="text-xs text-brand-cyan mb-1">${esc(v.tag)}</div><h3 class="font-orbitron font-bold text-white text-sm mb-1">${esc(v.title)}</h3><p class="text-xs text-gray-400">${esc(v.desc)}</p></div></a>`).join('');
+}
+function renderNews(){
+ $('newsGrid').innerHTML=[...NEWS].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,9).map(p=>{
+  const d=new Date(p.date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  return `<div class="p-6 rounded-2xl bg-brand-card border border-gray-800 flex flex-col justify-between"><div>
+   <div class="flex justify-between text-xs mb-3"><span class="text-emerald-400">${esc(p.tag)}</span><span class="text-gray-500 font-mono">${d}</span></div>
+   <h3 class="font-orbitron font-bold text-white text-base mb-2">${esc(p.title)}</h3><p class="text-xs text-gray-400 leading-relaxed">${esc(p.summary)}</p></div>
+   ${p.link?`<a href="${p.link}" target="_blank" rel="noopener" class="text-brand-cyan text-xs mt-4 self-end">Read more</a>`:''}</div>`}).join('');
+}
+function renderConnect(){
+ const L=[['fa-tiktok','TikTok LIVE','@familyforge22',TIKTOK_LINK,'pink'],['fa-youtube','YouTube','@SiddharthaGamin-f8h',YOUTUBE_LINK,'red'],['fa-facebook-f','Facebook','DKLionelMjn',FACEBOOK_LINK,'blue'],['fa-whatsapp','WhatsApp','+971 56 775 2421','https://wa.me/'+WHATSAPP_NUMBER+'?text=Hello%20Forge%20Family!','green'],['fa-telegram','Telegram','Message us',TELEGRAM_LINK,'sky']];
+ $('connectGrid').innerHTML=L.map(([i,t,s,u,c])=>`<a href="${u}" target="_blank" rel="noopener" class="p-5 rounded-2xl bg-brand-card border border-gray-800 hover:border-${c}-500/60 flex items-center gap-4"><span class="w-14 h-14 rounded-xl bg-${c}-500/15 text-${c}-400 flex items-center justify-center text-2xl"><i class="fa-brands ${i}"></i></span><span><span class="block font-orbitron font-bold text-white text-sm">${t}</span><span class="text-xs text-gray-400 font-mono">${s}</span></span></a>`).join('')+
+ `<button onclick="copyDiscord()" class="text-left p-5 rounded-2xl bg-brand-card border border-gray-800 hover:border-indigo-500/60 flex items-center gap-4"><span class="w-14 h-14 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center text-2xl"><i class="fa-brands fa-discord"></i></span><span><span class="block font-orbitron font-bold text-white text-sm">Discord</span><span class="text-xs text-gray-400 font-mono">${DISCORD_USERNAME}</span></span><span class="ml-auto text-xs text-gray-500">Copy</span></button>`;
+}
+
+/* Fetch dynamic content from data.json */
+async function loadSiteData() {
+  try {
+    const res = await fetch('data.json');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.live) LIVE = data.live;
+      if (data.schedule) SCHEDULE = data.schedule;
+      if (data.videos) VIDEOS = data.videos;
+      if (data.news) NEWS = data.news;
+    }
+  } catch (err) {
+    console.warn('Could not load data.json, using default fallback values.');
+  }
+  renderLive();
+  renderVideos();
+  renderNews();
+  startCountdown();
+}
+
+/* ----- routing ----- */
+function route(){
+ let h=(location.hash||'#home').slice(1),sub=null;
+ if(h.startsWith('member-')){sub=h.slice(7);h='member'}
+ if(!$(h))h='home';
+ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===h));
+ if(h==='member')renderMember(sub);
+ if(h==='quiz'&&!$('quizFrame').src)$('quizFrame').src=QUIZ_LINK;
+ const on=h==='member'?'members':h;
+ document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('on',b.dataset.v===on));
+ $('mobileNav').classList.add('hidden');
+ $('foot').classList.toggle('hidden',h==='home');
+ window.scrollTo(0,0);
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+ document.querySelectorAll('.quiz-link').forEach(a=>a.href=QUIZ_LINK);
+ renderNav();renderHome();renderMembers();renderStory();renderConnect();
+ loadSiteData();
+ $('menuBtn').onclick=()=>$('mobileNav').classList.toggle('hidden');
+ window.addEventListener('hashchange',route);route();
+});
+</script>
+</body>
+</html>

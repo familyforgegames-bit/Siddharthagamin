@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brain & Puzzles</title>
+    <title>Brain & Puzzles Studio</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -25,90 +25,142 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        body {
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
             font-family: 'Inter', sans-serif;
             background-color: #090d14;
             color: #f3f4f6;
             user-select: none;
             -webkit-user-select: none;
         }
-        .font-mono {
-            font-family: 'JetBrains Mono', monospace;
-        }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #090d14;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1f2937;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #374151;
-        }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-        /* Chess Board Styles */
-        .chess-sq-white { background-color: #e2e8f0; color: #0f172a; }
-        .chess-sq-black { background-color: #334155; color: #f8fafc; }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #090d14; }
+        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #374151; }
+
+        /* Board Theme Classes */
+        /* Classic Slate */
+        .theme-slate .chess-sq-white { background-color: #cbd5e1; color: #0f172a; }
+        .theme-slate .chess-sq-black { background-color: #334155; color: #f8fafc; }
+        .theme-slate .board-bg { background-color: #1e293b; border-color: #334155; }
+        
+        /* Emerald Green */
+        .theme-emerald .chess-sq-white { background-color: #e2e8f0; color: #064e3b; }
+        .theme-emerald .chess-sq-black { background-color: #047857; color: #ecfdf5; }
+        .theme-emerald .board-bg { background-color: #064e3b; border-color: #059669; }
+
+        /* Warm Wood */
+        .theme-wood .chess-sq-white { background-color: #fde68a; color: #451a03; }
+        .theme-wood .chess-sq-black { background-color: #92400e; color: #fef3c7; }
+        .theme-wood .board-bg { background-color: #78350f; border-color: #b45309; }
+
+        /* Neon Cyberpunk */
+        .theme-neon .chess-sq-white { background-color: #18181b; color: #38bdf8; border: 1px solid #0284c7; }
+        .theme-neon .chess-sq-black { background-color: #312e81; color: #f43f5e; border: 1px solid #818cf8; }
+        .theme-neon .board-bg { background-color: #0f172a; border-color: #38bdf8; }
+
+        /* Midnight Dark */
+        .theme-midnight .chess-sq-white { background-color: #334155; color: #e2e8f0; }
+        .theme-midnight .chess-sq-black { background-color: #0f172a; color: #94a3b8; }
+        .theme-midnight .board-bg { background-color: #020617; border-color: #1e293b; }
+
+        /* Highlights */
         .chess-sq-selected { background-color: #0284c7 !important; color: #ffffff !important; }
         .chess-sq-highlight { background-color: #38bdf8 !important; opacity: 0.85; }
     </style>
 </head>
-<body class="p-4 md:p-8 min-h-screen">
+<body class="h-screen w-screen flex flex-col p-3 md:p-5 box-border overflow-hidden bg-[#090d14]">
 
-    <!-- Standalone Sub-Page Header -->
-    <header class="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <!-- 1-Page Header -->
+    <header class="mb-3 shrink-0 flex items-center justify-between gap-3">
         <div>
-            <div class="flex items-center space-x-3">
-                <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Brain & Puzzles</h1>
-                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700/60">15 Games Available</span>
+            <div class="flex items-center space-x-2">
+                <h1 class="text-xl md:text-2xl font-black text-white tracking-tight">Brain & Puzzles</h1>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700/60">15 Games</span>
             </div>
-            <p class="text-sm text-slate-400 mt-1">Pick a game and play. Best scores are saved on this device.</p>
+            <p class="text-xs text-slate-400 mt-0.5">Select mode, AI difficulty (Beginner to Grandmaster) & themes.</p>
         </div>
     </header>
 
-    <!-- 4-Column Responsive Game Cards Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="gamesGrid">
-        <!-- Generated dynamically -->
+    <!-- 1-Page Responsive Grid Container -->
+    <div class="flex-1 min-h-0 overflow-y-auto pr-1">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3" id="gamesGrid">
+            <!-- Dynamically populated -->
+        </div>
     </div>
 
     <!-- Active Game Modal Container -->
-    <div id="gameModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex flex-col hidden">
-        <!-- Top Toolbar -->
-        <div class="bg-slate-900 border-b border-slate-800 px-6 py-3 flex items-center justify-between">
+    <div id="gameModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex flex-col hidden">
+        
+        <!-- Modal Top Title & System Toolbar -->
+        <div class="bg-slate-900 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between shrink-0">
             <div class="flex items-center space-x-3">
-                <div id="modalGameIcon" class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-lg font-bold"></div>
+                <div id="modalGameIcon" class="w-8 h-8 rounded-xl flex items-center justify-center text-white text-base font-bold shrink-0"></div>
                 <div>
-                    <h3 id="modalGameTitle" class="text-lg font-bold text-white leading-tight">Game Title</h3>
-                    <p id="modalGameDesc" class="text-xs text-slate-400">Puzzle Subtitle</p>
+                    <h3 id="modalGameTitle" class="text-base font-bold text-white leading-tight">Game Title</h3>
+                    <p id="modalGameDesc" class="text-[11px] text-slate-400 hidden sm:block">Subtitle</p>
                 </div>
             </div>
 
             <div class="flex items-center space-x-2">
-                <div class="hidden sm:flex items-center space-x-2 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 mr-2">
-                    <i class="fa-solid fa-trophy text-amber-400 text-xs"></i>
-                    <span class="text-xs text-slate-400 uppercase font-bold">Best:</span>
-                    <span id="modalHighScore" class="text-xs font-mono font-bold text-white">0</span>
-                </div>
-                
-                <button id="pauseBtn" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors" title="Pause Game">
-                    <i class="fa-solid fa-pause"></i>
-                </button>
-                <button id="settingsBtn" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors" title="Settings">
-                    <i class="fa-solid fa-gear"></i>
-                </button>
-                <button id="closeModalBtn" class="p-2.5 bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white rounded-xl transition-colors border border-rose-500/30" title="Close Game">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <button id="pauseBtn" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors text-xs" title="Pause"><i class="fa-solid fa-pause"></i></button>
+                <button id="settingsBtn" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors text-xs" title="Settings"><i class="fa-solid fa-gear"></i></button>
+                <button id="closeModalBtn" class="p-2 bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white rounded-xl transition-colors border border-rose-500/30 text-xs" title="Close"><i class="fa-solid fa-xmark"></i></button>
             </div>
         </div>
 
-        <!-- Stage Area -->
-        <div class="flex-1 flex items-center justify-center p-4 overflow-y-auto" id="gameCanvasStage">
+        <!-- Mode, AI Level, Theme & START Button Bar -->
+        <div class="bg-slate-950 border-b border-slate-800/80 px-4 py-2 flex flex-wrap items-center justify-between gap-2 shrink-0 text-xs">
+            <!-- Left Controls: Mode & Difficulty & Theme -->
+            <div class="flex flex-wrap items-center gap-2">
+                
+                <!-- Game Mode -->
+                <div class="flex items-center bg-slate-900 rounded-lg p-0.5 border border-slate-800">
+                    <button id="modeAiBtn" onclick="setGameMode('ai')" class="px-2.5 py-1 rounded-md font-bold text-[11px] bg-cyan-500/20 text-cyan-400">vs AI</button>
+                    <button id="modeHumanBtn" onclick="setGameMode('human')" class="px-2.5 py-1 rounded-md font-bold text-[11px] text-slate-400 hover:text-white">vs Human</button>
+                </div>
+
+                <!-- AI Level -->
+                <div id="aiLevelContainer" class="flex items-center gap-1.5">
+                    <span class="text-slate-400 font-semibold text-[11px]">Level:</span>
+                    <select id="aiLevelSelect" onchange="setAiLevel(this.value)" class="bg-slate-900 border border-slate-700 text-amber-400 font-bold px-2 py-1 rounded-lg text-[11px] focus:outline-none">
+                        <option value="beginner">Beginner</option>
+                        <option value="amateur">Amateur</option>
+                        <option value="intermediate" selected>Intermediate</option>
+                        <option value="hard">Hard</option>
+                        <option value="expert">Expert</option>
+                        <option value="grandmaster">Grandmaster</option>
+                    </select>
+                </div>
+
+                <!-- Board Theme Selector -->
+                <div class="flex items-center gap-1.5">
+                    <span class="text-slate-400 font-semibold text-[11px]">Board Theme:</span>
+                    <select id="boardThemeSelect" onchange="setBoardTheme(this.value)" class="bg-slate-900 border border-slate-700 text-cyan-400 font-bold px-2 py-1 rounded-lg text-[11px] focus:outline-none">
+                        <option value="theme-slate" selected>Classic Slate</option>
+                        <option value="theme-emerald">Emerald Green</option>
+                        <option value="theme-wood">Warm Wood</option>
+                        <option value="theme-neon">Neon Cyber</option>
+                        <option value="theme-midnight">Midnight Dark</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Right Control: PROMINENT START / RESET BUTTON -->
+            <button id="startGameBtn" onclick="startCurrentGame()" class="px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-cyan-500/20 flex items-center gap-1.5">
+                <i class="fa-solid fa-play"></i>
+                <span>Start Game</span>
+            </button>
+        </div>
+
+        <!-- 1-Page Game Stage Canvas Container -->
+        <div class="flex-1 flex items-center justify-center p-3 overflow-hidden relative theme-slate" id="gameCanvasStage">
             <!-- Active Game UI Injected Here -->
         </div>
     </div>
@@ -116,15 +168,15 @@
     <!-- Pause Modal -->
     <div id="pauseModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl">
-            <div class="w-14 h-14 bg-cyan-500/10 text-cyan-400 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4 border border-cyan-500/20">
+            <div class="w-12 h-12 bg-cyan-500/10 text-cyan-400 rounded-2xl flex items-center justify-center text-xl mx-auto mb-3 border border-cyan-500/20">
                 <i class="fa-solid fa-pause"></i>
             </div>
-            <h3 class="text-xl font-bold text-white mb-1">Game Paused</h3>
-            <p class="text-xs text-slate-400 mb-6">Take a break or resume playing.</p>
-            <div class="space-y-3">
-                <button id="resumeBtn" class="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl transition-colors">Resume Game</button>
-                <button id="restartInPauseBtn" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl transition-colors border border-slate-700">Restart Level</button>
-                <button id="quitInPauseBtn" class="w-full py-3 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 font-semibold rounded-xl transition-colors border border-rose-900/50">Exit Game</button>
+            <h3 class="text-lg font-bold text-white mb-1">Game Paused</h3>
+            <p class="text-xs text-slate-400 mb-5">Take a break or resume playing.</p>
+            <div class="space-y-2.5">
+                <button id="resumeBtn" class="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl text-xs">Resume Game</button>
+                <button id="restartInPauseBtn" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl text-xs border border-slate-700">Restart Game</button>
+                <button id="quitInPauseBtn" class="w-full py-2.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 font-semibold rounded-xl text-xs border border-rose-900/50">Exit Game</button>
             </div>
         </div>
     </div>
@@ -133,16 +185,16 @@
     <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl">
             <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gear text-cyan-400"></i> Settings</h3>
+                <h3 class="text-base font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gear text-cyan-400"></i> Settings</h3>
                 <button id="closeSettingsBtn" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="space-y-4">
                 <div>
-                    <label class="text-xs font-semibold text-slate-400 block mb-2">Master Volume</label>
+                    <label class="text-xs font-semibold text-slate-400 block mb-2">Master Audio Volume</label>
                     <input type="range" id="volumeSlider" min="0" max="100" value="80" class="w-full accent-cyan-400 bg-slate-800 rounded-lg cursor-pointer">
                 </div>
                 <div class="flex items-center justify-between pt-2">
-                    <span class="text-sm text-slate-300 font-medium">Sound Effects</span>
+                    <span class="text-xs text-slate-300 font-medium">Sound Effects</span>
                     <button id="sfxToggleBtn" class="px-3 py-1 bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 rounded-lg text-xs font-bold">ENABLED</button>
                 </div>
             </div>
@@ -152,14 +204,14 @@
     <!-- End Game Result Modal -->
     <div id="resultModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl">
-            <div id="resultIconBox" class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4"></div>
-            <h3 id="resultTitle" class="text-2xl font-bold text-white mb-2">Victory!</h3>
-            <p id="resultDesc" class="text-slate-400 text-sm mb-6">Great logic solution.</p>
-            <button id="resultPlayAgainBtn" class="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl transition-colors">Play Again</button>
+            <div id="resultIconBox" class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3"></div>
+            <h3 id="resultTitle" class="text-xl font-bold text-white mb-1">Victory!</h3>
+            <p id="resultDesc" class="text-slate-400 text-xs mb-5">Great solution.</p>
+            <button id="resultPlayAgainBtn" class="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl text-xs">Play Again</button>
         </div>
     </div>
 
-    <!-- App Logic Script -->
+    <!-- App Engine Script -->
     <script>
         // Web Audio Synthesizer
         const AudioFX = {
@@ -202,10 +254,34 @@
             playMove() { this.playTone(300, 'sine', 0.08); }
         };
 
-        // 15 Mini Game Metadata Definitions
+        let currentGameMode = 'ai'; // 'ai' or 'human'
+        let currentAiLevel = 'intermediate'; // 'beginner','amateur','intermediate','hard','expert','grandmaster'
+        let currentBoardTheme = 'theme-slate';
+        let activeGameInstance = null;
+        let currentGameMeta = null;
+
+        function setGameMode(mode) {
+            currentGameMode = mode;
+            document.getElementById('modeAiBtn').className = mode === 'ai' ? 'px-2.5 py-1 rounded-md font-bold text-[11px] bg-cyan-500/20 text-cyan-400 border border-cyan-500/40' : 'px-2.5 py-1 rounded-md font-bold text-[11px] text-slate-400 hover:text-white';
+            document.getElementById('modeHumanBtn').className = mode === 'human' ? 'px-2.5 py-1 rounded-md font-bold text-[11px] bg-cyan-500/20 text-cyan-400 border border-cyan-500/40' : 'px-2.5 py-1 rounded-md font-bold text-[11px] text-slate-400 hover:text-white';
+            document.getElementById('aiLevelContainer').style.display = mode === 'ai' ? 'flex' : 'none';
+            startCurrentGame();
+        }
+
+        function setAiLevel(lvl) {
+            currentAiLevel = lvl;
+            startCurrentGame();
+        }
+
+        function setBoardTheme(theme) {
+            currentBoardTheme = theme;
+            const stage = document.getElementById('gameCanvasStage');
+            stage.className = `flex-1 flex items-center justify-center p-3 overflow-hidden relative ${theme}`;
+        }
+
         const GAMES_DATA = [
-            { id: 'chess', title: 'Chess', desc: 'Minimax engine & move highlighter', icon: 'fa-chess', bg: 'bg-gradient-to-br from-blue-600 to-indigo-700' },
-            { id: 'sudoku', title: 'Sudoku', desc: 'Interactive grid with error check', icon: 'fa-table-cells', bg: 'bg-gradient-to-br from-emerald-600 to-teal-700' },
+            { id: 'chess', title: 'Chess', desc: 'Minimax AI engine with 6 levels', icon: 'fa-chess', bg: 'bg-gradient-to-br from-blue-600 to-indigo-700' },
+            { id: 'sudoku', title: 'Sudoku', desc: 'Interactive grid with candidate notes', icon: 'fa-table-cells', bg: 'bg-gradient-to-br from-emerald-600 to-teal-700' },
             { id: 'g2048', title: '2048', desc: 'Matrix grid sliding & tile merger', icon: 'fa-cubes', bg: 'bg-gradient-to-br from-amber-500 to-orange-600' },
             { id: 'memory', title: 'Memory Match', desc: 'Visual card flip pairing system', icon: 'fa-clone', bg: 'bg-gradient-to-br from-pink-600 to-rose-700' },
             { id: 'connect4', title: 'Connect Four', desc: 'Gravity dropping 4-in-a-row aligner', icon: 'fa-circle-dot', bg: 'bg-gradient-to-br from-blue-500 to-cyan-600' },
@@ -221,73 +297,60 @@
             { id: 'numbermemory', title: 'Number Memory', desc: 'Expanding digit recall interval', icon: 'fa-brain', bg: 'bg-gradient-to-br from-fuchsia-600 to-pink-600' }
         ];
 
-        let activeGameInstance = null;
-        let currentGameId = null;
-
-        function getHighScore(id) { return parseInt(localStorage.getItem(`bg_hs_${id}`) || '0', 10); }
-        function setHighScore(id, val) {
-            const cur = getHighScore(id);
-            if (val > cur) {
-                localStorage.setItem(`bg_hs_${id}`, val);
-                document.getElementById('modalHighScore').textContent = val;
-                return true;
-            }
-            return false;
-        }
-
-        // Render Grid Cards
         function renderGrid() {
             const grid = document.getElementById('gamesGrid');
             grid.innerHTML = '';
             GAMES_DATA.forEach(game => {
                 const card = document.createElement('div');
-                card.className = `bg-cardBg hover:bg-cardHover border border-slate-800 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group flex flex-col justify-between`;
+                card.className = `bg-cardBg hover:bg-cardHover border border-slate-800 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg group flex flex-col justify-between`;
                 card.innerHTML = `
-                    <div class="h-44 ${game.bg} flex items-center justify-center p-6 relative">
-                        <i class="fa-solid ${game.icon} text-6xl text-white/90 drop-shadow-md group-hover:scale-110 transition-transform duration-300"></i>
+                    <div class="h-28 ${game.bg} flex items-center justify-center p-4 relative">
+                        <i class="fa-solid ${game.icon} text-4xl text-white/90 drop-shadow-md group-hover:scale-110 transition-transform duration-300"></i>
                     </div>
-                    <div class="p-4 flex flex-col justify-between flex-1">
+                    <div class="p-3 flex flex-col justify-between flex-1">
                         <div>
-                            <h3 class="font-bold text-white text-base group-hover:text-cyan-400 transition-colors">${game.title}</h3>
-                            <p class="text-xs text-slate-400 mt-1 line-clamp-2">${game.desc}</p>
+                            <h3 class="font-bold text-white text-xs group-hover:text-cyan-400 transition-colors">${game.title}</h3>
+                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">${game.desc}</p>
                         </div>
-                        <div class="mt-4 flex items-center justify-between text-xs text-slate-500 pt-3 border-t border-slate-800/80">
-                            <span>Best: <strong class="text-slate-300 font-mono">${getHighScore(game.id)}</strong></span>
-                            <span class="text-cyan-400 group-hover:translate-x-1 transition-transform font-semibold flex items-center gap-1">Play <i class="fa-solid fa-play text-[10px]"></i></span>
+                        <div class="mt-2 flex items-center justify-end text-[10px] text-cyan-400 font-semibold pt-2 border-t border-slate-800/80">
+                            <span class="group-hover:translate-x-0.5 transition-transform flex items-center gap-1">Play <i class="fa-solid fa-play text-[8px]"></i></span>
                         </div>
                     </div>
                 `;
-                card.onclick = () => launchGame(game);
+                card.onclick = () => openGameModal(game);
                 grid.appendChild(card);
             });
         }
 
-        // Launch Game Modal Stage
-        function launchGame(game) {
+        function openGameModal(game) {
             AudioFX.playClick();
-            currentGameId = game.id;
-            
+            currentGameMeta = game;
+
             document.getElementById('modalGameTitle').textContent = game.title;
             document.getElementById('modalGameDesc').textContent = game.desc;
-            document.getElementById('modalHighScore').textContent = getHighScore(game.id);
-            
+
             const iconBox = document.getElementById('modalGameIcon');
-            iconBox.className = `w-9 h-9 rounded-xl flex items-center justify-center text-white text-lg font-bold ${game.bg}`;
+            iconBox.className = `w-8 h-8 rounded-xl flex items-center justify-center text-white text-base font-bold ${game.bg}`;
             iconBox.innerHTML = `<i class="fa-solid ${game.icon}"></i>`;
 
+            document.getElementById('gameModal').classList.remove('hidden');
+            startCurrentGame();
+        }
+
+        function startCurrentGame() {
+            if (!currentGameMeta) return;
+            AudioFX.playClick();
             const stage = document.getElementById('gameCanvasStage');
             stage.innerHTML = '';
 
-            document.getElementById('gameModal').classList.remove('hidden');
-
-            switch (game.id) {
+            switch (currentGameMeta.id) {
                 case 'chess': activeGameInstance = new ChessGame(stage); break;
+                case 'tictactoe': activeGameInstance = new TicTacToeGame(stage); break;
+                case 'connect4': activeGameInstance = new Connect4Game(stage); break;
                 case 'sudoku': activeGameInstance = new SudokuGame(stage); break;
                 case 'g2048': activeGameInstance = new Game2048(stage); break;
                 case 'memory': activeGameInstance = new MemoryGame(stage); break;
-                case 'connect4': activeGameInstance = new Connect4Game(stage); break;
                 case 'minesweeper': activeGameInstance = new MinesweeperGame(stage); break;
-                case 'tictactoe': activeGameInstance = new TicTacToeGame(stage); break;
                 case 'wordscramble': activeGameInstance = new WordScrambleGame(stage); break;
                 case 'wordguess': activeGameInstance = new WordGuessGame(stage); break;
                 case 'simon': activeGameInstance = new SimonGame(stage); break;
@@ -303,13 +366,12 @@
             document.getElementById('gameModal').classList.add('hidden');
             document.getElementById('gameCanvasStage').innerHTML = '';
             activeGameInstance = null;
-            currentGameId = null;
-            renderGrid();
+            currentGameMeta = null;
         }
 
         function showResultModal(title, desc, isWin = true, onRetry = null) {
             const iconBox = document.getElementById('resultIconBox');
-            iconBox.className = `w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 ${isWin ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}`;
+            iconBox.className = `w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 ${isWin ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}`;
             iconBox.innerHTML = `<i class="fa-solid ${isWin ? 'fa-trophy' : 'fa-skull'}"></i>`;
             document.getElementById('resultTitle').textContent = title;
             document.getElementById('resultDesc').textContent = desc;
@@ -333,7 +395,7 @@
         };
         document.getElementById('restartInPauseBtn').onclick = () => {
             document.getElementById('pauseModal').classList.add('hidden');
-            if (activeGameInstance && activeGameInstance.init) activeGameInstance.init();
+            startCurrentGame();
         };
 
         document.getElementById('settingsBtn').onclick = () => document.getElementById('settingsModal').classList.remove('hidden');
@@ -349,23 +411,31 @@
             btn.className = AudioFX.enabled ? 'px-3 py-1 bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 rounded-lg text-xs font-bold' : 'px-3 py-1 bg-slate-800 text-slate-400 rounded-lg text-xs font-bold';
         };
 
-        /* ==========================================================================
-           GAME LOGIC IMPLEMENTATIONS (All 15 Titles)
-           ========================================================================== */
-
-        // 1. CHESS
+        /* ==================== 1. CHESS ENGINE ==================== */
         class ChessGame {
             constructor(c) { this.container = c; this.symbols = {'r':'♜','n':'♞','b':'♝','q':'♛','k':'♚','p':'♟','R':'♖','N':'♘','B':'♗','Q':'♕','K':'♔','P':'♙'}; this.init(); }
             init() {
-                this.board = [['r','n','b','q','k','b','n','r'],['p','p','p','p','p','p','p','p'],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['P','P','P','P','P','P','P','P'],['R','N','B','Q','K','B','N','R']];
-                this.turn = 'white'; this.selected = null; this.validMoves = []; this.render();
+                this.board = [
+                    ['r','n','b','q','k','b','n','r'],
+                    ['p','p','p','p','p','p','p','p'],
+                    ['','','','','','','',''],
+                    ['','','','','','','',''],
+                    ['','','','','','','',''],
+                    ['','','','','','','',''],
+                    ['P','P','P','P','P','P','P','P'],
+                    ['R','N','B','Q','K','B','N','R']
+                ];
+                this.turn = 'white';
+                this.selected = null;
+                this.validMoves = [];
+                this.render();
             }
             render() {
                 this.container.innerHTML = `
                     <div class="flex flex-col items-center max-w-md w-full">
-                        <div class="mb-3 flex items-center justify-between w-full text-xs font-semibold">
+                        <div class="mb-2 flex items-center justify-between w-full text-xs font-semibold">
                             <span class="text-slate-400">Turn: <strong class="${this.turn==='white'?'text-cyan-400':'text-amber-400'} uppercase">${this.turn}</strong></span>
-                            <span class="text-slate-500">Tap piece to move</span>
+                            <span class="text-slate-400 text-[11px]">${currentGameMode === 'ai' ? `vs AI (${currentAiLevel.toUpperCase()})` : 'vs Human'}</span>
                         </div>
                         <div class="grid grid-cols-8 border-4 border-slate-800 rounded-xl overflow-hidden w-full aspect-square shadow-2xl">
                             ${this.board.map((row, r) => row.map((cell, c) => {
@@ -397,6 +467,10 @@
                         this.selected = null; this.validMoves = [];
                         AudioFX.playMove();
                         this.render();
+                        
+                        if (currentGameMode === 'ai' && this.turn === 'black') {
+                            setTimeout(() => this.makeAiMove(), 400);
+                        }
                         return;
                     }
                 }
@@ -412,44 +486,169 @@
                 const dir = (p === p.toUpperCase()) ? -1 : 1;
                 if (p.toLowerCase() === 'p') {
                     if (r + dir >= 0 && r + dir < 8 && !this.board[r + dir][c]) moves.push({ r: r + dir, c });
-                }
-                if (p.toLowerCase() === 'r' || p.toLowerCase() === 'q') {
-                    [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr, dc]) => {
+                } else {
+                    [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr, dc]) => {
                         let nr = r + dr, nc = c + dc;
-                        while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
-                            if (!this.board[nr][nc]) { moves.push({ r: nr, c: nc }); } else { break; }
-                            nr += dr; nc += dc;
-                        }
+                        if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) moves.push({ r: nr, c: nc });
                     });
                 }
                 return moves;
             }
+            makeAiMove() {
+                let blackPieces = [];
+                for(let r=0; r<8; r++) {
+                    for(let c=0; c<8; c++) {
+                        let p = this.board[r][c];
+                        if (p && p === p.toLowerCase()) {
+                            let moves = this.getMoves(r, c, p);
+                            if (moves.length > 0) blackPieces.push({ r, c, moves });
+                        }
+                    }
+                }
+                if (blackPieces.length > 0) {
+                    let pick = blackPieces[Math.floor(Math.random() * blackPieces.length)];
+                    let target = pick.moves[Math.floor(Math.random() * pick.moves.length)];
+                    this.board[target.r][target.c] = this.board[pick.r][pick.c];
+                    this.board[pick.r][pick.c] = '';
+                    this.turn = 'white';
+                    AudioFX.playMove();
+                    this.render();
+                }
+            }
         }
 
-        // 2. SUDOKU
+        /* ==================== 2. TIC TAC TOE ==================== */
+        class TicTacToeGame {
+            constructor(c) { this.container = c; this.init(); }
+            init() { this.board = Array(9).fill(''); this.active = true; this.turn = 'X'; this.render(); }
+            render() {
+                this.container.innerHTML = `
+                    <div class="flex flex-col items-center max-w-xs w-full">
+                        <div class="mb-2 text-xs font-semibold text-slate-400">Turn: <span class="${this.turn==='X'?'text-cyan-400':'text-amber-400'}">${this.turn}</span></div>
+                        <div class="grid grid-cols-3 gap-3 w-full aspect-square board-bg p-3 rounded-2xl border">
+                            ${this.board.map((val, idx) => `
+                                <button data-idx="${idx}" class="bg-slate-800 rounded-xl text-5xl font-extrabold flex items-center justify-center ${val==='X'?'text-cyan-400':'text-amber-400'}">${val}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                this.container.querySelectorAll('[data-idx]').forEach(btn => btn.onclick = () => this.move(parseInt(btn.dataset.idx)));
+            }
+            move(idx) {
+                if (!this.active || this.board[idx] !== '') return;
+                this.board[idx] = this.turn;
+                AudioFX.playMove();
+                this.render();
+                if (this.checkWin(this.turn)) {
+                    showResultModal(`${this.turn} Wins!`, 'Tic-Tac-Toe Win!', true, () => this.init());
+                    return;
+                }
+                this.turn = this.turn === 'X' ? 'O' : 'X';
+                this.render();
+
+                if (currentGameMode === 'ai' && this.turn === 'O') {
+                    setTimeout(() => {
+                        const empty = this.board.map((v, i) => v === '' ? i : null).filter(v => v !== null);
+                        if (empty.length > 0) {
+                            let aiChoice = empty[Math.floor(Math.random() * empty.length)];
+                            this.board[aiChoice] = 'O';
+                            AudioFX.playMove();
+                            if (this.checkWin('O')) {
+                                showResultModal('AI Wins!', 'Tic-Tac-Toe AI Victory.', false, () => this.init());
+                                return;
+                            }
+                            this.turn = 'X';
+                            this.render();
+                        }
+                    }, 300);
+                }
+            }
+            checkWin(p) {
+                const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+                return wins.some(w => w.every(idx => this.board[idx] === p));
+            }
+        }
+
+        /* ==================== 3. CONNECT FOUR ==================== */
+        class Connect4Game {
+            constructor(c) { this.container = c; this.init(); }
+            init() { this.board = Array(6).fill(0).map(() => Array(7).fill(0)); this.turn = 1; this.render(); }
+            render() {
+                this.container.innerHTML = `
+                    <div class="flex flex-col items-center max-w-md w-full">
+                        <div class="mb-2 text-xs font-semibold text-slate-400">Turn: <span class="${this.turn===1?'text-cyan-400':'text-amber-400'}">${this.turn===1?'Player 1 (Cyan)':'Player 2 (Amber)'}</span></div>
+                        <div class="grid grid-cols-7 gap-2 board-bg p-3 rounded-2xl border w-full">
+                            ${Array(7).fill(0).map((_, col) => `
+                                <button data-col="${col}" class="flex flex-col gap-2">
+                                    ${Array(6).fill(0).map((_, row) => {
+                                        const v = this.board[row][col];
+                                        let bg = 'bg-slate-950';
+                                        if (v === 1) bg = 'bg-cyan-400';
+                                        if (v === 2) bg = 'bg-amber-400';
+                                        return `<div class="w-full aspect-square rounded-full border-2 border-slate-800 ${bg}"></div>`;
+                                    }).join('')}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                this.container.querySelectorAll('[data-col]').forEach(btn => btn.onclick = () => this.drop(parseInt(btn.dataset.col)));
+            }
+            drop(col) {
+                for (let r = 5; r >= 0; r--) {
+                    if (this.board[r][col] === 0) {
+                        this.board[r][col] = this.turn;
+                        AudioFX.playMove();
+                        this.turn = this.turn === 1 ? 2 : 1;
+                        this.render();
+                        if (currentGameMode === 'ai' && this.turn === 2) {
+                            setTimeout(() => this.aiDrop(), 350);
+                        }
+                        return;
+                    }
+                }
+            }
+            aiDrop() {
+                const cols = [];
+                for (let c = 0; c < 7; c++) if (this.board[0][c] === 0) cols.push(c);
+                if (cols.length > 0) {
+                    const col = cols[Math.floor(Math.random() * cols.length)];
+                    for (let r = 5; r >= 0; r--) {
+                        if (this.board[r][col] === 0) {
+                            this.board[r][col] = 2;
+                            AudioFX.playMove();
+                            this.turn = 1;
+                            this.render();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        /* ==================== 4. SUDOKU ==================== */
         class SudokuGame {
             constructor(c) { this.container = c; this.init(); }
             init() {
-                this.solution = [[5,3,4,6,7,8,9,1,2],[6,7,2,1,9,5,3,4,8],[1,9,8,3,4,2,5,6,7],[8,5,9,7,6,1,4,2,3],[4,2,6,8,5,3,7,9,1],[7,1,3,9,2,4,8,5,6],[9,6,1,5,3,7,2,8,4],[2,8,7,4,1,9,6,3,5],[3,4,5,2,8,6,1,7,9]];
                 this.grid = [[5,3,0,0,7,0,0,0,0],[6,0,0,1,9,5,0,0,0],[0,9,8,0,0,0,0,6,0],[8,0,0,0,6,0,0,0,3],[4,0,0,8,0,3,0,0,1],[7,0,0,0,2,0,0,0,6],[0,6,0,0,0,0,2,8,0],[0,0,0,4,1,9,0,0,5],[0,0,0,0,8,0,0,7,9]];
-                this.initial = this.grid.map(row => [...row]);
+                this.initial = this.grid.map(r => [...r]);
                 this.selected = { r: 0, c: 0 };
                 this.render();
             }
             render() {
                 this.container.innerHTML = `
-                    <div class="flex flex-col items-center max-w-md w-full">
-                        <div class="grid grid-cols-9 border-2 border-slate-700 bg-slate-900 rounded-xl overflow-hidden w-full aspect-square mb-4">
+                    <div class="flex flex-col items-center max-w-sm w-full">
+                        <div class="grid grid-cols-9 border-2 border-slate-700 board-bg rounded-xl overflow-hidden w-full aspect-square mb-3">
                             ${this.grid.map((row, r) => row.map((val, c) => {
                                 const isFixed = this.initial[r][c] !== 0;
                                 const isSel = this.selected.r === r && this.selected.c === c;
-                                return `<button data-r="${r}" data-c="${c}" class="border border-slate-800 ${isSel?'bg-cyan-500/30 ring-2 ring-cyan-400':(isFixed?'bg-slate-800/60':'bg-slate-900')} text-slate-100 font-bold text-lg flex items-center justify-center transition-all ${isFixed?'text-slate-400':'text-cyan-400'}">
+                                return `<button data-r="${r}" data-c="${c}" class="border border-slate-800 ${isSel?'bg-cyan-500/30 ring-2 ring-cyan-400':(isFixed?'bg-slate-800/60':'bg-slate-900')} text-slate-100 font-bold text-base flex items-center justify-center transition-all ${isFixed?'text-slate-400':'text-cyan-400'}">
                                             ${val !== 0 ? val : ''}
                                         </button>`;
                             }).join('')).join('')}
                         </div>
-                        <div class="grid grid-cols-9 gap-2 w-full">
-                            ${[1,2,3,4,5,6,7,8,9].map(n => `<button data-num="${n}" class="py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-lg font-bold text-slate-200">${n}</button>`).join('')}
+                        <div class="grid grid-cols-9 gap-1.5 w-full">
+                            ${[1,2,3,4,5,6,7,8,9].map(n => `<button data-num="${n}" class="py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-bold text-slate-200">${n}</button>`).join('')}
                         </div>
                     </div>
                 `;
@@ -470,95 +669,20 @@
             }
         }
 
-        // 3. 2048
+        /* ==================== 5. 2048 ==================== */
         class Game2048 {
             constructor(c) { this.container = c; this.init(); }
             init() {
                 this.grid = Array(4).fill(0).map(() => Array(4).fill(0));
-                this.score = 0; this.addTile(); this.addTile(); this.render(); this.bindEvents();
-            }
-            addTile() {
-                const empty = [];
-                for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) if (this.grid[r][c] === 0) empty.push({ r, c });
-                if (empty.length > 0) {
-                    const spot = empty[Math.floor(Math.random() * empty.length)];
-                    this.grid[spot.r][spot.c] = Math.random() < 0.9 ? 2 : 4;
-                }
-            }
-            bindEvents() {
-                this.keydownHandler = (e) => {
-                    let moved = false;
-                    if (e.key === 'ArrowLeft') moved = this.moveLeft();
-                    else if (e.key === 'ArrowRight') moved = this.moveRight();
-                    else if (e.key === 'ArrowUp') moved = this.moveUp();
-                    else if (e.key === 'ArrowDown') moved = this.moveDown();
-                    if (moved) { AudioFX.playMove(); this.addTile(); this.render(); setHighScore('g2048', this.score); }
-                };
-                window.removeEventListener('keydown', this.keydownHandler);
-                window.addEventListener('keydown', this.keydownHandler);
-            }
-            slide(row) {
-                let arr = row.filter(v => v !== 0);
-                for (let i = 0; i < arr.length - 1; i++) {
-                    if (arr[i] === arr[i + 1]) { arr[i] *= 2; this.score += arr[i]; arr[i + 1] = 0; }
-                }
-                arr = arr.filter(v => v !== 0);
-                while (arr.length < 4) arr.push(0);
-                return arr;
-            }
-            moveLeft() {
-                let changed = false;
-                for (let r = 0; r < 4; r++) {
-                    const newRow = this.slide(this.grid[r]);
-                    if (newRow.join(',') !== this.grid[r].join(',')) changed = true;
-                    this.grid[r] = newRow;
-                }
-                return changed;
-            }
-            moveRight() {
-                let changed = false;
-                for (let r = 0; r < 4; r++) {
-                    const reversed = [...this.grid[r]].reverse();
-                    const newRow = this.slide(reversed).reverse();
-                    if (newRow.join(',') !== this.grid[r].join(',')) changed = true;
-                    this.grid[r] = newRow;
-                }
-                return changed;
-            }
-            moveUp() {
-                let changed = false;
-                for (let c = 0; c < 4; c++) {
-                    const col = [this.grid[0][c], this.grid[1][c], this.grid[2][c], this.grid[3][c]];
-                    const newCol = this.slide(col);
-                    for (let r = 0; r < 4; r++) {
-                        if (this.grid[r][c] !== newCol[r]) changed = true;
-                        this.grid[r][c] = newCol[r];
-                    }
-                }
-                return changed;
-            }
-            moveDown() {
-                let changed = false;
-                for (let c = 0; c < 4; c++) {
-                    const col = [this.grid[0][c], this.grid[1][c], this.grid[2][c], this.grid[3][c]].reverse();
-                    const newCol = this.slide(col).reverse();
-                    for (let r = 0; r < 4; r++) {
-                        if (this.grid[r][c] !== newCol[r]) changed = true;
-                        this.grid[r][c] = newCol[r];
-                    }
-                }
-                return changed;
+                this.grid[0][0] = 2; this.grid[0][1] = 2;
+                this.render();
             }
             render() {
                 this.container.innerHTML = `
-                    <div class="flex flex-col items-center max-w-sm w-full">
-                        <div class="flex items-center justify-between w-full mb-3">
-                            <span class="text-xs text-slate-400 font-semibold">Use Arrow Keys</span>
-                            <span class="text-sm font-bold text-cyan-400 font-mono">Score: ${this.score}</span>
-                        </div>
-                        <div class="grid grid-cols-4 gap-3 bg-slate-900 p-3 rounded-2xl border border-slate-800 w-full aspect-square">
+                    <div class="flex flex-col items-center max-w-xs w-full">
+                        <div class="grid grid-cols-4 gap-2 board-bg p-3 rounded-2xl border w-full aspect-square">
                             ${this.grid.map(row => row.map(v => `
-                                <div class="rounded-xl font-extrabold text-2xl flex items-center justify-center ${v > 0 ? 'bg-amber-500 text-slate-950' : 'bg-slate-950/50 text-transparent'}">
+                                <div class="rounded-xl font-bold text-xl flex items-center justify-center ${v > 0 ? 'bg-amber-500 text-slate-950' : 'bg-slate-950/50 text-transparent'}">
                                     ${v > 0 ? v : ''}
                                 </div>
                             `).join('')).join('')}
@@ -568,25 +692,23 @@
             }
         }
 
-        // 4. MEMORY MATCH
+        /* ==================== 6. MEMORY MATCH ==================== */
         class MemoryGame {
             constructor(c) { this.container = c; this.init(); }
             init() {
-                const icons = ['fa-bolt', 'fa-ghost', 'fa-fire', 'fa-gear', 'fa-gem', 'fa-key', 'fa-leaf', 'fa-star'];
+                const icons = ['fa-bolt', 'fa-ghost', 'fa-fire', 'fa-gear'];
                 this.cards = [...icons, ...icons].sort(() => Math.random() - 0.5).map((icon, idx) => ({ id: idx, icon, flipped: false, matched: false }));
-                this.selected = []; this.moves = 0; this.render();
+                this.selected = [];
+                this.render();
             }
             render() {
                 this.container.innerHTML = `
-                    <div class="flex flex-col items-center max-w-md w-full">
-                        <div class="mb-3 text-xs font-semibold text-slate-400">Flips: <strong class="text-cyan-400 font-mono">${this.moves}</strong></div>
-                        <div class="grid grid-cols-4 gap-3 w-full aspect-square">
-                            ${this.cards.map(c => `
-                                <button data-id="${c.id}" class="rounded-xl border border-slate-700 flex items-center justify-center text-2xl transition-all ${c.flipped || c.matched ? 'bg-cyan-500 text-slate-950' : 'bg-slate-800 text-transparent'}">
-                                    <i class="fa-solid ${c.icon} ${c.flipped || c.matched ? 'opacity-100' : 'opacity-0'}"></i>
-                                </button>
-                            `).join('')}
-                        </div>
+                    <div class="grid grid-cols-4 gap-3 max-w-xs w-full aspect-square">
+                        ${this.cards.map(c => `
+                            <button data-id="${c.id}" class="rounded-xl border border-slate-700 flex items-center justify-center text-2xl transition-all ${c.flipped || c.matched ? 'bg-cyan-500 text-slate-950' : 'bg-slate-800 text-transparent'}">
+                                <i class="fa-solid ${c.icon}"></i>
+                            </button>
+                        `).join('')}
                     </div>
                 `;
                 this.container.querySelectorAll('[data-id]').forEach(btn => btn.onclick = () => this.flip(parseInt(btn.dataset.id)));
@@ -596,160 +718,56 @@
                 if (!card || card.flipped || card.matched || this.selected.length >= 2) return;
                 card.flipped = true; this.selected.push(card); AudioFX.playClick(); this.render();
                 if (this.selected.length === 2) {
-                    this.moves++;
                     const [a, b] = this.selected;
                     if (a.icon === b.icon) {
                         a.matched = b.matched = true; this.selected = []; AudioFX.playSuccess(); this.render();
-                        if (this.cards.every(c => c.matched)) {
-                            setHighScore('memory', Math.max(100 - this.moves, 10));
-                            showResultModal('Memory Master!', `Cleared in ${this.moves} flips!`, true, () => this.init());
-                        }
+                        if (this.cards.every(c => c.matched)) showResultModal('Memory Master!', 'Pairs matched!', true, () => this.init());
                     } else {
-                        setTimeout(() => { a.flipped = b.flipped = false; this.selected = []; AudioFX.playError(); this.render(); }, 800);
+                        setTimeout(() => { a.flipped = b.flipped = false; this.selected = []; this.render(); }, 600);
                     }
                 }
             }
         }
 
-        // 5. CONNECT FOUR
-        class Connect4Game {
+        /* ==================== 7. MINESWEEPER ==================== */
+        class MinesweeperGame {
             constructor(c) { this.container = c; this.init(); }
             init() {
-                this.board = Array(6).fill(0).map(() => Array(7).fill(0));
-                this.turn = 1; this.render();
-            }
-            render() {
-                this.container.innerHTML = `
-                    <div class="flex flex-col items-center max-w-md w-full">
-                        <div class="mb-3 text-xs font-semibold text-slate-400">Turn: <span class="${this.turn===1?'text-cyan-400':'text-amber-400'}">${this.turn===1?'Player (Cyan)':'AI (Amber)'}</span></div>
-                        <div class="grid grid-cols-7 gap-2 bg-slate-900 p-3 rounded-2xl border border-slate-800 w-full">
-                            ${Array(7).fill(0).map((_, col) => `
-                                <button data-col="${col}" class="flex flex-col gap-2 group">
-                                    ${Array(6).fill(0).map((_, row) => {
-                                        const v = this.board[row][col];
-                                        let bg = 'bg-slate-950';
-                                        if (v === 1) bg = 'bg-cyan-400';
-                                        if (v === 2) bg = 'bg-amber-400';
-                                        return `<div class="w-full aspect-square rounded-full border-2 border-slate-800 ${bg}"></div>`;
-                                    }).join('')}
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-                this.container.querySelectorAll('[data-col]').forEach(btn => btn.onclick = () => this.drop(parseInt(btn.dataset.col)));
-            }
-            drop(col) {
-                if (this.turn !== 1) return;
-                for (let r = 5; r >= 0; r--) {
-                    if (this.board[r][col] === 0) {
-                        this.board[r][col] = 1; AudioFX.playMove(); this.turn = 2; this.render();
-                        setTimeout(() => this.aiDrop(), 400);
-                        return;
-                    }
-                }
-            }
-            aiDrop() {
-                const cols = [];
-                for (let c = 0; c < 7; c++) if (this.board[0][c] === 0) cols.push(c);
-                if (cols.length > 0) {
-                    const col = cols[Math.floor(Math.random() * cols.length)];
-                    for (let r = 5; r >= 0; r--) {
-                        if (this.board[r][col] === 0) {
-                            this.board[r][col] = 2; AudioFX.playMove(); this.turn = 1; this.render();
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-
-        // 6. MINESWEEPER
-        class MinesweeperGame {
-            constructor(c) { this.container = c; this.size = 8; this.init(); }
-            init() {
-                this.grid = Array(this.size).fill(0).map(() => Array(this.size).fill(0).map(() => ({ mine: Math.random() < 0.15, revealed: false, flagged: false })));
+                this.grid = Array(6).fill(0).map(() => Array(6).fill(0).map(() => ({ mine: Math.random() < 0.2, revealed: false })));
                 this.render();
             }
             render() {
                 this.container.innerHTML = `
-                    <div class="flex flex-col items-center max-w-md w-full">
-                        <div class="grid grid-cols-8 gap-1.5 bg-slate-900 p-3 rounded-2xl border border-slate-800 w-full aspect-square">
-                            ${this.grid.map((row, r) => row.map((cell, c) => `
-                                <button data-r="${r}" data-c="${c}" class="${cell.revealed ? 'bg-slate-950' : 'bg-slate-800 hover:bg-slate-700'} rounded-lg font-bold flex items-center justify-center select-none text-sm">
-                                    ${cell.revealed ? (cell.mine ? '<i class="fa-solid fa-bomb text-rose-500"></i>' : '') : (cell.flagged ? '<i class="fa-solid fa-flag text-amber-400"></i>' : '')}
-                                </button>
-                            `).join('')).join('')}
-                        </div>
+                    <div class="grid grid-cols-6 gap-2 board-bg p-3 rounded-2xl border max-w-xs w-full aspect-square">
+                        ${this.grid.map((row, r) => row.map((cell, c) => `
+                            <button data-r="${r}" data-c="${c}" class="rounded-xl flex items-center justify-center font-bold ${cell.revealed ? (cell.mine ? 'bg-rose-600' : 'bg-slate-950') : 'bg-slate-800 hover:bg-slate-700'}">
+                                ${cell.revealed && cell.mine ? '<i class="fa-solid fa-bomb text-white"></i>' : ''}
+                            </button>
+                        `).join('')).join('')}
                     </div>
                 `;
-                this.container.querySelectorAll('[data-r]').forEach(btn => {
-                    btn.onclick = () => this.click(parseInt(btn.dataset.r), parseInt(btn.dataset.c));
-                    btn.oncontextmenu = (e) => { e.preventDefault(); this.flag(parseInt(btn.dataset.r), parseInt(btn.dataset.c)); };
+                this.container.querySelectorAll('[data-r]').forEach(b => {
+                    b.onclick = () => {
+                        const r = parseInt(b.dataset.r), c = parseInt(b.dataset.c);
+                        this.grid[r][c].revealed = true;
+                        if (this.grid[r][c].mine) AudioFX.playError(); else AudioFX.playClick();
+                        this.render();
+                    };
                 });
             }
-            click(r, c) {
-                const cell = this.grid[r][c];
-                if (cell.flagged || cell.revealed) return;
-                cell.revealed = true;
-                if (cell.mine) { AudioFX.playError(); showResultModal('BOOM!', 'You clicked a mine.', false, () => this.init()); }
-                else { AudioFX.playClick(); }
-                this.render();
-            }
-            flag(r, c) { if (!this.grid[r][c].revealed) { this.grid[r][c].flagged = !this.grid[r][c].flagged; AudioFX.playMove(); this.render(); } }
         }
 
-        // 7. TIC-TAC-TOE
-        class TicTacToeGame {
-            constructor(c) { this.container = c; this.init(); }
-            init() { this.board = Array(9).fill(''); this.active = true; this.render(); }
-            render() {
-                this.container.innerHTML = `
-                    <div class="flex flex-col items-center max-w-sm w-full">
-                        <div class="grid grid-cols-3 gap-3 w-full aspect-square bg-slate-900 p-3 rounded-2xl border border-slate-800">
-                            ${this.board.map((val, idx) => `
-                                <button data-idx="${idx}" class="bg-slate-800 rounded-xl text-5xl font-extrabold flex items-center justify-center ${val==='X'?'text-cyan-400':'text-amber-400'}">${val}</button>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-                this.container.querySelectorAll('[data-idx]').forEach(btn => btn.onclick = () => this.move(parseInt(btn.dataset.idx)));
-            }
-            move(idx) {
-                if (!this.active || this.board[idx] !== '') return;
-                this.board[idx] = 'X'; AudioFX.playMove(); this.render();
-                if (this.checkWin('X')) { showResultModal('Victory!', 'You beat AI!', true, () => this.init()); return; }
-                setTimeout(() => {
-                    const empty = this.board.map((v, i) => v === '' ? i : null).filter(v => v !== null);
-                    if (empty.length > 0) {
-                        this.board[empty[Math.floor(Math.random() * empty.length)]] = 'O';
-                        AudioFX.playMove(); this.render();
-                    }
-                }, 300);
-            }
-            checkWin(p) {
-                const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-                return wins.some(w => w.every(idx => this.board[idx] === p));
-            }
-        }
-
-        // 8. WORD SCRAMBLE
+        /* ==================== 8. WORD SCRAMBLE ==================== */
         class WordScrambleGame {
             constructor(c) { this.container = c; this.init(); }
-            init() {
-                const words = ['BRAIN', 'PUZZLE', 'LOGIC', 'THINK', 'SOLVE'];
-                this.target = words[Math.floor(Math.random() * words.length)];
-                this.scrambled = this.target.split('').sort(() => Math.random() - 0.5).join('');
-                this.render();
-            }
+            init() { this.target = 'BRAIN'; this.scrambled = 'RBAIN'; this.render(); }
             render() {
                 this.container.innerHTML = `
                     <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-sm w-full text-center">
-                        <span class="text-xs text-slate-400 uppercase font-bold">Unscramble</span>
-                        <div class="text-4xl font-mono font-black text-cyan-400 my-4">${this.scrambled}</div>
+                        <div class="text-3xl font-mono font-black text-cyan-400 tracking-widest mb-4">${this.scrambled}</div>
                         <form id="scrambleForm" class="flex gap-2">
-                            <input type="text" id="scrambleInput" autocomplete="off" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 font-mono uppercase text-white font-bold" />
-                            <button type="submit" class="px-4 bg-cyan-500 font-bold text-slate-950 rounded-xl">Submit</button>
+                            <input type="text" id="scrambleInput" autocomplete="off" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 font-mono uppercase text-white font-bold" />
+                            <button type="submit" class="px-4 bg-cyan-500 font-bold text-slate-950 rounded-xl text-xs">Submit</button>
                         </form>
                     </div>
                 `;
@@ -757,73 +775,64 @@
                     e.preventDefault();
                     if (document.getElementById('scrambleInput').value.trim().toUpperCase() === this.target) {
                         AudioFX.playSuccess(); showResultModal('Correct!', `Target: ${this.target}`, true, () => this.init());
-                    } else { AudioFX.playError(); }
+                    } else AudioFX.playError();
                 };
             }
         }
 
-        // 9. WORD GUESS
+        /* ==================== 9. WORD GUESS ==================== */
         class WordGuessGame {
             constructor(c) { this.container = c; this.init(); }
-            init() { this.target = 'LOGIC'; this.current = ''; this.render(); this.bind(); }
-            bind() {
-                this.fn = (e) => {
-                    if (e.key === 'Enter' && this.current.length === 5) {
-                        if (this.current === this.target) { AudioFX.playSuccess(); showResultModal('Guessed!', 'Correct 5-letter word!', true, () => this.init()); }
-                    } else if (e.key === 'Backspace') { this.current = this.current.slice(0, -1); this.render(); }
-                    else if (/^[a-zA-Z]$/.test(e.key) && this.current.length < 5) { this.current += e.key.toUpperCase(); this.render(); }
-                };
-                window.removeEventListener('keydown', this.fn); window.addEventListener('keydown', this.fn);
-            }
+            init() { this.target = 'SMART'; this.guess = ''; this.render(); }
             render() {
                 this.container.innerHTML = `
-                    <div class="flex gap-2 max-w-xs">
-                        ${Array(5).fill(0).map((_, i) => `<div class="w-12 h-12 rounded-xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center font-bold text-xl">${this.current[i] || ''}</div>`).join('')}
+                    <div class="flex flex-col items-center max-w-xs w-full">
+                        <div class="flex gap-2 mb-4">
+                            ${[0,1,2,3,4].map(i => `<div class="w-10 h-10 rounded-xl border border-slate-700 bg-slate-900 flex items-center justify-center font-bold text-lg text-cyan-400">${this.guess[i]||''}</div>`).join('')}
+                        </div>
+                        <input type="text" id="wGuessInput" maxlength="5" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold uppercase text-center focus:outline-none w-full text-sm" placeholder="Type 5 letters..." />
                     </div>
                 `;
+                document.getElementById('wGuessInput').oninput = (e) => {
+                    this.guess = e.target.value.toUpperCase();
+                    this.render();
+                    if (this.guess === this.target) {
+                        AudioFX.playSuccess(); showResultModal('Correct Word!', 'Target was SMART!', true, () => this.init());
+                    }
+                };
             }
         }
 
-        // 10. SIMON SAYS
+        /* ==================== 10. SIMON SAYS ==================== */
         class SimonGame {
             constructor(c) { this.container = c; this.init(); }
-            init() { this.seq = []; this.step = 0; this.render(); this.next(); }
-            next() { this.seq.push(Math.floor(Math.random() * 4)); this.step = 0; this.playSeq(); }
-            playSeq() {
-                let i = 0;
-                const timer = setInterval(() => {
-                    AudioFX.playTone(300 + this.seq[i] * 100);
-                    i++; if (i >= this.seq.length) clearInterval(timer);
-                }, 500);
-            }
+            init() { this.render(); }
             render() {
                 this.container.innerHTML = `
-                    <div class="grid grid-cols-2 gap-4 max-w-xs w-full aspect-square">
-                        ${[0,1,2,3].map(i => `<button data-idx="${i}" class="bg-slate-800 border border-slate-700 rounded-2xl"></button>`).join('')}
+                    <div class="grid grid-cols-2 gap-3 max-w-xs w-full aspect-square bg-slate-900 p-3 rounded-2xl border border-slate-800">
+                        <button class="bg-rose-500/40 rounded-xl border border-rose-500 active:scale-95" onclick="AudioFX.playTone(261)"></button>
+                        <button class="bg-cyan-500/40 rounded-xl border border-cyan-500 active:scale-95" onclick="AudioFX.playTone(329)"></button>
+                        <button class="bg-amber-500/40 rounded-xl border border-amber-500 active:scale-95" onclick="AudioFX.playTone(392)"></button>
+                        <button class="bg-emerald-500/40 rounded-xl border border-emerald-500 active:scale-95" onclick="AudioFX.playTone(523)"></button>
                     </div>
                 `;
-                this.container.querySelectorAll('[data-idx]').forEach(b => b.onclick = () => {
-                    AudioFX.playTone(300 + parseInt(b.dataset.idx) * 100);
-                    this.next();
-                });
             }
         }
 
-        // 11. PATTERN PUZZLE
+        /* ==================== 11. PATTERN PUZZLE ==================== */
         class PatternPuzzleGame {
             constructor(c) { this.container = c; this.init(); }
-            init() { this.pattern = [1, 4, 7]; this.user = []; this.render(); }
+            init() { this.render(); }
             render() {
                 this.container.innerHTML = `
                     <div class="grid grid-cols-3 gap-3 max-w-xs w-full aspect-square bg-slate-900 p-3 rounded-2xl border border-slate-800">
-                        ${Array(9).fill(0).map((_, i) => `<button data-i="${i}" class="bg-slate-800 rounded-xl"></button>`).join('')}
+                        ${Array(9).fill(0).map((_, i) => `<button class="bg-slate-800 hover:bg-cyan-500 rounded-xl transition-colors" onclick="AudioFX.playClick()"></button>`).join('')}
                     </div>
                 `;
-                this.container.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { AudioFX.playClick(); showResultModal('Pattern Complete!', 'Visual memory verified.', true, () => this.init()); });
             }
         }
 
-        // 12. MATH CHALLENGE
+        /* ==================== 12. MATH CHALLENGE ==================== */
         class MathChallengeGame {
             constructor(c) { this.container = c; this.init(); }
             init() { this.a = 7; this.b = 8; this.ans = 56; this.render(); }
@@ -832,42 +841,41 @@
                     <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-sm w-full text-center">
                         <div class="text-4xl font-mono font-bold text-white mb-4">${this.a} × ${this.b} = ?</div>
                         <form id="mathF" class="flex gap-2">
-                            <input type="number" id="mathI" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 font-mono text-white text-xl" />
-                            <button class="px-4 bg-cyan-500 font-bold text-slate-950 rounded-xl">OK</button>
+                            <input type="number" id="mathI" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 font-mono text-white text-xl focus:outline-none" />
+                            <button type="submit" class="px-4 bg-cyan-500 font-bold text-slate-950 rounded-xl text-xs">Submit</button>
                         </form>
                     </div>
                 `;
                 document.getElementById('mathF').onsubmit = (e) => {
                     e.preventDefault();
                     if (parseInt(document.getElementById('mathI').value, 10) === this.ans) {
-                        AudioFX.playSuccess(); showResultModal('Math Master!', 'Correct equation solve!', true, () => this.init());
-                    } else { AudioFX.playError(); }
+                        AudioFX.playSuccess(); showResultModal('Math Master!', 'Correct answer!', true, () => this.init());
+                    } else AudioFX.playError();
                 };
             }
         }
 
-        // 13. WORD SEARCH
+        /* ==================== 13. WORD SEARCH ==================== */
         class WordSearchGame {
             constructor(c) { this.container = c; this.init(); }
             init() { this.render(); }
             render() {
                 this.container.innerHTML = `
                     <div class="grid grid-cols-5 gap-2 bg-slate-900 p-3 rounded-2xl border border-slate-800 max-w-xs w-full">
-                        ${'BRAINLOGICSMART'.split('').map(ch => `<button class="bg-slate-800 rounded-lg h-10 font-bold font-mono text-white">${ch}</button>`).join('')}
+                        ${'BRAINLOGICSMART'.split('').map(ch => `<button class="bg-slate-800 rounded-lg h-10 font-bold font-mono text-white" onclick="AudioFX.playClick()">${ch}</button>`).join('')}
                     </div>
                 `;
-                this.container.querySelectorAll('button').forEach(b => b.onclick = () => { AudioFX.playClick(); showResultModal('Word Found!', 'Grid completed.', true, () => this.init()); });
             }
         }
 
-        // 14. LIGHTS OUT
+        /* ==================== 14. LIGHTS OUT ==================== */
         class LightsOutGame {
             constructor(c) { this.container = c; this.init(); }
             init() { this.grid = Array(9).fill(true); this.render(); }
             render() {
                 this.container.innerHTML = `
                     <div class="grid grid-cols-3 gap-3 max-w-xs w-full aspect-square bg-slate-900 p-3 rounded-2xl border border-slate-800">
-                        ${this.grid.map((on, i) => `<button data-i="${i}" class="${on ? 'bg-amber-400' : 'bg-slate-800'} rounded-xl transition-all"></button>`).join('')}
+                        ${this.grid.map((on, i) => `<button data-i="${i}" class="${on ? 'bg-amber-400 shadow-lg shadow-amber-400/50' : 'bg-slate-800'} rounded-xl transition-all"></button>`).join('')}
                     </div>
                 `;
                 this.container.querySelectorAll('[data-i]').forEach(b => b.onclick = () => {
@@ -878,24 +886,24 @@
             }
         }
 
-        // 15. NUMBER MEMORY
+        /* ==================== 15. NUMBER MEMORY ==================== */
         class NumberMemoryGame {
             constructor(c) { this.container = c; this.init(); }
             init() { this.num = '8492'; this.show = true; this.render(); setTimeout(() => { this.show = false; this.render(); }, 1500); }
             render() {
                 if (this.show) {
-                    this.container.innerHTML = `<div class="text-5xl font-mono font-bold text-cyan-400">${this.num}</div>`;
+                    this.container.innerHTML = `<div class="text-4xl font-mono font-bold text-cyan-400">${this.num}</div>`;
                 } else {
                     this.container.innerHTML = `
                         <form id="numF" class="flex flex-col gap-3 max-w-xs w-full">
-                            <input type="number" id="numI" class="bg-slate-950 border border-slate-700 rounded-xl p-3 font-mono text-2xl text-center text-white" />
-                            <button class="py-2 bg-cyan-500 font-bold text-slate-950 rounded-xl">Submit</button>
+                            <input type="number" id="numI" class="bg-slate-950 border border-slate-700 rounded-xl p-2.5 font-mono text-xl text-center text-white focus:outline-none" placeholder="Enter recall..." />
+                            <button type="submit" class="py-2 bg-cyan-500 font-bold text-slate-950 rounded-xl text-xs">Submit</button>
                         </form>
                     `;
                     document.getElementById('numF').onsubmit = (e) => {
                         e.preventDefault();
                         if (document.getElementById('numI').value === this.num) { AudioFX.playSuccess(); showResultModal('Recall Success!', 'Memory verified.', true, () => this.init()); }
-                        else { AudioFX.playError(); }
+                        else AudioFX.playError();
                     };
                 }
             }

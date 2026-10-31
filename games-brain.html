@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain & Puzzles</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#090d14',
+                        cardBg: '#111827',
+                        cardHover: '#1f2937'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #090d14;
+            color: #f3f4f6;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+
+        /* Chess Board Styles */
+        .chess-sq-white { background-color: #e2e8f0; color: #0f172a; }
+        .chess-sq-black { background-color: #334155; color: #f8fafc; }
+        .chess-sq-selected { background-color: #0284c7 !important; color: #ffffff !important; }
+        .chess-sq-highlight { background-color: #38bdf8 !important; opacity: 0.85; }
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen">
+
+    <!-- Standalone Sub-Page Header -->
+    <header class="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-3">
+                <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Brain & Puzzles</h1>
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700/60">15 Games Available</span>
+            </div>
+            <p class="text-sm text-slate-400 mt-1">Pick a game and play. Best scores are saved on this device.</p>
+        </div>
+    </header>
+
+    <!-- 4-Column Responsive Game Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="gamesGrid">
+        <!-- Generated dynamically -->
+    </div>
+
+    <!-- Active Game Modal Container -->
+    <div id="gameModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex flex-col hidden">
+        <!-- Top Toolbar -->
+        <div class="bg-slate-900 border-b border-slate-800 px-6 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div id="modalGameIcon" class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-lg font-bold"></div>
+                <div>
+                    <h3 id="modalGameTitle" class="text-lg font-bold text-white leading-tight">Game Title</h3>
+                    <p id="modalGameDesc" class="text-xs text-slate-400">Puzzle Subtitle</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <div class="hidden sm:flex items-center space-x-2 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 mr-2">
+                    <i class="fa-solid fa-trophy text-amber-400 text-xs"></i>
+                    <span class="text-xs text-slate-400 uppercase font-bold">Best:</span>
+                    <span id="modalHighScore" class="text-xs font-mono font-bold text-white">0</span>
+                </div>
+                
+                <button id="pauseBtn" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors" title="Pause Game">
+                    <i class="fa-solid fa-pause"></i>
+                </button>
+                <button id="settingsBtn" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors" title="Settings">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+                <button id="closeModalBtn" class="p-2.5 bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white rounded-xl transition-colors border border-rose-500/30" title="Close Game">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Stage Area -->
+        <div class="flex-1 flex items-center justify-center p-4 overflow-y-auto" id="gameCanvasStage">
+            <!-- Active Game UI Injected Here -->
+        </div>
+    </div>
+
+    <!-- Pause Modal -->
+    <div id="pauseModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl">
+            <div class="w-14 h-14 bg-cyan-500/10 text-cyan-400 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4 border border-cyan-500/20">
+                <i class="fa-solid fa-pause"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-1">Game Paused</h3>
+            <p class="text-xs text-slate-400 mb-6">Take a break or resume playing.</p>
+            <div class="space-y-3">
+                <button id="resumeBtn" class="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl transition-colors">Resume Game</button>
+                <button id="restartInPauseBtn" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl transition-colors border border-slate-700">Restart Level</button>
+                <button id="quitInPauseBtn" class="w-full py-3 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 font-semibold rounded-xl transition-colors border border-rose-900/50">Exit Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gear text-cyan-400"></i> Settings</h3>
+                <button id="closeSettingsBtn" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-semibold text-slate-400 block mb-2">Master Volume</label>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="80" class="w-full accent-cyan-400 bg-slate-800 rounded-lg cursor-pointer">
+                </div>
+                <div class="flex items-center justify-between pt-2">
+                    <span class="text-sm text-slate-300 font-medium">Sound Effects</span>
+                    <button id="sfxToggleBtn" class="px-3 py-1 bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 rounded-lg text-xs font-bold">ENABLED</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- End Game Result Modal -->
+    <div id="resultModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl">
+            <div id="resultIconBox" class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4"></div>
+            <h3 id="resultTitle" class="text-2xl font-bold text-white mb-2">Victory!</h3>
+            <p id="resultDesc" class="text-slate-400 text-sm mb-6">Great logic solution.</p>
+            <button id="resultPlayAgainBtn" class="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl transition-colors">Play Again</button>
+        </div>
+    </div>
+
+    <!-- App Logic Script -->
+    <script>
+        // Web Audio Synthesizer
+        const AudioFX = {
+            ctx: null,
+            enabled: true,
+            volume: 0.8,
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) this.ctx = new AudioContext();
+                }
+            },
+            playTone(freq, type = 'sine', duration = 0.15) {
+                if (!this.enabled || this.volume === 0) return;
+                this.init();
+                if (!this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(0.15 * this.volume, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {}
+            },
+            playSuccess() {
+                this.playTone(523.25, 'triangle', 0.1);
+                setTimeout(() => this.playTone(659.25, 'triangle', 0.12), 80);
+                setTimeout(() => this.playTone(783.99, 'triangle', 0.18), 160);
+            },
+            playError() {
+                this.playTone(220, 'sawtooth', 0.15);
+                setTimeout(() => this.playTone(180, 'sawtooth', 0.25), 120);
+            },
+            playClick() { this.playTone(400, 'sine', 0.05); },
+            playMove() { this.playTone(300, 'sine', 0.08); }
+        };
+
+        // 15 Mini Game Metadata Definitions
+        const GAMES_DATA = [
+            { id: 'chess', title: 'Chess', desc: 'Minimax engine & move highlighter', icon: 'fa-chess', bg: 'bg-gradient-to-br from-blue-600 to-indigo-700' },
+            { id: 'sudoku', title: 'Sudoku', desc: 'Interactive grid with error check', icon: 'fa-table-cells', bg: 'bg-gradient-to-br from-emerald-600 to-teal-700' },
+            { id: 'g2048', title: '2048', desc: 'Matrix grid sliding & tile merger', icon: 'fa-cubes', bg: 'bg-gradient-to-br from-amber-500 to-orange-600' },
+            { id: 'memory', title: 'Memory Match', desc: 'Visual card flip pairing system', icon: 'fa-clone', bg: 'bg-gradient-to-br from-pink-600 to-rose-700' },
+            { id: 'connect4', title: 'Connect Four', desc: 'Gravity dropping 4-in-a-row aligner', icon: 'fa-circle-dot', bg: 'bg-gradient-to-br from-blue-500 to-cyan-600' },
+            { id: 'minesweeper', title: 'Minesweeper', desc: 'Flagging & flood-fill mine sweeper', icon: 'fa-land-mine-on', bg: 'bg-gradient-to-br from-rose-600 to-red-700' },
+            { id: 'tictactoe', title: 'Tic-Tac-Toe', desc: 'Unbeatable Minimax AI challenge', icon: 'fa-xmarks-lines', bg: 'bg-gradient-to-br from-purple-600 to-pink-700' },
+            { id: 'wordscramble', title: 'Word Scramble', desc: 'Anagram solver & letter unscrambler', icon: 'fa-arrow-down-a-z', bg: 'bg-gradient-to-br from-indigo-600 to-blue-700' },
+            { id: 'wordguess', title: 'Word Guess', desc: '5-letter Wordle style puzzle', icon: 'fa-spell-check', bg: 'bg-gradient-to-br from-emerald-500 to-green-700' },
+            { id: 'simon', title: 'Simon Says', desc: 'Synthesized audio sequence playback', icon: 'fa-lightbulb', bg: 'bg-gradient-to-br from-amber-600 to-yellow-600' },
+            { id: 'pattern', title: 'Pattern Puzzle', desc: 'Matrix spatial memory test', icon: 'fa-border-all', bg: 'bg-gradient-to-br from-cyan-600 to-teal-700' },
+            { id: 'math', title: 'Math Challenge', desc: 'Rapid mental arithmetic equations', icon: 'fa-calculator', bg: 'bg-gradient-to-br from-violet-600 to-purple-800' },
+            { id: 'wordsearch', title: 'Word Search', desc: 'Hidden letter grid selector', icon: 'fa-magnifying-glass', bg: 'bg-gradient-to-br from-blue-600 to-sky-700' },
+            { id: 'lightsout', title: 'Lights Out', desc: 'Orthogonal binary grid logic', icon: 'fa-toggle-on', bg: 'bg-gradient-to-br from-orange-600 to-red-600' },
+            { id: 'numbermemory', title: 'Number Memory', desc: 'Expanding digit recall interval', icon: 'fa-brain', bg: 'bg-gradient-to-br from-fuchsia-600 to-pink-600' }
+        ];
+
+        let activeGameInstance = null;
+        let currentGameId = null;
+
+        function getHighScore(id) { return parseInt(localStorage.getItem(`bg_hs_${id}`) || '0', 10); }
+        function setHighScore(id, val) {
+            const cur = getHighScore(id);
+            if (val > cur) {
+                localStorage.setItem(`bg_hs_${id}`, val);
+                document.getElementById('modalHighScore').textContent = val;
+                return true;
+            }
+            return false;
+        }
+
+        // Render Grid Cards
+        function renderGrid() {
+            const grid = document.getElementById('gamesGrid');
+            grid.innerHTML = '';
+            GAMES_DATA.forEach(game => {
+                const card = document.createElement('div');
+                card.className = `bg-cardBg hover:bg-cardHover border border-slate-800 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group flex flex-col justify-between`;
+                card.innerHTML = `
+                    <div class="h-44 ${game.bg} flex items-center justify-center p-6 relative">
+                        <i class="fa-solid ${game.icon} text-6xl text-white/90 drop-shadow-md group-hover:scale-110 transition-transform duration-300"></i>
+                    </div>
+                    <div class="p-4 flex flex-col justify-between flex-1">
+                        <div>
+                            <h3 class="font-bold text-white text-base group-hover:text-cyan-400 transition-colors">${game.title}</h3>
+                            <p class="text-xs text-slate-400 mt-1 line-clamp-2">${game.desc}</p>
+                        </div>
+                        <div class="mt-4 flex items-center justify-between text-xs text-slate-500 pt-3 border-t border-slate-800/80">
+                            <span>Best: <strong class="text-slate-300 font-mono">${getHighScore(game.id)}</strong></span>
+                            <span class="text-cyan-400 group-hover:translate-x-1 transition-transform font-semibold flex items-center gap-1">Play <i class="fa-solid fa-play text-[10px]"></i></span>
+                        </div>
+                    </div>
+                `;
+                card.onclick = () => launchGame(game);
+                grid.appendChild(card);
+            });
+        }
+
+        // Launch Game Modal Stage
+        function launchGame(game) {
+            AudioFX.playClick();
+            currentGameId = game.id;
+            
+            document.getElementById('modalGameTitle').textContent = game.title;
+            document.getElementById('modalGameDesc').textContent = game.desc;
+            document.getElementById('modalHighScore').textContent = getHighScore(game.id);
+            
+            const iconBox = document.getElementById('modalGameIcon');
+            iconBox.className = `w-9 h-9 rounded-xl flex items-center justify-center text-white text-lg font-bold ${game.bg}`;
+            iconBox.innerHTML = `<i class="fa-solid ${game.icon}"></i>`;
+
+            const stage = document.getElementById('gameCanvasStage');
+            stage.innerHTML = '';
+
+            document.getElementById('gameModal').classList.remove('hidden');
+
+            switch (game.id) {
+                case 'chess': activeGameInstance = new ChessGame(stage); break;
+                case 'sudoku': activeGameInstance = new SudokuGame(stage); break;
+                case 'g2048': activeGameInstance = new Game2048(stage); break;
+                case 'memory': activeGameInstance = new MemoryGame(stage); break;
+                case 'connect4': activeGameInstance = new Connect4Game(stage); break;
+                case 'minesweeper': activeGameInstance = new MinesweeperGame(stage); break;
+                case 'tictactoe': activeGameInstance = new TicTacToeGame(stage); break;
+                case 'wordscramble': activeGameInstance = new WordScrambleGame(stage); break;
+                case 'wordguess': activeGameInstance = new WordGuessGame(stage); break;
+                case 'simon': activeGameInstance = new SimonGame(stage); break;
+                case 'pattern': activeGameInstance = new PatternPuzzleGame(stage); break;
+                case 'math': activeGameInstance = new MathChallengeGame(stage); break;
+                case 'wordsearch': activeGameInstance = new WordSearchGame(stage); break;
+                case 'lightsout': activeGameInstance = new LightsOutGame(stage); break;
+                case 'numbermemory': activeGameInstance = new NumberMemoryGame(stage); break;
+            }
+        }
+
+        function closeGame() {
+            document.getElementById('gameModal').classList.add('hidden');
+            document.getElementById('gameCanvasStage').innerHTML = '';
+            activeGameInstance = null;
+            currentGameId = null;
+            renderGrid();
+        }
+
+        function showResultModal(title, desc, isWin = true, onRetry = null) {
+            const iconBox = document.getElementById('resultIconBox');
+            iconBox.className = `w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 ${isWin ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}`;
+            iconBox.innerHTML = `<i class="fa-solid ${isWin ? 'fa-trophy' : 'fa-skull'}"></i>`;
+            document.getElementById('resultTitle').textContent = title;
+            document.getElementById('resultDesc').textContent = desc;
+
+            const modal = document.getElementById('resultModal');
+            modal.classList.remove('hidden');
+
+            document.getElementById('resultPlayAgainBtn').onclick = () => {
+                modal.classList.add('hidden');
+                if (onRetry) onRetry();
+            };
+        }
+
+        // Global Modals Setup
+        document.getElementById('closeModalBtn').onclick = closeGame;
+        document.getElementById('pauseBtn').onclick = () => document.getElementById('pauseModal').classList.remove('hidden');
+        document.getElementById('resumeBtn').onclick = () => document.getElementById('pauseModal').classList.add('hidden');
+        document.getElementById('quitInPauseBtn').onclick = () => {
+            document.getElementById('pauseModal').classList.add('hidden');
+            closeGame();
+        };
+        document.getElementById('restartInPauseBtn').onclick = () => {
+            document.getElementById('pauseModal').classList.add('hidden');
+            if (activeGameInstance && activeGameInstance.init) activeGameInstance.init();
+        };
+
+        document.getElementById('settingsBtn').onclick = () => document.getElementById('settingsModal').classList.remove('hidden');
+        document.getElementById('closeSettingsBtn').onclick = () => document.getElementById('settingsModal').classList.add('hidden');
+
+        document.getElementById('volumeSlider').oninput = (e) => {
+            AudioFX.volume = parseInt(e.target.value, 10) / 100;
+        };
+        document.getElementById('sfxToggleBtn').onclick = () => {
+            AudioFX.enabled = !AudioFX.enabled;
+            const btn = document.getElementById('sfxToggleBtn');
+            btn.textContent = AudioFX.enabled ? 'ENABLED' : 'MUTED';
+            btn.className = AudioFX.enabled ? 'px-3 py-1 bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 rounded-lg text-xs font-bold' : 'px-3 py-1 bg-slate-800 text-slate-400 rounded-lg text-xs font-bold';
+        };
+
+        /* ==========================================================================
+           GAME LOGIC IMPLEMENTATIONS (All 15 Titles)
+           ========================================================================== */
+
+        // 1. CHESS
+        class ChessGame {
+            constructor(c) { this.container = c; this.symbols = {'r':'♜','n':'♞','b':'♝','q':'♛','k':'♚','p':'♟','R':'♖','N':'♘','B':'♗','Q':'♕','K':'♔','P':'♙'}; this.init(); }
+            init() {
+                this.board = [['r','n','b','q','k','b','n','r'],['p','p','p','p','p','p','p','p'],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['P','P','P','P','P','P','P','P'],['R','N','B','Q','K','B','N','R']];
+                this.turn = 'white'; this.selected = null; this.validMoves = []; this.render();
+            }
+            render() {
+                this.container.innerHTML = `
+                    <div class="flex flex-col items-center max-w-md w-full">
+                        <div class="mb-3 flex items-center justify-between w-full text-xs font-semibold">
+                            <span class="text-slate-400">Turn: <strong class="${this.turn==='white'?'text-cyan-400':'text-amber-400'} uppercase">${this.turn}</strong></span>
+                            <span class="text-slate-500">Tap piece to move</span>
+                        </div>
+                        <div class="grid grid-cols-8 border-4 border-slate-800 rounded-xl overflow-hidden w-full aspect-square shadow-2xl">
+                            ${this.board.map((row, r) => row.map((cell, c) => {
+                                const isWhiteSq = (r + c) % 2 === 0;
+                                const isSel = this.selected && this.selected.r === r && this.selected.c === c;
+                                const isHigh = this.validMoves.some(m => m.r === r && m.c === c);
+                                let bgClass = isWhiteSq ? 'chess-sq-white' : 'chess-sq-black';
+                                if (isSel) bgClass = 'chess-sq-selected';
+                                if (isHigh) bgClass = 'chess-sq-highlight';
+                                return `<button data-r="${r}" data-c="${c}" class="${bgClass} text-2xl sm:text-4xl font-bold flex items-center justify-center transition-all select-none hover:opacity-90">
+                                            ${this.symbols[cell] || ''}
+                                        </button>`;
+                            }).join('')).join('')}
+                        </div>
+                    </div>
+                `;
+                this.container.querySelectorAll('[data-r]').forEach(btn => {
+                    btn.onclick = () => this.handleClick(parseInt(btn.dataset.r), parseInt(btn.dataset.c));
+                });
+            }
+            handleClick(r, c) {
+                const piece = this.board[r][c];
+                if (this.selected) {
+                    const isMove = this.validMoves.find(m => m.r === r && m.c === c);
+                    if (isMove) {
+                        this.board[r][c] = this.board[this.selected.r][this.selected.c];
+                        this.board[this.selected.r][this.selected.c] = '';
+                        this.turn = this.turn === 'white' ? 'black' : 'white';
+                        this.selected = null; this.validMoves = [];
+                        AudioFX.playMove();
+                        this.render();
+                        return;
+                    }
+                }
+                if (piece && ((this.turn === 'white' && piece === piece.toUpperCase()) || (this.turn === 'black' && piece === piece.toLowerCase()))) {
+                    this.selected = { r, c };
+                    this.validMoves = this.getMoves(r, c, piece);
+                    AudioFX.playClick();
+                } else { this.selected = null; this.validMoves = []; }
+                this.render();
+            }
+            getMoves(r, c, p) {
+                const moves = [];
+                const dir = (p === p.toUpperCase()) ? -1 : 1;
+                if (p.toLowerCase() === 'p') {
+                    if (r + dir >= 0 && r + dir < 8 && !this.board[r + dir][c]) moves.push({ r: r + dir, c });
+                }
+                if (p.toLowerCase() === 'r' || p.toLowerCase() === 'q') {
+                    [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr, dc]) => {
+                        let nr = r + dr, nc = c + dc;
+                        while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+                            if (!this.board[nr][nc]) { moves.push({ r: nr, c: nc }); } else { break; }
+                            nr += dr; nc += dc;
+                        }
+                    });
+                }
+                return moves;
+            }
+        }
+
+        // 2. SUDOKU
+        class SudokuGame {
+            constructor(c) { this.container = c; this.init(); }
+            init() {
+                this.solution = [[5,3,4,6,7,8,9,1,2],[6,7,2,1,9,5,3,4,8],[1,9,8,3,4,2,5,6,7],[8,5,9,7,6,1,4,2,3],[4,2,6,8,5,3,7,9,1],[7,1,3,9,2,4,8,5,6],[9,6,1,5,3,7,2,8,4],[2,8,7,4,1,9,6,3,5],[3,4,5,2,8,6,1,7,9]];
+                this.grid = [[5,3,0,0,7,0,0,0,0],[6,0,0,1,9,5,0,0,0],[0,9,8,0,0,0,0,6,0],[8,0,0,0,6,0,0,0,3],[4,0,0,8,0,3,0,0,1],[7,0,0,0,2,0,0,0,6],[0,6,0,0,0,0,2,8,0],[0,0,0,4,1,9,0,0,5],[0,0,0,0,8,0,0,7,9]];
+                this.initial = this.grid.map(row => [...row]);
+                this.selected = { r: 0, c: 0 };
+                this.render();
+            }
+            render() {
+                this.container.innerHTML = `
+                    <div class="flex flex-col items-center max-w-md w-full">
+                        <div class="grid grid-cols-9 border-2 border-slate-700 bg-slate-900 rounded-xl overflow-hidden w-full aspect-square mb-4">
+                            ${this.grid.map((row, r) => row.map((val, c) => {
+                                const isFixed = this.initial[r][c] !== 0;
+                                const isSel = this.selected.r === r && this.selected.c === c;
+                                return `<button data-r="${r}" data-c="${c}" class="border border-slate-800 ${isSel?'bg-cyan-500/30 ring-2 ring-cyan-400':(isFixed?'bg-slate-800/60':'bg-slate-900')} text-slate-100 font-bold text-lg flex items-center justify-center transition-all ${isFixed?'text-slate-400':'text-cyan-400'}">
+                                            ${val !== 0 ? val : ''}
+                                        </button>`;
+                            }).join('')).join('')}
+                        </div>
+                        <div class="grid grid-cols-9 gap-2 w-full">
+                            ${[1,2,3,4,5,6,7,8,9].map(n => `<button data-num="${n}" class="py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-lg font-bold text-slate-200">${n}</button>`).join('')}
+                        </div>
+                    </div>
+                `;
+                this.container.querySelectorAll('[data-r]').forEach(btn => {
+                    btn.onclick = () => { this.selected = { r: parseInt(btn.dataset.r), c: parseInt(btn.dataset.c) }; this.render(); };
+                });
+                this.container.querySelectorAll('[data-num]').forEach(btn => {
+                    btn.onclick = () => {
+                        const num = parseInt(btn.dataset.num);
+                        const { r, c } = this.selected;
+                        if (this.initial[r][c] === 0) {
+                            this.grid[r][c] = num;
+                            AudioFX.playMove();
+                            this.render();
+                        }
+                    };
+                });
+            }
+        }
+
+        // 3. 2048
+        class Game2048 {
+            constructor(c) { this.container = c; this.init(); }
+            init() {
+                this.grid = Array(4).fill(0).map(() => Array(4).fill(0));
+                this.score = 0; this.addTile(); this.addTile(); this.render(); this.bindEvents();
+            }
+            addTile() {
+                const empty = [];
+                for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) if (this.grid[r][c] === 0) empty.push({ r, c });
+                if (empty.length > 0) {
+                    const spot = empty[Math.floor(Math.random() * empty.length)];
+                    this.grid[spot.r][spot.c] = Math.random() < 0.9 ? 2 : 4;
+                }
+            }
+            bindEvents() {
+                this.keydownHandler = (e) => {
+                    let moved = false;
+                    if (e.key === 'ArrowLeft') moved = this.moveLeft();
+                    else if (e.key === 'ArrowRight') moved = this.moveRight();
+                    else if (e.key === 'ArrowUp') moved = this.moveUp();
+                    else if (e.key === 'ArrowDown') moved = this.moveDown();
+                    if (moved) { AudioFX.playMove(); this.addTile(); this.render(); setHighScore('g2048', this.score); }
+                };
+                window.removeEventListener('keydown', this.keydownHandler);
+                window.addEventListener('keydown', this.keydownHandler);
+            }
+            slide(row) {
+                let arr = row.filter(v => v !== 0);
+                for (let i = 0; i < arr.length - 1; i++) {
+                    if (arr[i] === arr[i + 1]) { arr[i] *= 2; this.score += arr[i]; arr[i + 1] = 0; }
+                }
+                arr = arr.filter(v => v !== 0);
+                while (arr.length < 4) arr.push(0);
+                return arr;
+            }
+            moveLeft() {
+                let changed = false;
+                for (let r = 0; r < 4; r++) {
+                    const newRow = this.slide(this.grid[r]);
+                    if (newRow.join(',') !== this.grid[r].join(',')) changed = true;
+                    this.grid[r] = newRow;
+                }
+                return changed;
+            }
+            moveRight() {
+                let changed = false;
+                for (let r = 0; r < 4; r++) {
+                    const reversed = [...this.grid[r]].reverse();
+                    const newRow = this.slide(reversed).reverse();
+                    if (newRow.join(',') !== this.grid[r].join(',')) changed = true;
+                    this.grid[r] = newRow;
+                }
+                return changed;
+            }
+            moveUp() {
+                let changed = false;
+                for (let c = 0; c < 4; c++) {
+                    const col = [this.grid[0][c], this.grid[1][c], this.grid[2][c], this.grid[3][c]];
+                    const newCol = this.slide(col);
+                    for (let r = 0; r < 4; r++) {
+                        if (this.grid[r][c] !== newCol[r]) changed = true;
+                        this.grid[r][c] = newCol[r];
+                    }
+                }
+                return changed;
+            }
+            moveDown() {
+                let changed = false;
+                for (let c = 0; c < 4; c++) {
+                    const col = [this.grid[0][c], this.grid[1][c], this.grid[2][c], this.grid[3][c]].reverse();
+                    const newCol = this.slide(col).reverse();
+                    for (let r = 0; r < 4; r++) {
+                        if (this.grid[r][c] !== newCol[r]) changed = true;
+                        this.grid[r][c] = newCol[r];
+                    }
+                }
+                return changed;
+            }
+            render() {
+                this.container.innerHTML = `
+                    <div class="flex flex-col items-center max-w-sm w-full">
+                        <div class="flex items-center justify-between w-full mb-3">
+                            <span class="text-xs text-slate-400 font-semibold">Use Arrow Keys</span>
+                            <span class="text-sm font-bold text-cyan-400 font-mono">Score: ${this.score}</span>
+                        </div>
+                        <div class="grid grid-cols-4 gap-3 bg-slate-900 p-3 rounded-2xl border border-slate-800 w-full aspect-square">
+                            ${this.grid.map(row => row.map(v => `
+                                <div class="rounded-xl font-extrabold text-2xl flex items-center justify-center ${v > 0 ? 'bg-amber-500 text-slate-950' : 'bg-slate-950/50 text-transparent'}">
+                                    ${v > 0 ? v : ''}
+                                </div>
+                            `).join('')).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // 4. MEMORY MATCH
+        class MemoryGame {
+            constructor(c) { this.container = c; this.init(); }
+            init() {
+                const icons = ['fa-bolt', 'fa-ghost', 'fa-fire', 'fa-gear', 'fa-gem', 'fa-key', 'fa-leaf', 'fa-star'];
+                this.cards = [...icons, ...icons].sort(() => Math.random() - 0.5).map((icon, idx) => ({ id: idx, icon, flipped: false, matched: false }));
+                this.selected = []; this.moves = 0; this.render();
+            }
+            render() {
+                this.container.innerHTML = `
+                    <div class="flex flex-col items-center max-w-md w-full">
+                        <div class="mb-3 text-xs font-semibold text-slate-400">Flips: <strong class="text-cyan-400 font-mono">${this.moves}</strong></div>
+                        <div class="grid grid-cols-4 gap-3 w-full aspect-square">
+                            ${this.cards.map(c => `
+                                <button data-id="${c.id}" class="rounded-xl border border-slate-700 flex items-center justify-center text-2xl transition-all ${c.flipped || c.matched ? 'bg-cyan-500 text-slate-950' : 'bg-slate-800 text-transparent'}">
+                                    <i class="fa-solid ${c.icon} ${c.flipped || c.matched ? 'opacity-100' : 'opacity-0'}"></i>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                this.container.querySelectorAll('[data-id]').forEach(btn => btn.onclick = () => this.flip(parseInt(btn.dataset.id)));
+            }
+            flip(id) {
+                const card = this.cards.find(c => c.id === id);
+                if (!card || card.flipped || card.matched || this.selected.length >= 2) return;
+                card.flipped = true; this.selected.push(card); AudioFX.playClick(); this.render();
+                if (this.selected.length === 2) {
+                    this.moves++;
+                    const [a, b] = this.selected;
+                    if (a.icon === b.icon) {
+                        a.matched = b.matched = true; this.selected = []; AudioFX.playSuccess(); this.render();
+                        if (this.cards.every(c => c.matched)) {
+                            setHighScore('memory', Math.max(100 - this.moves, 10));
+                            showResultModal('Memory Master!', `Cleared in ${this.moves} flips!`, true, () => this.init());
+                        }
+                    } else {
+                        setTimeout(() => { a.flipped = b.flipped = false; this.selected = []; AudioFX.playError(); this.render(); }, 800);
+                    }
+                }
+            }
+        }
+
+        // 5. CONNECT FOUR
+        class Connect4Game {
+            constructor(c) { this.container = c; this.init(); }
+            init() {
+                this.board = Array(6).fill(0).map(() => Array(7).fill(0));
+                this.turn = 1; this.render();
+            }
+            render() {
+                this.container.innerHTML = `
+                    <div class="flex flex-col items-center max-w-md w-full">
+                        <div class="mb-3 text-xs font-semibold text-slate-400">Turn: <span class="${this.turn===1?'text-cyan-400':'text-amber-400'}">${this.turn===1?'Player (Cyan)':'AI (Amber)'}</span></div>
+                        <div class="grid grid-cols-7 gap-2 bg-slate-900 p-3 rounded-2xl border border-slate-800 w-full">
+                            ${Array(7).fill(0).map((_, col) => `
+                                <button data-col="${col}" class="flex flex-col gap-2 group">
+                                    ${Array(6).fill(0).map((_, row) => {
+                                        const v = this.board[row][col];
+                                        let bg = 'bg-slate-950';
+                                        if (v === 1) bg = 'bg-cyan-400';
+                                        if (v === 2) bg = 'bg-amber-400';
+                                        return `<div class="w-full aspect-square rounded-full border-2 border-slate-800 ${bg}"></div>`;
+                                    }).join('')}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                this.container.querySelectorAll('[data-col]').forEach(btn => btn.onclick = () => this.drop(parseInt(btn.dataset.col)));
+            }
+            drop(col) {
+                if (this.turn !== 1) return;
+                for (let r = 5; r >= 0; r--) {
+                    if (this.board[r][col] === 0) {
+                        this.board[r][col] = 1; AudioFX.playMove(); this.turn = 2; this.render();
+                        setTimeout(() => this.aiDrop(), 400);
+                        return;
+                    }
+                }
+            }
+            aiDrop() {
+                const cols = [];
+                for (let c = 0; c < 7; c++) if (this.board[0][c] === 0) cols.push(c);
+                if (cols.length > 0) {
+                    const col = cols[Math.floor(Math.random() * cols.length)];
+                    for (let r = 5; r >= 0; r--) {
+                        if (this.board[r][col] === 0) {
+                            this.board[r][col] = 2; AudioFX.playMove(); this.turn = 1; this.render();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 6. MINESWEEPER
+        class MinesweeperGame {
+            constructor(c) { this.container = c; this.size = 8; this.init(); }
+            init() {
+                this.grid = Array(this.size).fill(0).map(() => Array(this.size).fill(0).map(() => ({ mine: Math.random() < 0.15, revealed: false, flagged: false })));
+                this.render();
+            }
+            render() {
+                this.container.innerHTML = `
+                    <div class="flex flex-col items-center max-w-md w-full">
+                        <div class="grid grid-cols-8 gap-1.5 bg-slate-900 p-3 rounded-2xl border border-slate-800 w-full aspect-square">
+                            ${this.grid.map((row, r) => row.map((cell, c) => `
+                                <button data-r="${r}" data-c="${c}" class="${cell.revealed ? 'bg-slate-950' : 'bg-slate-800 hover:bg-slate-700'} rounded-lg font-bold flex items-center justify-center select-none text-sm">
+                                    ${cell.revealed ? (cell.mine ? '<i class="fa-solid fa-bomb text-rose-500"></i>' : '') : (cell.flagged ? '<i class="fa-solid fa-flag text-amber-400"></i>' : '')}
+                                </button>
+                            `).join('')).join('')}
+                        </div>
+                    </div>
+                `;
+                this.container.querySelectorAll('[data-r]').forEach(btn => {
+                    btn.onclick = () => this.click(parseInt(btn.dataset.r), parseInt(btn.dataset.c));
+                    btn.oncontextmenu = (e) => { e.preventDefault(); this.flag(parseInt(btn.dataset.r), parseInt(btn.dataset.c)); };
+                });
+            }
+            click(r, c) {
+                const cell = this.grid[r][c];
+                if (cell.flagged || cell.revealed) return;
+                cell.revealed = true;
+                if (cell.mine) { AudioFX.playError(); showResultModal('BOOM!', 'You clicked a mine.', false, () => this.init()); }
+                else { AudioFX.playClick(); }
+                this.render();
+            }
+            flag(r, c) { if (!this.grid[r][c].revealed) { this.grid[r][c].flagged = !this.grid[r][c].flagged; AudioFX.playMove(); this.render(); } }
+        }
+
+        // 7. TIC-TAC-TOE
+        class TicTacToeGame {
+            constructor(c) { this.container = c; this.init(); }
+            init() { this.board = Array(9).fill(''); this.active = true; this.render(); }
+            render() {
+                this.container.innerHTML = `
+                    <div class="flex flex-col items-center max-w-sm w-full">
+                        <div class="grid grid-cols-3 gap-3 w-full aspect-square bg-slate-900 p-3 rounded-2xl border border-slate-800">
+                            ${this.board.map((val, idx) => `
+                                <button data-idx="${idx}" class="bg-slate-800 rounded-xl text-5xl font-extrabold flex items-center justify-center ${val==='X'?'text-cyan-400':'text-amber-400'}">${val}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                this.container.querySelectorAll('[data-idx]').forEach(btn => btn.onclick = () => this.move(parseInt(btn.dataset.idx)));
+            }
+            move(idx) {
+                if (!this.active || this.board[idx] !== '') return;
+                this.board[idx] = 'X'; AudioFX.playMove(); this.render();
+                if (this.checkWin('X')) { showResultModal('Victory!', 'You beat AI!', true, () => this.init()); return; }
+                setTimeout(() => {
+                    const empty = this.board.map((v, i) => v === '' ? i : null).filter(v => v !== null);
+                    if (empty.length > 0) {
+                        this.board[empty[Math.floor(Math.random() * empty.length)]] = 'O';
+                        AudioFX.playMove(); this.render();
+                    }
+                }, 300);
+            }
+            checkWin(p) {
+                const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+                return wins.some(w => w.every(idx => this.board[idx] === p));
+            }
+        }
+
+        // 8. WORD SCRAMBLE
+        class WordScrambleGame {
+            constructor(c) { this.container = c; this.init(); }
+            init() {
+                const words = ['BRAIN', 'PUZZLE', 'LOGIC', 'THINK', 'SOLVE'];
+                this.target = words[Math.floor(Math.random() * words.length)];
+                this.scrambled = this.target.split('').sort(() => Math.random() - 0.5).join('');
+                this.render();
+            }
+            render() {
+                this.container.innerHTML = `
+                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-sm w-full text-center">
+                        <span class="text-xs text-slate-400 uppercase font-bold">Unscramble</span>
+                        <div class="text-4xl font-mono font-black text-cyan-400 my-4">${this.scrambled}</div>
+                        <form id="scrambleForm" class="flex gap-2">
+                            <input type="text" id="scrambleInput" autocomplete="off" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 font-mono uppercase text-white font-bold" />
+                            <button type="submit" class="px-4 bg-cyan-500 font-bold text-slate-950 rounded-xl">Submit</button>
+                        </form>
+                    </div>
+                `;
+                document.getElementById('scrambleForm').onsubmit = (e) => {
+                    e.preventDefault();
+                    if (document.getElementById('scrambleInput').value.trim().toUpperCase() === this.target) {
+                        AudioFX.playSuccess(); showResultModal('Correct!', `Target: ${this.target}`, true, () => this.init());
+                    } else { AudioFX.playError(); }
+                };
+            }
+        }
+
+        // 9. WORD GUESS
+        class WordGuessGame {
+            constructor(c) { this.container = c; this.init(); }
+            init() { this.target = 'LOGIC'; this.current = ''; this.render(); this.bind(); }
+            bind() {
+                this.fn = (e) => {
+                    if (e.key === 'Enter' && this.current.length === 5) {
+                        if (this.current === this.target) { AudioFX.playSuccess(); showResultModal('Guessed!', 'Correct 5-letter word!', true, () => this.init()); }
+                    } else if (e.key === 'Backspace') { this.current = this.current.slice(0, -1); this.render(); }
+                    else if (/^[a-zA-Z]$/.test(e.key) && this.current.length < 5) { this.current += e.key.toUpperCase(); this.render(); }
+                };
+                window.removeEventListener('keydown', this.fn); window.addEventListener('keydown', this.fn);
+            }
+            render() {
+                this.container.innerHTML = `
+                    <div class="flex gap-2 max-w-xs">
+                        ${Array(5).fill(0).map((_, i) => `<div class="w-12 h-12 rounded-xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center font-bold text-xl">${this.current[i] || ''}</div>`).join('')}
+                    </div>
+                `;
+            }
+        }
+
+        // 10. SIMON SAYS
+        class SimonGame {
+            constructor(c) { this.container = c; this.init(); }
+            init() { this.seq = []; this.step = 0; this.render(); this.next(); }
+            next() { this.seq.push(Math.floor(Math.random() * 4)); this.step = 0; this.playSeq(); }
+            playSeq() {
+                let i = 0;
+                const timer = setInterval(() => {
+                    AudioFX.playTone(300 + this.seq[i] * 100);
+                    i++; if (i >= this.seq.length) clearInterval(timer);
+                }, 500);
+            }
+            render() {
+                this.container.innerHTML = `
+                    <div class="grid grid-cols-2 gap-4 max-w-xs w-full aspect-square">
+                        ${[0,1,2,3].map(i => `<button data-idx="${i}" class="bg-slate-800 border border-slate-700 rounded-2xl"></button>`).join('')}
+                    </div>
+                `;
+                this.container.querySelectorAll('[data-idx]').forEach(b => b.onclick = () => {
+                    AudioFX.playTone(300 + parseInt(b.dataset.idx) * 100);
+                    this.next();
+                });
+            }
+        }
+
+        // 11. PATTERN PUZZLE
+        class PatternPuzzleGame {
+            constructor(c) { this.container = c; this.init(); }
+            init() { this.pattern = [1, 4, 7]; this.user = []; this.render(); }
+            render() {
+                this.container.innerHTML = `
+                    <div class="grid grid-cols-3 gap-3 max-w-xs w-full aspect-square bg-slate-900 p-3 rounded-2xl border border-slate-800">
+                        ${Array(9).fill(0).map((_, i) => `<button data-i="${i}" class="bg-slate-800 rounded-xl"></button>`).join('')}
+                    </div>
+                `;
+                this.container.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { AudioFX.playClick(); showResultModal('Pattern Complete!', 'Visual memory verified.', true, () => this.init()); });
+            }
+        }
+
+        // 12. MATH CHALLENGE
+        class MathChallengeGame {
+            constructor(c) { this.container = c; this.init(); }
+            init() { this.a = 7; this.b = 8; this.ans = 56; this.render(); }
+            render() {
+                this.container.innerHTML = `
+                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-sm w-full text-center">
+                        <div class="text-4xl font-mono font-bold text-white mb-4">${this.a} × ${this.b} = ?</div>
+                        <form id="mathF" class="flex gap-2">
+                            <input type="number" id="mathI" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 font-mono text-white text-xl" />
+                            <button class="px-4 bg-cyan-500 font-bold text-slate-950 rounded-xl">OK</button>
+                        </form>
+                    </div>
+                `;
+                document.getElementById('mathF').onsubmit = (e) => {
+                    e.preventDefault();
+                    if (parseInt(document.getElementById('mathI').value, 10) === this.ans) {
+                        AudioFX.playSuccess(); showResultModal('Math Master!', 'Correct equation solve!', true, () => this.init());
+                    } else { AudioFX.playError(); }
+                };
+            }
+        }
+
+        // 13. WORD SEARCH
+        class WordSearchGame {
+            constructor(c) { this.container = c; this.init(); }
+            init() { this.render(); }
+            render() {
+                this.container.innerHTML = `
+                    <div class="grid grid-cols-5 gap-2 bg-slate-900 p-3 rounded-2xl border border-slate-800 max-w-xs w-full">
+                        ${'BRAINLOGICSMART'.split('').map(ch => `<button class="bg-slate-800 rounded-lg h-10 font-bold font-mono text-white">${ch}</button>`).join('')}
+                    </div>
+                `;
+                this.container.querySelectorAll('button').forEach(b => b.onclick = () => { AudioFX.playClick(); showResultModal('Word Found!', 'Grid completed.', true, () => this.init()); });
+            }
+        }
+
+        // 14. LIGHTS OUT
+        class LightsOutGame {
+            constructor(c) { this.container = c; this.init(); }
+            init() { this.grid = Array(9).fill(true); this.render(); }
+            render() {
+                this.container.innerHTML = `
+                    <div class="grid grid-cols-3 gap-3 max-w-xs w-full aspect-square bg-slate-900 p-3 rounded-2xl border border-slate-800">
+                        ${this.grid.map((on, i) => `<button data-i="${i}" class="${on ? 'bg-amber-400' : 'bg-slate-800'} rounded-xl transition-all"></button>`).join('')}
+                    </div>
+                `;
+                this.container.querySelectorAll('[data-i]').forEach(b => b.onclick = () => {
+                    const idx = parseInt(b.dataset.i);
+                    this.grid[idx] = !this.grid[idx];
+                    AudioFX.playClick(); this.render();
+                });
+            }
+        }
+
+        // 15. NUMBER MEMORY
+        class NumberMemoryGame {
+            constructor(c) { this.container = c; this.init(); }
+            init() { this.num = '8492'; this.show = true; this.render(); setTimeout(() => { this.show = false; this.render(); }, 1500); }
+            render() {
+                if (this.show) {
+                    this.container.innerHTML = `<div class="text-5xl font-mono font-bold text-cyan-400">${this.num}</div>`;
+                } else {
+                    this.container.innerHTML = `
+                        <form id="numF" class="flex flex-col gap-3 max-w-xs w-full">
+                            <input type="number" id="numI" class="bg-slate-950 border border-slate-700 rounded-xl p-3 font-mono text-2xl text-center text-white" />
+                            <button class="py-2 bg-cyan-500 font-bold text-slate-950 rounded-xl">Submit</button>
+                        </form>
+                    `;
+                    document.getElementById('numF').onsubmit = (e) => {
+                        e.preventDefault();
+                        if (document.getElementById('numI').value === this.num) { AudioFX.playSuccess(); showResultModal('Recall Success!', 'Memory verified.', true, () => this.init()); }
+                        else { AudioFX.playError(); }
+                    };
+                }
+            }
+        }
+
+        // Initialize Standalone Page
+        window.addEventListener('DOMContentLoaded', renderGrid);
+    </script>
+</body>
+</html>

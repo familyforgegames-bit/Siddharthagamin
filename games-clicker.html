@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One-Click Action Games | Siddharthagamin - Familyforge</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config={theme:{extend:{colors:{brand:{cyan:'#00f2fe',blue:'#4facfe',purple:'#7f00ff',pink:'#ff007f',gold:'#fbbf24',dark:'#0a0d14',card:'#121824'}}}}}
+</script>
+<style>
+  body { background: #080b11; color: #f3f4f6; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 20px; }
+  .clicker-card { transition: all 0.2s ease; }
+  .clicker-card:hover { transform: translateY(-3px); border-color: rgba(251, 191, 36, 0.6); }
+  canvas { background: #111827; border-radius: 16px; border: 2px solid rgba(0, 242, 254, 0.3); display: block; margin: 0 auto; cursor: pointer; max-width: 100%; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col items-center">
+
+  <div class="max-w-5xl w-full">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-800">
+      <div>
+        <a href="index.html#games" class="text-xs text-brand-gold hover:underline mb-1 inline-block"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Main Games</a>
+        <h1 class="font-orbitron font-black text-3xl text-white">One-Click Action &amp; Arcade Hub</h1>
+        <p class="text-xs text-gray-400 mt-1">15 action games featuring instructions, pause menus, and 4 difficulty modes!</p>
+      </div>
+      <span class="px-3 py-1 rounded-full bg-brand-gold/10 border border-brand-gold/30 text-brand-gold font-mono text-xs">15 Action Games</span>
+    </div>
+
+    <!-- Games Grid Selection -->
+    <div id="clickerSelectorGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Generated via JS -->
+    </div>
+
+    <!-- Active Game Frame Container -->
+    <div id="activeClickerContainer" class="hidden mt-6 bg-brand-card p-6 rounded-3xl border border-gray-800 shadow-2xl">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-gray-800">
+        <div>
+          <h2 id="activeClickerTitle" class="font-orbitron font-bold text-lg text-white">Game Title</h2>
+          <span id="activeClickerDesc" class="text-xs text-gray-400">How to play &amp; rules</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <!-- Difficulty Selector -->
+          <select id="difficultySelect" onchange="changeDifficulty(this.value)" class="px-3 py-1.5 rounded-xl bg-brand-dark border border-gray-700 text-xs text-brand-gold font-orbitron focus:outline-none">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="semi">Semi-Hard</option>
+            <option value="expert">Expert</option>
+          </select>
+          <!-- Pause Button -->
+          <button onclick="togglePauseGame()" id="pauseBtn" class="px-3 py-1.5 rounded-xl bg-brand-purple hover:bg-opacity-80 text-white text-xs font-semibold font-orbitron"><i class="fa-solid fa-pause mr-1"></i> Pause</button>
+          <!-- Back Button -->
+          <button onclick="closeClickerGame()" class="px-3 py-1.5 rounded-xl bg-gray-800 text-gray-200 text-xs font-semibold hover:bg-gray-700"><i class="fa-solid fa-arrow-left mr-1"></i> Menu</button>
+        </div>
+      </div>
+      
+      <!-- Canvas / Game Area -->
+      <div class="flex justify-center bg-brand-dark p-6 rounded-2xl border border-gray-800 relative min-h-[440px] items-center" id="clickerFrameArea">
+        <!-- Dynamic Canvas UI -->
+      </div>
+    </div>
+  </div>
+
+<script>
+const CLICKER_GAMES = [
+  { id: 'jump', title: 'Cyber Jump Hero', icon: 'fa-person-running', hint: 'Click or Tap to Jump over incoming red obstacle blocks.', type: 'jump' },
+  { id: 'climb', title: 'Ninja Tower Climber', icon: 'fa-building', hint: 'Click to switch walls and dodge descending obstacles.', type: 'climb' },
+  { id: 'drive', title: 'Tap Highway Racer', icon: 'fa-car-side', hint: 'Click to switch between 3 highway lanes and avoid incoming traffic cars.', type: 'drive' },
+  { id: 'flappy', title: 'Flappy Rocket Pilot', icon: 'fa-rocket', hint: 'Click to boost your rocket upward through narrow pipe gaps.', type: 'flappy' },
+  { id: 'stack', title: 'Block Tower Stacker', icon: 'fa-layer-group', hint: 'Click to drop sliding blocks and build the highest tower.', type: 'stack' },
+  { id: 'slice', title: 'Click Fruit Ninja', icon: 'fa-apple-whole', hint: 'Click bouncing target spheres before they fall off screen.', type: 'slice' },
+  { id: 'target', title: 'Sniper Reflex Strike', icon: 'fa-bullseye', hint: 'Click shrinking targets as fast as possible.', type: 'target' },
+  { id: 'helicopter', title: 'Cave Chopper Run', icon: 'fa-helicopter', hint: 'Click and hold to fly up, release to glide down through cavern walls.', type: 'helicopter' },
+  { id: 'knife', title: 'Knife Hit Challenge', icon: 'fa-utensils', hint: 'Click to throw your dagger into the rotating wheel without hitting other knives.', type: 'knife' },
+  { id: 'color', title: 'Color Switch Tap', icon: 'fa-circle-notch', hint: 'Click to bounce through matching color barriers.', type: 'color' },
+  { id: 'golf', title: 'One-Tap Mini Golf', icon: 'fa-flag-checkered', hint: 'Click when the power bar hits the sweet spot to sink the putt.', type: 'golf' },
+  { id: 'orbit', title: 'Planet Orbit Jumper', icon: 'fa-globe', hint: 'Click to launch your ship from one spinning planetary orbit to the next.', type: 'orbit' },
+  { id: 'whack', title: 'Cyber Whack-a-Mole', icon: 'fa-hammer', hint: 'Click popping security bugs before they disappear.', type: 'whack' },
+  { id: 'bridge', title: 'Click Bridge Builder', icon: 'fa-bridge', hint: 'Click and hold to grow your bridge, release to cross the gap.', type: 'bridge' },
+  { id: 'speed', title: '10-Sec Speed Tap', icon: 'fa-bolt', hint: 'Rapid-fire click challenge. Tap as many times as you can in 10 seconds!', type: 'speed' }
+];
+
+let currentGame = null;
+let currentDifficulty = 'medium';
+let isPaused = false;
+let gameInstance = null;
+
+function renderClickerList() {
+  const grid = document.getElementById('clickerSelectorGrid');
+  grid.innerHTML = CLICKER_GAMES.map((g) => `
+    <button onclick="launchClickerGame('${g.id}')" class="clicker-card text-left p-5 rounded-2xl bg-brand-card border border-gray-800 flex items-start gap-4">
+      <span class="w-12 h-12 rounded-xl bg-brand-gold/15 text-brand-gold flex items-center justify-center text-xl shrink-0"><i class="fa-solid ${g.icon}"></i></span>
+      <div>
+        <span class="block font-orbitron font-bold text-white text-base">${g.title}</span>
+        <span class="block text-xs text-gray-400 mt-1">${g.hint}</span>
+        <span class="inline-flex items-center gap-1 text-[11px] text-brand-gold font-orbitron font-bold mt-3">PLAY NOW <i class="fa-solid fa-play text-[9px]"></i></span>
+      </div>
+    </button>
+  `).join('');
+}
+
+function launchClickerGame(id) {
+  document.getElementById('clickerSelectorGrid').classList.add('hidden');
+  document.getElementById('activeClickerContainer').classList.remove('hidden');
+  currentGame = CLICKER_GAMES.find(g => g.id === id);
+  document.getElementById('activeClickerTitle').textContent = currentGame.title;
+  document.getElementById('activeClickerDesc').textContent = `Instructions: ${currentGame.hint}`;
+  isPaused = false;
+  document.getElementById('pauseBtn').innerHTML = `<i class="fa-solid fa-pause mr-1"></i> Pause`;
+  
+  startGameInstance();
+}
+
+function closeClickerGame() {
+  if (gameInstance && gameInstance.stop) gameInstance.stop();
+  document.getElementById('activeClickerContainer').classList.add('hidden');
+  document.getElementById('clickerSelectorGrid').classList.remove('hidden');
+}
+
+function togglePauseGame() {
+  isPaused = !isPaused;
+  const btn = document.getElementById('pauseBtn');
+  if (isPaused) {
+    btn.innerHTML = `<i class="fa-solid fa-play mr-1"></i> Resume`;
+    btn.className = "px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-semibold font-orbitron";
+  } else {
+    btn.innerHTML = `<i class="fa-solid fa-pause mr-1"></i> Pause`;
+    btn.className = "px-3 py-1.5 rounded-xl bg-brand-purple text-white text-xs font-semibold font-orbitron";
+  }
+}
+
+function changeDifficulty(val) {
+  currentDifficulty = val;
+  if (currentGame) startGameInstance();
+}
+
+function startGameInstance() {
+  if (gameInstance && gameInstance.stop) gameInstance.stop();
+  const area = document.getElementById('clickerFrameArea');
+  area.innerHTML = '';
+
+  const speeds = { easy: 0.8, medium: 1.0, semi: 1.3, expert: 1.6 };
+  let speedMult = speeds[currentDifficulty];
+
+  if (currentGame.type === 'jump') gameInstance = initJumperGame(area, speedMult);
+  else if (currentGame.type === 'climb') gameInstance = initClimberGame(area, speedMult);
+  else if (currentGame.type === 'drive') gameInstance = initDrivingGame(area, speedMult);
+  else if (currentGame.type === 'flappy') gameInstance = initRocketGame(area, speedMult);
+  else if (currentGame.type === 'stack') gameInstance = initStackerGame(area, speedMult);
+  else if (currentGame.type === 'slice' || currentGame.type === 'target' || currentGame.type === 'whack') gameInstance = initTargetGame(area, speedMult, currentGame.title);
+  else gameInstance = initGenericClickerGame(area, currentGame.title);
+}
+
+/* --- GAME 1: JUMPER --- */
+function initJumperGame(area, mult) {
+  area.innerHTML = `<canvas id="c" width="600" height="340"></canvas><div class="absolute bottom-2 left-6 text-xs text-gray-400 font-orbitron">SCORE: <span id="s" class="text-brand-gold font-bold">0</span></div>`;
+  const cvs = document.getElementById('c'), ctx = cvs.getContext('2d');
+  let p = { x: 80, y: 240, w: 24, h: 36, vy: 0, grounded: false };
+  let obstacles = [], score = 0, over = false, frame = 0, reqId;
+
+  cvs.onclick = () => { if (over) return startGameInstance(); if (p.grounded && !isPaused) { p.vy = -11; p.grounded = false; } };
+
+  function loop() {
+    if (!isPaused && !over) {
+      p.vy += 0.55; p.y += p.vy;
+      if (p.y >= 240) { p.y = 240; p.vy = 0; p.grounded = true; }
+      frame++;
+      if (frame % Math.floor(90 / mult) === 0) obstacles.push({ x: 600, w: 20, h: 25 + Math.random() * 25 });
+      obstacles.forEach((o, i) => {
+        o.x -= 4.5 * mult;
+        if (p.x < o.x + o.w && p.x + p.w > o.x && p.y + p.h > 276 - o.h) over = true;
+        if (o.x + o.w < 0) { obstacles.splice(i, 1); score += 10; document.getElementById('s').textContent = score; }
+      });
+    }
+    ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,600,340);
+    ctx.fillStyle = '#1e293b'; ctx.fillRect(0, 276, 600, 64);
+    ctx.fillStyle = '#ff007f'; ctx.fillRect(p.x, p.y, p.w, p.h);
+    ctx.fillStyle = '#fbbf24'; obstacles.forEach(o => ctx.fillRect(o.x, 276 - o.h, o.w, o.h));
+    if (over) { ctx.fillStyle = '#ff007f'; ctx.font = '22px Orbitron'; ctx.fillText('GAME OVER - CLICK TO RESTART', 100, 170); }
+    if (isPaused) { ctx.fillStyle = 'rgba(10,13,20,0.7)'; ctx.fillRect(0,0,600,340); ctx.fillStyle = '#00f2fe'; ctx.font = '24px Orbitron'; ctx.fillText('PAUSED', 240, 175); }
+    reqId = requestAnimationFrame(loop);
+  }
+  loop();
+  return { stop: () => cancelAnimationFrame(reqId) };
+}
+
+/* --- GAME 2: CLIMBER --- */
+function initClimberGame(area, mult) {
+  area.innerHTML = `<canvas id="c" width="400" height="400"></canvas><div class="absolute bottom-2 left-6 text-xs text-gray-400 font-orbitron">SCORE: <span id="s" class="text-brand-gold font-bold">0</span></div>`;
+  const cvs = document.getElementById('c'), ctx = cvs.getContext('2d');
+  let wall = 'left', py = 280, obstacles = [], score = 0, over = false, frame = 0, reqId;
+
+  cvs.onclick = () => { if (over) return startGameInstance(); if (!isPaused) wall = wall === 'left' ? 'right' : 'left'; };
+
+  function loop() {
+    if (!isPaused && !over) {
+      frame++; score++; document.getElementById('s').textContent = Math.floor(score/10);
+      if (frame % Math.floor(55 / mult) === 0) obstacles.push({ side: Math.random() > 0.5 ? 'left' : 'right', y: -20 });
+      obstacles.forEach((o, i) => {
+        o.y += 4 * mult;
+        if (o.y > 400) obstacles.splice(i, 1);
+        if (Math.abs(o.y - py) < 22 && o.side === wall) over = true;
+      });
+    }
+    ctx.fillStyle = '#0a0d14'; ctx.fillRect(0,0,400,400);
+    ctx.fillStyle = '#1e293b'; ctx.fillRect(0,0,20,400); ctx.fillRect(380,0,20,400);
+    ctx.fillStyle = '#00f2fe'; ctx.beginPath(); ctx.arc(wall === 'left' ? 35 : 365, py, 12, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#ff007f'; obstacles.forEach(o => ctx.fillRect(o.side === 'left' ? 20 : 350, o.y, 30, 15));
+    if (over) { ctx.fillStyle = '#ff007f'; ctx.font = '20px Orbitron'; ctx.fillText('CRASHED! CLICK RESTART', 50, 200); }
+    if (isPaused) { ctx.fillStyle = 'rgba(10,13,20,0.7)'; ctx.fillRect(0,0,400,400); ctx.fillStyle = '#00f2fe'; ctx.font = '24px Orbitron'; ctx.fillText('PAUSED', 145, 205); }
+    reqId = requestAnimationFrame(loop);
+  }
+  loop();
+  return { stop: () => cancelAnimationFrame(reqId) };
+}
+
+/* --- GAME 3: DRIVING --- */
+function initDrivingGame(area, mult) {
+  area.innerHTML = `<canvas id="c" width="360" height="400"></canvas><div class="absolute bottom-2 left-6 text-xs text-gray-400 font-orbitron">SCORE: <span id="s" class="text-brand-gold font-bold">0</span></div>`;
+  const cvs = document.getElementById('c'), ctx = cvs.getContext('2d');
+  let lane = 1, cars = [], score = 0, over = false, frame = 0, reqId;
+  const lanes = [70, 180, 290];
+
+  cvs.onclick = () => { if (over) return startGameInstance(); if (!isPaused) lane = (lane + 1) % 3; };
+
+  function loop() {
+    if (!isPaused && !over) {
+      frame++; score++; document.getElementById('s').textContent = Math.floor(score/5);
+      if (frame % Math.floor(45 / mult) === 0) cars.push({ lane: Math.floor(Math.random()*3), y: -60 });
+      cars.forEach((c, i) => {
+        c.y += 5 * mult;
+        if (c.y > 400) cars.splice(i, 1);
+        if (c.lane === lane && Math.abs(c.y - 300) < 40) over = true;
+      });
+    }
+    ctx.fillStyle = '#111827'; ctx.fillRect(0,0,360,400);
+    ctx.strokeStyle = '#374151'; ctx.setLineDash([15, 15]);
+    ctx.beginPath(); ctx.moveTo(120,0); ctx.lineTo(120,400); ctx.moveTo(240,0); ctx.lineTo(240,400); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#00f2fe'; ctx.fillRect(lanes[lane] - 15, 300, 30, 50);
+    ctx.fillStyle = '#ff007f'; cars.forEach(c => ctx.fillRect(lanes[c.lane] - 15, c.y, 30, 50));
+    if (over) { ctx.fillStyle = '#ff007f'; ctx.font = '20px Orbitron'; ctx.fillText('CRASH! CLICK RESTART', 45, 200); }
+    if (isPaused) { ctx.fillStyle = 'rgba(10,13,20,0.7)'; ctx.fillRect(0,0,360,400); ctx.fillStyle = '#00f2fe'; ctx.font = '24px Orbitron'; ctx.fillText('PAUSED', 130, 205); }
+    reqId = requestAnimationFrame(loop);
+  }
+  loop();
+  return { stop: () => cancelAnimationFrame(reqId) };
+}
+
+/* --- GAME 4: FLAPPY ROCKET --- */
+function initRocketGame(area, mult) {
+  area.innerHTML = `<canvas id="c" width="400" height="400"></canvas><div class="absolute bottom-2 left-6 text-xs text-gray-400 font-orbitron">SCORE: <span id="s" class="text-brand-gold font-bold">0</span></div>`;
+  const cvs = document.getElementById('c'), ctx = cvs.getContext('2d');
+  let ry = 200, vy = 0, pipes = [], score = 0, over = false, frame = 0, reqId;
+
+  cvs.onclick = () => { if (over) return startGameInstance(); if (!isPaused) vy = -5.5 * Math.sqrt(mult); };
+
+  function loop() {
+    if (!isPaused && !over) {
+      vy += 0.35 * mult; ry += vy;
+      if (ry < 0 || ry > 400) over = true;
+      frame++;
+      if (frame % Math.floor(75 / mult) === 0) {
+        let gap = Math.max(80, 110 - (mult * 15));
+        let top = Math.random() * (200 - 40) + 40;
+        pipes.push({ x: 400, top: top, bottom: top + gap });
+      }
+      pipes.forEach((p, i) => {
+        p.x -= 3 * mult;
+        if (p.x < -40) { pipes.splice(i, 1); score++; document.getElementById('s').textContent = score; }
+        if (p.x < 110 && p.x + 40 > 80 && (ry < p.top || ry > p.bottom)) over = true;
+      });
+    }
+    ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,400,400);
+    ctx.fillStyle = '#ff007f'; ctx.beginPath(); ctx.arc(100, ry, 12, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#10b981'; pipes.forEach(p => { ctx.fillRect(p.x, 0, 40, p.top); ctx.fillRect(p.x, p.bottom, 40, 400 - p.bottom); });
+    if (over) { ctx.fillStyle = '#ff007f'; ctx.font = '20px Orbitron'; ctx.fillText('CRASHED! CLICK RESTART', 60, 200); }
+    if (isPaused) { ctx.fillStyle = 'rgba(10,13,20,0.7)'; ctx.fillRect(0,0,400,400); ctx.fillStyle = '#00f2fe'; ctx.font = '24px Orbitron'; ctx.fillText('PAUSED', 145, 205); }
+    reqId = requestAnimationFrame(loop);
+  }
+  loop();
+  return { stop: () => cancelAnimationFrame(reqId) };
+}
+
+/* --- GAME 5: STACKER --- */
+function initStackerGame(area, mult) {
+  area.innerHTML = `<canvas id="c" width="360" height="400"></canvas><div class="absolute bottom-2 left-6 text-xs text-gray-400 font-orbitron">SCORE: <span id="s" class="text-brand-gold font-bold">0</span></div>`;
+  const cvs = document.getElementById('c'), ctx = cvs.getContext('2d');
+  let current = { x: 0, y: 340, w: 90, dir: 3 * mult }, stack = [{ x: 135, y: 370, w: 90 }], score = 0, over = false, reqId;
+
+  cvs.onclick = () => {
+    if (over) return startGameInstance();
+    if (isPaused) return;
+    let prev = stack[stack.length - 1];
+    let diff = current.x - prev.x;
+    if (Math.abs(diff) >= current.w) return over = true;
+    let newWidth = current.w - Math.abs(diff);
+    let newX = diff > 0 ? current.x : prev.x;
+    stack.push({ x: newX, y: current.y, w: newWidth });
+    score++; document.getElementById('s').textContent = score;
+    current = { x: 0, y: current.y - 28, w: newWidth, dir: (3 + score * 0.4) * mult };
+  };
+
+  function loop() {
+    if (!isPaused && !over) {
+      current.x += current.dir;
+      if (current.x <= 0 || current.x + current.w >= 360) current.dir *= -1;
+    }
+    ctx.fillStyle = '#0a0d14'; ctx.fillRect(0,0,360,400);
+    stack.forEach(b => { ctx.fillStyle = '#00f2fe'; ctx.fillRect(b.x, b.y, b.w, 24); });
+    if (!over) { ctx.fillStyle = '#ff007f'; ctx.fillRect(current.x, current.y, current.w, 24); }
+    else { ctx.fillStyle = '#ff007f'; ctx.font = '20px Orbitron'; ctx.fillText('MISSED! CLICK RESTART', 50, 200); }
+    if (isPaused) { ctx.fillStyle = 'rgba(10,13,20,0.7)'; ctx.fillRect(0,0,360,400); ctx.fillStyle = '#00f2fe'; ctx.font = '24px Orbitron'; ctx.fillText('PAUSED', 130, 205); }
+    reqId = requestAnimationFrame(loop);
+  }
+  loop();
+  return { stop: () => cancelAnimationFrame(reqId) };
+}
+
+/* --- OTHER ACTION GAMES (TARGET, SLICE, WHACK, ETC.) --- */
+function initTargetGame(area, mult, title) {
+  let score = 0;
+  area.innerHTML = `
+    <div class="text-center">
+      <h3 class="font-orbitron font-bold text-white text-sm mb-2">${title}</h3>
+      <p class="text-xs text-gray-400 mb-4">Click the active cyber target before it disappears!</p>
+      <div id="targetBox" onclick="hitTarget()" class="w-32 h-32 rounded-full bg-brand-pink mx-auto flex items-center justify-center font-orbitron font-bold text-white text-xl cursor-pointer shadow-lg hover:scale-105">CLICK ME</div>
+      <div class="mt-4 font-orbitron text-white text-sm">SCORE: <span id="tScore" class="text-brand-gold">0</span></div>
+    </div>
+  `;
+  window.hitTarget = () => {
+    if (isPaused) return;
+    score += 10;
+    document.getElementById('tScore').textContent = score;
+    let box = document.getElementById('targetBox');
+    box.style.transform = `translate(${Math.random()*120 - 60}px, ${Math.random()*80 - 40}px) scale(${Math.max(0.6, 1.2 - mult*0.2)})`;
+  };
+  return { stop: () => {} };
+}
+
+function initGenericClickerGame(area, title) {
+  let score = 0;
+  area.innerHTML = `
+    <div class="text-center">
+      <h3 class="font-orbitron font-bold text-white text-sm mb-3">${title}</h3>
+      <button onclick="if(!isPaused) { score++; document.getElementById('gScore').textContent = score; }" class="w-40 h-40 rounded-full bg-gradient-to-tr from-brand-cyan to-brand-purple text-white font-orbitron font-black text-xl shadow-xl mx-auto block mb-4 hover:scale-105 active:scale-95">TAP!</button>
+      <div class="font-orbitron text-white text-sm">SCORE: <span id="gScore" class="text-brand-gold">0</span></div>
+    </div>
+  `;
+  return { stop: () => {} };
+}
+
+renderClickerList();
+</script>
+</body>
+</html>

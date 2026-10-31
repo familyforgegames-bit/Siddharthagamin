@@ -64,7 +64,7 @@ const LIST=[
  {id:'spell',name:'Word Builder',desc:'Build the word letter by letter',e:'📝',bg:'linear-gradient(135deg,#9d174d,#ec4899)',help:'Tap the correct next letter. Finish the word to score!'},
  {id:'shape',name:'Shape Sorter',desc:'Match shapes to their slots',e:'🔷',bg:'linear-gradient(135deg,#0e7490,#06b6d4)',help:'Tap a shape then the matching slot. Clear the board!'},
  {id:'count',name:'Counting Zoo',desc:'Count the animals correctly',e:'🦁',bg:'linear-gradient(135deg,#854d0e,#eab308)',help:'Count the animals, then tap the correct number.'},
- {id:'planet',name:'Planet Hopper',desc:'Jump to the right planet',e:'🪐',bg:'linear-gradient(135deg,#1e1b4b,#6366f1)',help:'Tap the correct planet when asked. Learn the solar system!'},
+ {id:'planet',name:'Planet Hopper',desc:'Solar system facts quiz',e:'🪐',bg:'linear-gradient(135deg,#1e1b4b,#6366f1)',help:'Read the fact, then tap the correct planet. Learn the solar system!'},
  {id:'color',name:'Color Mixer',desc:'Mix primary colors',e:'🎨',bg:'linear-gradient(135deg,#be185d,#f472b6)',help:'Tap two colors to mix. Match the target color!'},
  {id:'clock',name:'Clock Master',desc:'Read and set the time',e:'⏰',bg:'linear-gradient(135deg,#1e40af,#60a5fa)',help:'Tap the clock face that shows the correct time.'},
  {id:'frac',name:'Fraction Pizza',desc:'Choose the right slice',e:'🍕',bg:'linear-gradient(135deg,#9a3412,#fb923c)',help:'Tap the pizza that matches the fraction shown.'},
@@ -409,31 +409,65 @@ G.count={
 /* ================================================================
    8. PLANET HOPPER
    ================================================================ */
-const PLANETS=[{n:'Mercury',c:'#a8a29e',r:14},{n:'Venus',c:'#fbbf24',r:20},{n:'Earth',c:'#3b82f6',r:22},{n:'Mars',c:'#ef4444',r:18},
- {n:'Jupiter',c:'#f59e0b',r:36},{n:'Saturn',c:'#fcd34d',r:30},{n:'Uranus',c:'#67e8f9',r:24},{n:'Neptune',c:'#6366f1',r:22}];
+const PLANETS=[
+ {n:'Mercury',c:'#a8a29e',r:14},
+ {n:'Venus',c:'#fbbf24',r:20},
+ {n:'Earth',c:'#3b82f6',r:22},
+ {n:'Mars',c:'#ef4444',r:18},
+ {n:'Jupiter',c:'#f59e0b',r:36},
+ {n:'Saturn',c:'#fcd34d',r:30},
+ {n:'Uranus',c:'#67e8f9',r:24},
+ {n:'Neptune',c:'#6366f1',r:22}
+];
+// Fact questions – answer is a planet name (player must know the fact)
+const PLANET_FACTS=[
+ {q:'Which planet is closest to the Sun?',a:'Mercury'},
+ {q:'Which planet is known as the Red Planet?',a:'Mars'},
+ {q:'Which planet has famous rings?',a:'Saturn'},
+ {q:'Which is the largest planet?',a:'Jupiter'},
+ {q:'Which planet do we live on?',a:'Earth'},
+ {q:'Which planet is hottest (thick atmosphere)?',a:'Venus'},
+ {q:'Which planet is farthest from the Sun?',a:'Neptune'},
+ {q:'Which planet spins on its side?',a:'Uranus'},
+ {q:'Which planet is the smallest?',a:'Mercury'},
+ {q:'Which planet is called the Blue Planet?',a:'Earth'},
+ {q:'Which planet has the Great Red Spot?',a:'Jupiter'},
+ {q:'Which planet is 2nd from the Sun?',a:'Venus'},
+ {q:'Which planet is 4th from the Sun?',a:'Mars'},
+ {q:'Which icy giant is 7th from the Sun?',a:'Uranus'},
+ {q:'Which planet is named after the Roman god of war?',a:'Mars'},
+ {q:'Which planet is named after the king of Roman gods?',a:'Jupiter'}
+];
 G.planet={
- init(){this.lives=3;this.target=0;this.newQ();this.ang=0},
- newQ(){this.target=Math.floor(R()*PLANETS.length);this.opts=[];const s=new Set([this.target]);
-  while(s.size<4)s.add(Math.floor(R()*PLANETS.length));this.opts=[...s];this.answered=0},
+ init(){this.lives=3;this.ang=0;this.newQ()},
+ newQ(){
+  this.fact=PLANET_FACTS[Math.floor(R()*PLANET_FACTS.length)];
+  this.target=PLANETS.findIndex(p=>p.n===this.fact.a);
+  if(this.target<0)this.target=0;
+  const s=new Set([this.target]);
+  while(s.size<4)s.add(Math.floor(R()*PLANETS.length));
+  this.opts=[...s];this.answered=0;
+ },
  act(k){if(k!=='tap'||this.answered)return;
-  const n=4,bw=Math.min(140,(W-40)/2),bh=70,ox=(W-2*bw)/2,oy=H*.55;
+  const bw=Math.min(140,(W-40)/2),bh=70,ox=(W-2*bw)/2,oy=H*.55;
   this.opts.forEach((idx,i)=>{const col=i%2,row=Math.floor(i/2),x=ox+col*bw+bw/2,y=oy+row*(bh+12);
    if(Math.abs(ptr.x-x)<bw/2-8&&Math.abs(ptr.y-y)<bh/2){this.answered=1;
     if(idx===this.target){score+=15;sfx('good');boom(x,y,'#818cf8',14);setTimeout(()=>this.newQ(),450)}
     else{this.lives--;sfx('wrong');shake=6;if(this.lives<=0)end();else setTimeout(()=>{this.answered=0},350)}}})},
  update(dt){this.ang+=dt*.3},
  draw(){bg('#0f0a1e','#1e1b4b');
-  // stars
   c.fillStyle='#fff';for(let i=0;i<50;i++){c.globalAlpha=.2+((i*17)%10)/20;c.fillRect((i*89)%W,(i*53)%H,1.5,1.5)}c.globalAlpha=1;
-  // sun
-  c.fillStyle='#fde047';c.shadowColor='#fbbf24';c.shadowBlur=30;c.beginPath();c.arc(W/2,H*.22,28,0,7);c.fill();c.shadowBlur=0;
-  // orbiting planets preview
-  PLANETS.forEach((p,i)=>{const a=this.ang+i*.8,rad=50+i*9;c.fillStyle=p.c;c.beginPath();c.arc(W/2+Math.cos(a)*rad,H*.22+Math.sin(a)*rad*.4,p.r*.35,0,7);c.fill()});
-  txt('Which planet is '+PLANETS[this.target].n+'?',W/2,H*.42,18,'#c7d2fe');
+  // sun + tiny orbiting dots (decoration only)
+  c.fillStyle='#fde047';c.shadowColor='#fbbf24';c.shadowBlur=30;c.beginPath();c.arc(W/2,H*.2,26,0,7);c.fill();c.shadowBlur=0;
+  PLANETS.forEach((p,i)=>{const a=this.ang+i*.8,rad=48+i*8;c.fillStyle=p.c;c.beginPath();c.arc(W/2+Math.cos(a)*rad,H*.2+Math.sin(a)*rad*.4,p.r*.3,0,7);c.fill()});
+  // Question is a FACT – not the planet name
+  txt(this.fact.q,W/2,H*.4,17,'#c7d2fe');
   const bw=Math.min(140,(W-40)/2),bh=70,ox=(W-2*bw)/2,oy=H*.55;
   this.opts.forEach((idx,i)=>{const col=i%2,row=Math.floor(i/2),x=ox+col*bw+8,y=oy+row*(bh+12);
    roundRect(x,y,bw-16,bh,14);c.fillStyle='rgba(99,102,241,.3)';c.fill();
-   c.fillStyle=PLANETS[idx].c;c.beginPath();c.arc(x+30,y+bh/2,PLANETS[idx].r*.6,0,7);c.fill();
+   c.fillStyle=PLANETS[idx].c;c.beginPath();c.arc(x+30,y+bh/2,PLANETS[idx].r*.55,0,7);c.fill();
+   // Saturn ring hint
+   if(PLANETS[idx].n==='Saturn'){c.strokeStyle='rgba(252,211,77,.7)';c.lineWidth=2;c.beginPath();c.ellipse(x+30,y+bh/2,PLANETS[idx].r*.9,PLANETS[idx].r*.25,0,0,7);c.stroke()}
    c.fillStyle='#e0e7ff';c.font='bold 16px Segoe UI';c.textAlign='left';c.textBaseline='middle';c.fillText(PLANETS[idx].n,x+55,y+bh/2)});
   hts(this.lives,3)}
 };

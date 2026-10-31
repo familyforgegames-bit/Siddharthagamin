@@ -23,7 +23,7 @@ tailwind.config={theme:{extend:{colors:{brand:{cyan:'#00f2fe',blue:'#4facfe',pur
   .tx span { font-size: 12px; color: #9ca3af; margin-top: 4px; display: block; }
 
   #stage { display:none; height:100%; flex-direction:column; }
-  #bar { display:flex; align-items:center; justify-content:between; padding:12px 20px; background:#0a0d14; border-bottom:1px solid #1f2937; }
+  #bar { display:flex; align-items:center; justify-content:space-between; padding:12px 20px; background:#0a0d14; border-bottom:1px solid #1f2937; }
   #bar button { background:#1f2937; color:#fff; border:0; padding:8px 14px; border-radius:10px; font-size:13px; cursor:pointer; }
   #bar button:hover { background:#334155; }
 
@@ -43,7 +43,7 @@ tailwind.config={theme:{extend:{colors:{brand:{cyan:'#00f2fe',blue:'#4facfe',pur
   .pn h2 { margin:0; text-align:center; color:#ff007f; font-family:'Orbitron',sans-serif; font-size:20px; }
   .pn label { display:flex; flex-direction:column; gap:6px; font-size:13px; color:#9ca3af; }
   .pn label.ck { flex-direction:row; align-items:center; gap:8px; color:#f3f4f6; }
-  .pn input[type=range] { width:100%; accent-color:#ff007f; }
+  .pn input[type=range], .pn select { width:100%; accent-color:#ff007f; background:#0a0d14; border:1px solid #2a3446; color:#fff; padding:6px; border-radius:8px; }
   .bt { display:flex; gap:8px; flex-wrap:wrap; }
   .bt button { flex:1; }
   .pn .pri { background:linear-gradient(to right, #ff007f, #7f00ff); font-weight:700; }
@@ -65,8 +65,8 @@ tailwind.config={theme:{extend:{colors:{brand:{cyan:'#00f2fe',blue:'#4facfe',pur
     <div class="max-w-md w-full bg-brand-card border border-gray-800 rounded-3xl p-8 shadow-2xl">
       <div class="text-center mb-6">
         <span class="w-16 h-16 rounded-2xl bg-brand-pink/20 text-brand-pink flex items-center justify-center text-2xl mx-auto mb-3"><i class="fa-solid fa-gamepad"></i></span>
-        <h2 class="font-orbitron font-black text-2xl text-white">Action Player Portal</h2>
-        <p class="text-xs text-gray-400 mt-1">Enter your username and password to track individual action game scores on leaderboards.</p>
+        <h2 class="font-orbitron font-black text-2xl text-white">Action Arcade Portal</h2>
+        <p class="text-xs text-gray-400 mt-1">Register or log in to track your global high scores across all action games.</p>
       </div>
 
       <form id="authForm" onsubmit="handleAuth(event)" class="space-y-4">
@@ -84,7 +84,7 @@ tailwind.config={theme:{extend:{colors:{brand:{cyan:'#00f2fe',blue:'#4facfe',pur
           </label>
           <button type="button" onclick="toggleAuthMode()" id="authSwitchBtn" class="text-brand-pink hover:underline font-semibold">Need an account? Register</button>
         </div>
-        <button type="submit" id="authSubmitBtn" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-pink to-brand-purple text-white font-orbitron font-bold text-sm shadow-lg hover:opacity-90 transition-opacity mt-2">Login to Action Games</button>
+        <button type="submit" id="authSubmitBtn" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-pink to-brand-purple text-white font-orbitron font-bold text-sm shadow-lg hover:opacity-90 transition-opacity mt-2">Login to Arcade</button>
       </form>
     </div>
   </div>
@@ -93,8 +93,8 @@ tailwind.config={theme:{extend:{colors:{brand:{cyan:'#00f2fe',blue:'#4facfe',pur
   <div id="menu" class="p-6 max-w-7xl mx-auto w-full">
     <div class="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b border-gray-800">
       <div>
-        <h1 class="font-orbitron font-black text-3xl text-white">Action Games</h1>
-        <p class="text-xs text-gray-400 mt-1">Pick a game and play. Individual high scores and leaderboards are saved!</p>
+        <h1 class="font-orbitron font-black text-3xl text-white">Action Games Arcade</h1>
+        <p class="text-xs text-gray-400 mt-1">Pick an action game, compete globally on leaderboards, and test your skills!</p>
       </div>
       <div class="flex items-center gap-4 bg-brand-card px-4 py-2.5 rounded-2xl border border-gray-800">
         <div class="text-right">
@@ -110,9 +110,10 @@ tailwind.config={theme:{extend:{colors:{brand:{cyan:'#00f2fe',blue:'#4facfe',pur
   <!-- GAME STAGE -->
   <div id="stage">
     <div id="bar">
-      <button id="back">&larr; All Action Games</button>
-      <div class="flex items-center gap-3">
-        <span class="text-xs text-gray-400 font-mono">Logged in as: <b id="stageUser" class="text-brand-pink font-orbitron">Player</b></span>
+      <button id="back">&larr; All Arcade Games</button>
+      <div class="flex items-center gap-4">
+        <span class="text-xs text-gray-400 font-mono">Difficulty: <b id="diffDisplay" class="text-brand-gold font-orbitron uppercase">Normal</b></span>
+        <span class="text-xs text-gray-400 font-mono">Player: <b id="stageUser" class="text-brand-pink font-orbitron">Player</b></span>
       </div>
     </div>
     <div id="lay">
@@ -121,7 +122,14 @@ tailwind.config={theme:{extend:{colors:{brand:{cyan:'#00f2fe',blue:'#4facfe',pur
           <canvas id="cv"></canvas>
           <div id="pm">
             <div class="pn">
-              <h2>Paused</h2>
+              <h2>Paused & Settings</h2>
+              <label>⚔️ Difficulty Level
+                <select id="diffSelect" onchange="changeDifficulty(this.value)">
+                  <option value="easy">Easy (Slower Enemies)</option>
+                  <option value="normal" selected>Normal</option>
+                  <option value="hard">Hard (Fast & Aggressive)</option>
+                </select>
+              </label>
               <label>🎵 Music<input type="range" id="vm" min="0" max="100"></label>
               <label>🔊 Sound effects<input type="range" id="vs" min="0" max="100"></label>
               <label class="ck"><input type="checkbox" id="mu"> Mute all sound</label>
@@ -136,14 +144,14 @@ tailwind.config={theme:{extend:{colors:{brand:{cyan:'#00f2fe',blue:'#4facfe',pur
         <div id="tb">
           <b id="gn"></b>
           <span class="sp"></span>
-          <button id="pb" title="Pause / Settings (P)">⏸ <u>Pause</u></button>
+          <button id="pb" title="Pause / Settings (P)">⏸ <u>Pause & Settings</u></button>
           <button id="mb" title="Mute / unmute">🔊</button>
           <button id="fb" title="Full screen">⛶ <u>Full screen</u></button>
         </div>
       </div>
       <div id="side">
         <div>
-          <h3><i class="fa-solid fa-trophy"></i> Game Leaderboard</h3>
+          <h3><i class="fa-solid fa-trophy"></i> Global Leaderboard</h3>
           <div id="gameLeaderboardList" class="space-y-2 mt-3"></div>
         </div>
       </div>
@@ -173,9 +181,11 @@ const LIST=[
 
 let currentUser = null;
 let isRegisterMode = false;
+let currentDifficulty = 'normal'; // easy, normal, hard
+let diffMultiplier = 1;
 
 window.addEventListener('DOMContentLoaded', () => {
-  const remembered = localStorage.getItem('action_remember_user');
+  const remembered = localStorage.getItem('action_arcade_user');
   if (remembered) {
     currentUser = JSON.parse(remembered);
     initActionHub();
@@ -187,7 +197,7 @@ window.addEventListener('DOMContentLoaded', () => {
 function toggleAuthMode() {
   isRegisterMode = !isRegisterMode;
   $('authSwitchBtn').textContent = isRegisterMode ? 'Already have an account? Login' : "Need an account? Register";
-  $('authSubmitBtn').textContent = isRegisterMode ? 'Register & Start' : 'Login to Action Games';
+  $('authSubmitBtn').textContent = isRegisterMode ? 'Register & Start' : 'Login to Arcade';
 }
 
 function handleAuth(e) {
@@ -196,7 +206,7 @@ function handleAuth(e) {
   const p = $('authPassword').value.trim();
   const remember = $('rememberMe').checked;
 
-  let users = JSON.parse(localStorage.getItem('action_users_v2') || '{}');
+  let users = JSON.parse(localStorage.getItem('action_arcade_users_db') || '{}');
 
   if (isRegisterMode) {
     if (users[u]) {
@@ -204,7 +214,7 @@ function handleAuth(e) {
       return;
     }
     users[u] = { password: p, scores: {} };
-    localStorage.setItem('action_users_v2', JSON.stringify(users));
+    localStorage.setItem('action_arcade_users_db', JSON.stringify(users));
   } else {
     if (!users[u] || users[u].password !== p) {
       alert('Invalid username or password.');
@@ -214,7 +224,7 @@ function handleAuth(e) {
 
   currentUser = { username: u };
   if (remember) {
-    localStorage.setItem('action_remember_user', JSON.stringify(currentUser));
+    localStorage.setItem('action_arcade_user', JSON.stringify(currentUser));
   }
 
   $('authModal').classList.add('hidden');
@@ -222,7 +232,7 @@ function handleAuth(e) {
 }
 
 function logoutUser() {
-  localStorage.removeItem('action_remember_user');
+  localStorage.removeItem('action_arcade_user');
   currentUser = null;
   location.reload();
 }
@@ -233,27 +243,35 @@ function initActionHub() {
   $('grid').innerHTML = LIST.map((g,i)=>`<button class="tile" onclick="launch(${i})"><div class="th" style="background:${g.bg}">${g.e}</div><div class="tx"><b>${g.name}</b><span>${g.desc}</span></div></button>`).join('');
 }
 
+function changeDifficulty(val) {
+  currentDifficulty = val;
+  $('diffDisplay').textContent = val;
+  if(val === 'easy') diffMultiplier = 0.75;
+  else if(val === 'hard') diffMultiplier = 1.35;
+  else diffMultiplier = 1.0;
+}
+
 function getUserHighScore(gameId) {
   if (!currentUser) return 0;
-  let users = JSON.parse(localStorage.getItem('action_users_v2') || '{}');
+  let users = JSON.parse(localStorage.getItem('action_arcade_users_db') || '{}');
   return users[currentUser.username]?.scores?.[gameId] || 0;
 }
 
 function saveUserHighScore(gameId, sc) {
   if (!currentUser) return;
-  let users = JSON.parse(localStorage.getItem('action_users_v2') || '{}');
+  let users = JSON.parse(localStorage.getItem('action_arcade_users_db') || '{}');
   if (users[currentUser.username]) {
     if (!users[currentUser.username].scores) users[currentUser.username].scores = {};
     if (sc > (users[currentUser.username].scores[gameId] || 0)) {
       users[currentUser.username].scores[gameId] = sc;
-      localStorage.setItem('action_users_v2', JSON.stringify(users));
+      localStorage.setItem('action_arcade_users_db', JSON.stringify(users));
     }
   }
   renderGameLeaderboard(gameId);
 }
 
 function renderGameLeaderboard(gameId) {
-  let users = JSON.parse(localStorage.getItem('action_users_v2') || '{}');
+  let users = JSON.parse(localStorage.getItem('action_arcade_users_db') || '{}');
   let sortedUsers = Object.keys(users).map(username => ({
     username,
     score: users[username].scores?.[gameId] || 0
@@ -292,7 +310,7 @@ function launch(i){aInit();mStart(i);pause(false);gi=i;g=G[LIST[i].id];$('menu')
 $('back').onclick=()=>{mStop();pause(false);if(document.fullscreenElement||document.webkitFullscreenElement)(document.exitFullscreen||document.webkitExitFullscreen).call(document);$('pl').classList.remove('pfs');cancelAnimationFrame(raf);g=null;$('stage').style.display='none';$('menu').style.display='block'};
 addEventListener('resize',()=>{if(g)size()});try{new ResizeObserver(()=>{if(g)size()}).observe($('cvw'))}catch(e){}
 function press(){if(state==='ready'){state='play';sfx('start');return true}if(state==='over'&&performance.now()-overAt>600){reset();state='play';return true}return false}
-addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;const k=e.key.toLowerCase();keys[k]=1;if(!g)return;if((k==='p'||k==='escape')&&state==='play'){pause(!paused);return}if(paused)return;if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(press())return;if(state==='play'&&g.act){g.act(k);sfx('act')}});
+addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;const k=e.key.toLowerCase();keys[k]=1;if(!g)return;if((k==='p'||k==='escape')&&state==='play'){pause(!paused);return}if(paused)return;if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(press())return;if(state==='play'&&g.act){g.act(k);sfx('act')}});
 addEventListener('keyup',e=>keys[e.key.toLowerCase()]=0);
 function pp(e){const r=cv.getBoundingClientRect();ptr.x=e.clientX-r.left;ptr.y=e.clientY-r.top}
 cv.addEventListener('pointerdown',e=>{pp(e);ptr.down=ptr.on=true;if(press())return;if(state==='play'&&g.act){g.act('tap',ptr.x/W);sfx('act')}});
@@ -308,7 +326,7 @@ function hud(){
   if(state==='ready'){txt(LIST[gi].name,W/2,H/2-40,34,'#00f2fe');txt(LIST[gi].help,W/2,H/2,15,'#e5e7eb');txt('Tap or press Space to start',W/2,H/2+40,16,'#fbbf24')}
   else{txt('Game over',W/2,H/2-40,36,'#ff007f');txt('Score '+score+'   Best '+bs,W/2,H/2,18);txt('Tap or press Space to play again',W/2,H/2+40,16,'#fbbf24')}}}
 function loop(ts){raf=requestAnimationFrame(loop);if(!g)return;const dt=Math.min(.033,(ts-last)/1e3||0);last=ts;
- const pd=paused?0:dt;if(state==='play'&&!paused){const k=LIST[gi].id==='arch'?'a':'b',n0=(g[k]||[]).length;t+=dt;g.update(dt);if((g[k]||[]).length>n0)sfx('shoot')}
+ const pd=paused?0:dt;if(state==='play'&&!paused){const k=LIST[gi].id==='arch'?'a':'b',n0=(g[k]||[]).length;t+=dt*diffMultiplier;g.update(dt*diffMultiplier);if((g[k]||[]).length>n0)sfx('shoot')}
  parts.forEach(p=>{p.x+=p.vx*pd;p.y+=p.vy*pd;p.l-=pd});parts=parts.filter(p=>p.l>0);shake=Math.max(0,shake-pd*30);
  c.setTransform(dpr,0,0,dpr,0,0);c.save();if(shake)c.translate((R()-.5)*shake,(R()-.5)*shake);
  g.draw();
@@ -575,7 +593,7 @@ G.heli={
   for(const b of this.b)for(const e of this.e)if(!b.d&&!e.dead&&Math.abs(b.x-e.x)<28&&Math.abs(b.y-e.y)<20){b.d=e.dead=1;score+=10;boom(e.x,e.y,'#ff7b39',22);shake=5}
   if(p.inv<=0&&(this.e.some(e=>hit(e,p,30))||this.eb.some(b=>hit(b,p,16)))){p.hp--;p.inv=1.5;shake=14;boom(p.x,p.y,'#4facfe',25);if(p.hp<=0)end()}
   this.b=this.b.filter(b=>!b.d&&b.x<W+20);this.e=this.e.filter(e=>!e.dead&&e.x>-50);this.eb=this.eb.filter(b=>b.x>-20&&b.x<W+20&&b.y>-20&&b.y<H+20)},
- draw(){bg('#38bdf8','#e0f2fe');c.fillStyle='rgba(255,255,255,.8)';this.cl.forEach(k=>{const x=((k.x-t*40*k.s)%(W+160)+W+160)%(W+160)-80;c.beginPath();c.ellipse(x,k.y,50*k.s,18*k.s,0,0,7);c.ellipse(x+25,k.y-8,30*k.s,16*k.s,0,0,7);c.fill()});
+ draw(){bg('#38bdf8','le#e0f2fe');c.fillStyle='rgba(255,255,255,.8)';this.cl.forEach(k=>{const x=((k.x-t*40*k.s)%(W+160)+W+160)%(W+160)-80;c.beginPath();c.ellipse(x,k.y,50*k.s,18*k.s,0,0,7);c.ellipse(x+25,k.y-8,30*k.s,16*k.s,0,0,7);c.fill()});
   this.e.forEach(e=>{c.save();c.translate(e.x,e.y);c.rotate(-Math.PI/2);c.scale(.8,.8);c.translate(-0,-0);c.restore();c.save();c.translate(e.x,e.y);c.rotate(-Math.PI/2);jet(0,0,'#9f1239',0);c.restore()});
   c.shadowBlur=8;c.shadowColor='#f59e0b';c.fillStyle='#fde68a';this.b.forEach(b=>c.fillRect(b.x,b.y-2,14,4));c.shadowColor='#ef4444';c.fillStyle='#fca5a5';this.eb.forEach(b=>{c.beginPath();c.arc(b.x,b.y,5,0,7);c.fill()});c.shadowBlur=0;
   const p=this.p;if(p.inv<=0||Math.floor(t*12)%2){c.fillStyle='#166534';c.beginPath();c.ellipse(p.x,p.y,34,16,0,0,7);c.fill();c.fillRect(p.x-62,p.y-5,32,7);c.fillRect(p.x-64,p.y-16,5,16);c.fillStyle='rgba(180,230,255,.9)';c.beginPath();c.ellipse(p.x+14,p.y-3,14,9,0,0,7);c.fill();

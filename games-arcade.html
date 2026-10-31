@@ -588,7 +588,6 @@ function getGameEngine(id) {
     }
   };
 
-  // Fallback engine for remaining arcade games
   return {
     init() { this.x=W/2; this.y=H/2; this.target={x:R()*W,y:R()*H}; },
     tap(x,y) { if(Math.hypot(x-this.target.x, y-this.target.y)<50) { score+=15; this.target={x:50+R()*(W-100),y:50+R()*(H-100)}; } },

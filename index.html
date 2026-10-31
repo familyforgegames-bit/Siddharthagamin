@@ -198,10 +198,11 @@ iframe{border:none;overflow:hidden;}
       <div id="gamePlayer" class="hidden">
         <div class="flex flex-wrap items-center gap-3 mb-4">
           <span id="gameName" class="font-orbitron font-bold text-white"></span>
-          <a id="gameFull" class="ml-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-cyan to-brand-blue text-brand-dark font-orbitron font-bold text-xs" target="_blank" rel="noopener"><i class="fa-solid fa-expand mr-1"></i> Open full screen</a>
+          <!-- In-Window Native Fullscreen Trigger -->
+          <button id="gameFull" onclick="toggleIframeFullscreen()" class="ml-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-cyan to-brand-blue text-brand-dark font-orbitron font-bold text-xs hover:opacity-90 active:scale-95 transition-all"><i class="fa-solid fa-expand mr-1"></i> Open full screen</button>
         </div>
         <div class="rounded-2xl overflow-hidden border border-gray-800 bg-brand-card">
-          <iframe id="gameFrame" title="Games" class="w-full h-[800px] bg-white"></iframe>
+          <iframe id="gameFrame" title="Games" allow="fullscreen" allowfullscreen class="w-full h-[800px] bg-white"></iframe>
         </div>
       </div>
     </div>
@@ -406,28 +407,28 @@ const NEWS=[
 ];
 
 const MEMBERS=[
- {id:'lionforge',name:'Lionforge',photo:'lionforge.jpg',closeup:'lionforge-closeup.jpg',dob:'2019-05-17',badge:'Big brother',role:'Minecraft pro (Lio)',fav:'Minecraft on PC',bg:'from-amber-500 to-red-800',icon:'fa-bolt',
+ {id:'lionforge',name:'Lionforge',photo:'lionforge.jpg',closeup:'lionforge-closeup.jpg',dob:'2019-05-17',badge:'Big brother',role:'Minecraft pro (Lio)',fav:'Minecraft on PC',bg:'from-amber-500 to-red-800',icon:'fa-bolt',fb:'https://www.facebook.com/Lionel1705/',
   bio:'Lio is the Minecraft pro of the family. He plays on PC with tons of Minecraft knowledge, and he is the one who started it all.',
   specs:{Nickname:'Lio',Started:'Age 5','Plays on':'PC',Level:'Pro by age 7'},storyTitle:'Where it all began',
   story:['Every great adventure has a first block. For the Forge Family, it was placed by Lio when he was just five years old.',
    'He started with free and copycat versions of Minecraft, building and exploring for the pure joy of it. The more he played, the more he knew: this was the game for him, and his passion grew bigger every day.',
    'For his 6th birthday, Mum and Dad surprised him with a tablet and the real Minecraft. That was the day his world got a whole lot bigger.',
    'By the age of 7, Lio was a true pro. Today he plays on PC with tons of Minecraft knowledge, and he is the one who lit the spark for the whole family.']},
- {id:'luanforge',name:'Luanforge',photo:'luanforge.jpg',closeup:'luanforge-closeup.jpg',dob:'2023-07-14',badge:'Little brother',role:"Little pro and Kuka's sidekick",fav:'Minecraft',bg:'from-teal-500 to-emerald-900',icon:'fa-wand-magic-sparkles',
+ {id:'luanforge',name:'Luanforge',photo:'luanforge.jpg',closeup:'luanforge-closeup.jpg',dob:'2023-07-14',badge:'Little brother',role:"Little pro and Kuka's sidekick",fav:'Minecraft',bg:'from-teal-500 to-emerald-900',icon:'fa-wand-magic-sparkles',fb:'https://www.facebook.com/profile.php?id=100090902546285',
   bio:'The little pro who learned by watching his Kuka. Curious about Minecraft at 2 years old and already a pro by 3.',
   specs:{Nickname:'Babu','Curious at':'Age 2','Pro by':'Age 3',Game:'Minecraft'},storyTitle:'Following Kuka',
   story:['Luan grew up with Minecraft all around him, and the best seat in the house was right beside his Kuka.',
    'He watched, he giggled, and at just 2 years old a big question grew in his mind: what is this amazing world?',
    'By 3, he was already a pro. Wherever Kuka goes in the game, little Luan is right behind him.',
    'Two brothers, one blocky world, and an adventure that gets better every day.']},
- {id:'fatherforge',name:'Fatherforge (Ananda)',photo:'fatherforge.jpg',closeup:'fatherforge-closeup.jpg',badge:'Dad',role:'Squad leader & Hospitality Professional',fav:'PUBG, football and Minecraft',bg:'from-blue-600 to-indigo-900',icon:'fa-shield-halved',
+ {id:'fatherforge',name:'Fatherforge (Ananda)',photo:'fatherforge.jpg',closeup:'fatherforge-closeup.jpg',badge:'Dad',role:'Squad leader & Hospitality Professional',fav:'PUBG, football and Minecraft',bg:'from-blue-600 to-indigo-900',icon:'fa-shield-halved',fb:'https://www.facebook.com/A.n.a.n.d.a.M.a.h.a.r.j.a.n123',
   bio:'Ananda came from Nepal to the UAE for a better career, working in hospitality and hotels before building our wonderful family.',
   specs:{Name:'Ananda',From:'Nepal',Background:'Hospitality & Hotel',Role:'Dad and squad leader'},storyTitle:'Ananda’s Journey: From Nepal to the UAE',
   story:[
    'With dreams as vast as the Himalayas, Ananda left his home in Nepal to chase a brighter future in the United Arab Emirates. Immersed in the vibrant world of hospitality, he worked diligently in hotel management, building a solid foundation of hard work and dedication.',
    'Little did he know, destiny was quietly orchestrating a masterclass in romance, paving the way for a chapter that would change his life forever.'
   ]},
- {id:'motherforge',name:'Motherforge (Aiza)',photo:'motherforge.jpg',closeup:'motherforge-closeup.jpg',dob:'1992-12-22',badge:'Mum',role:'Nurse & Healthcare Professional',fav:'Hay Day',bg:'from-pink-600 to-purple-900',icon:'fa-heart',
+ {id:'motherforge',name:'Motherforge (Aiza)',photo:'motherforge.jpg',closeup:'motherforge-closeup.jpg',dob:'1992-12-22',badge:'Mum',role:'Nurse & Healthcare Professional',fav:'Hay Day',bg:'from-pink-600 to-purple-900',icon:'fa-heart',fb:'https://www.facebook.com/aizaofilasmaharjan',
   bio:'Aiza came from the Philippines to the UAE for a better career, working dedicatedly as a nurse while filling our home with love.',
   specs:{Name:'Aiza',From:'Philippines',Birthday:'22 December',Background:'Medical & Nursing',Role:'Mum and healthcare hero'},storyTitle:'Aiza’s Journey: From the Philippines to the UAE',
   story:[
@@ -497,7 +498,10 @@ function renderMember(id){
  const m=MEMBERS.find(x=>x.id===id);if(!m){location.hash='#members';return}
  $('memberBody').innerHTML=`<a href="#members" class="text-sm text-brand-cyan"><i class="fa-solid fa-arrow-left mr-1"></i>All family</a>
  <div class="grid md:grid-cols-12 gap-8 mt-6">
-  <div class="md:col-span-4"><div class="w-56 h-72 mx-auto rounded-3xl bg-gradient-to-tr ${m.bg} p-1.5 shadow-xl"><div class="w-full h-full bg-brand-dark rounded-[20px] flex items-center justify-center overflow-hidden">${photo(m,'text-6xl',m.closeup)}</div></div></div>
+  <div class="md:col-span-4 flex flex-col items-center">
+    <div class="w-56 h-72 rounded-3xl bg-gradient-to-tr ${m.bg} p-1.5 shadow-xl"><div class="w-full h-full bg-brand-dark rounded-[20px] flex items-center justify-center overflow-hidden">${photo(m,'text-6xl',m.closeup)}</div></div>
+    ${m.fb ? `<a href="${m.fb}" target="_blank" rel="noopener" class="mt-4 inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-orbitron text-xs font-bold transition-colors shadow-lg"><i class="fa-brands fa-facebook-f"></i> Facebook Profile</a>` : ''}
+  </div>
   <div class="md:col-span-8">
    <div class="text-xs text-gray-400">${m.badge}</div>
    <h2 class="font-orbitron font-black text-4xl text-white">${m.name}</h2>
@@ -647,7 +651,19 @@ function showGamePicker(){
 function openGame(i){
  const g=GAME_ALL[i];renderGameNav(i);$('gameWelcome').classList.add('hidden');
  if(g.soon){$('gameFrame').removeAttribute('src');$('gamePlayer').classList.add('hidden');$('soonTitle').textContent=g.title+' games';$('gameSoon').classList.remove('hidden');return}
- $('gameSoon').classList.add('hidden');$('gameName').textContent=g.title;$('gameFull').href=g.file;$('gameFrame').src=g.file;$('gamePlayer').classList.remove('hidden');
+ $('gameSoon').classList.add('hidden');$('gameName').textContent=g.title;$('gameFrame').src=g.file;$('gamePlayer').classList.remove('hidden');
+}
+
+function toggleIframeFullscreen() {
+  const frame = document.getElementById('gameFrame');
+  if (!frame) return;
+  if (!document.fullscreenElement) {
+    if (frame.requestFullscreen) frame.requestFullscreen();
+    else if (frame.webkitRequestFullscreen) frame.webkitRequestFullscreen();
+    else if (frame.msRequestFullscreen) frame.msRequestFullscreen();
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen();
+  }
 }
 
 function route(){

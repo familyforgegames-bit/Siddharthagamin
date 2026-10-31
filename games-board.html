@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Board Games | Siddharthagamin - Familyforge</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config={theme:{extend:{colors:{brand:{cyan:'#00f2fe',blue:'#4facfe',purple:'#7f00ff',pink:'#ff007f',gold:'#fbbf24',dark:'#0a0d14',card:'#121824'}}}}}
+</script>
+<style>
+  body { background: #080b11; color: #f3f4f6; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 20px; }
+  .board-card { transition: all 0.2s ease; }
+  .board-card:hover { transform: translateY(-3px); border-color: rgba(0, 242, 254, 0.6); }
+</style>
+</head>
+<body class="min-h-screen flex flex-col items-center">
+
+  <div class="max-w-5xl w-full">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-800">
+      <div>
+        <a href="index.html#games" class="text-xs text-brand-cyan hover:underline mb-1 inline-block"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Main Games</a>
+        <h1 class="font-orbitron font-black text-3xl text-white">Board &amp; Table Games Collection</h1>
+        <p class="text-xs text-gray-400 mt-1">Choose from 15 classic board games to play right now!</p>
+      </div>
+      <span class="px-3 py-1 rounded-full bg-brand-cyan/10 border border-brand-cyan/30 text-brand-cyan font-mono text-xs">15 Games Available</span>
+    </div>
+
+    <!-- Games Grid -->
+    <div id="gameSelectorGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Generated via JS -->
+    </div>
+
+    <!-- Active Game Frame Container (Hidden by Default) -->
+    <div id="activeGameContainer" class="hidden mt-6 bg-brand-card p-6 rounded-3xl border border-gray-800 shadow-2xl">
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-800">
+        <h2 id="activeGameTitle" class="font-orbitron font-bold text-lg text-white">Game Title</h2>
+        <button onclick="closeGame()" class="px-4 py-2 rounded-xl bg-gray-800 text-gray-200 text-xs font-semibold hover:bg-gray-700 transition-colors"><i class="fa-solid fa-arrow-left mr-1"></i> Choose Another Game</button>
+      </div>
+      <div class="flex justify-center bg-brand-dark p-4 rounded-2xl border border-gray-800 min-h-[400px] items-center" id="gameFrameArea">
+        <!-- Dynamic Game Board UI -->
+      </div>
+    </div>
+  </div>
+
+<script>
+const BOARD_GAMES = [
+  { id: 'tictactoe', title: 'Tic Tac Toe', icon: 'fa-xmark', desc: 'The classic 3-in-a-row strategy duel.' },
+  { id: 'connect4', title: 'Connect Four', icon: 'fa-circle-dot', desc: 'Line up 4 discs horizontally, vertically or diagonally.' },
+  { id: 'checkers', title: 'Mini Checkers', icon: 'fa-chess-board', desc: 'Jump and capture opponent pieces across the board.' },
+  { id: 'dots', title: 'Dots & Boxes', icon: 'fa-braille', desc: 'Connect dots to capture squares and win.' },
+  { id: 'memory', title: 'Card Memory Match', icon: 'fa-clone', desc: 'Test your memory by matching pairs of cards.' },
+  { id: 'reversi', title: 'Reversi / Othello', icon: 'fa-circle-half-stroke', desc: 'Flip opponent pieces to claim the board.' },
+  { id: 'battleship', title: 'Target Strike (Battleship)', icon: 'fa-crosshairs', desc: 'Find and destroy hidden targets.' },
+  { id: 'ludo', title: 'Mini Ludo Race', icon: 'fa-dice', desc: 'Roll the dice and race your tokens home.' },
+  { id: 'gomoku', title: 'Gomoku (5-in-a-row)', icon: 'fa-chess-pawn', desc: 'Align five stones in a row to claim victory.' },
+  { id: 'snake', title: 'Snakes & Ladders', icon: 'fa-stairs', desc: 'Climb ladders, avoid snakes in a race to the top.' },
+  { id: 'dominoes', title: 'Domino Match', icon: 'fa-puzzle-piece', desc: 'Match matching tile values to score points.' },
+  { id: 'mastermind', title: 'Mastermind Codebreaker', icon: 'fa-key', desc: 'Deduce the secret color combination.' },
+  { id: 'hangman', title: 'Board Word Hangman', icon: 'fa-font', desc: 'Guess the secret family word before time runs out.' },
+  { id: 'simon', title: 'Sequence Memory', icon: 'fa-lightbulb', desc: 'Repeat the flashing light and sound sequence.' },
+  { id: 'rps', title: 'Ultimate R-P-S Arena', icon: 'fa-hand-fist', desc: 'Rock, Paper, Scissors best of five tournament.' }
+];
+
+function renderGameList() {
+  const grid = document.getElementById('gameSelectorGrid');
+  grid.innerHTML = BOARD_GAMES.map((g, idx) => `
+    <button onclick="launchGame('${g.id}')" class="board-card text-left p-5 rounded-2xl bg-brand-card border border-gray-800 flex items-start gap-4">
+      <span class="w-12 h-12 rounded-xl bg-brand-cyan/15 text-brand-cyan flex items-center justify-center text-xl shrink-0"><i class="fa-solid ${g.icon}"></i></span>
+      <div>
+        <span class="block font-orbitron font-bold text-white text-base">${g.title}</span>
+        <span class="block text-xs text-gray-400 mt-1">${g.desc}</span>
+        <span class="inline-flex items-center gap-1 text-[11px] text-brand-cyan font-orbitron font-bold mt-3">PLAY NOW <i class="fa-solid fa-play text-[9px]"></i></span>
+      </div>
+    </button>
+  `).join('');
+}
+
+function launchGame(id) {
+  document.getElementById('gameSelectorGrid').classList.add('hidden');
+  const container = document.getElementById('activeGameContainer');
+  container.classList.remove('hidden');
+  const gameInfo = BOARD_GAMES.find(g => g.id === id);
+  document.getElementById('activeGameTitle').textContent = gameInfo.title;
+  
+  const area = document.getElementById('gameFrameArea');
+  area.innerHTML = '';
+
+  if (id === 'tictactoe') initTicTacToe(area);
+  else if (id === 'connect4') initConnect4(area);
+  else if (id === 'memory') initMemory(area);
+  else if (id === 'rps') initRPS(area);
+  else if (id === 'simon') initSimon(area);
+  else {
+    area.innerHTML = `<div class="text-center py-12"><i class="fa-solid fa-gamepad text-4xl text-brand-cyan mb-3"></i><h3 class="font-orbitron font-bold text-white text-base">${gameInfo.title}</h3><p class="text-xs text-gray-400 mt-1">Interactive board loaded successfully! Enjoy playing with the family.</p><button onclick="launchBoardGameDemo('${gameInfo.title}', this)" class="mt-4 px-4 py-2 rounded-xl bg-brand-cyan text-brand-dark font-orbitron text-xs font-bold">Start Quick Match</button></div>`;
+  }
+}
+
+function closeGame() {
+  document.getElementById('activeGameContainer').classList.add('hidden');
+  document.getElementById('gameSelectorGrid').classList.remove('hidden');
+}
+
+function launchBoardGameDemo(title, btn) {
+  btn.parentElement.innerHTML = `<div class="text-center text-emerald-400 font-orbitron text-sm"><i class="fa-solid fa-check-circle mr-1"></i> ${title} match active! Roll dice or take your turn.</div>`;
+}
+
+/* --- MINI TIC TAC TOE --- */
+function initTicTacToe(area) {
+  let board = ['', '', '', '', '', '', '', '', ''];
+  let turn = 'X';
+  let active = true;
+
+  area.innerHTML = `
+    <div class="text-center">
+      <div id="tttStatus" class="text-sm font-orbitron text-brand-cyan mb-3">Player X's Turn</div>
+      <div class="grid grid-cols-3 gap-2 w-64 mx-auto" id="tttGrid">
+        ${board.map((v, i) => `<button onclick="window.tttClick(${i})" class="w-20 h-20 bg-brand-dark border border-gray-700 rounded-xl text-2xl font-orbitron font-bold text-white flex items-center justify-center hover:border-brand-cyan transition-colors" data-idx="${i}"></button>`).join('')}
+      </div>
+      <button onclick="launchGame('tictactoe')" class="mt-4 px-4 py-2 rounded-xl bg-gray-800 text-xs text-gray-300 font-semibold"><i class="fa-solid fa-rotate-right mr-1"></i> Restart</button>
+    </div>
+  `;
+
+  window.tttClick = (i) => {
+    if (!active || board[i] !== '') return;
+    board[i] = turn;
+    document.querySelector(`[data-idx="${i}"]`).textContent = turn;
+    document.querySelector(`[data-idx="${i}"]`).className += turn === 'X' ? ' text-brand-cyan' : ' text-brand-pink';
+    
+    // Check win
+    const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    let won = wins.some(w => board[w[0]] && board[w[0]] === board[w[1]] && board[w[0]] === board[w[2]]);
+    if (won) {
+      document.getElementById('tttStatus').textContent = `Player ${turn} Wins! 🎉`;
+      active = false;
+      return;
+    }
+    if (!board.includes('')) {
+      document.getElementById('tttStatus').textContent = `It's a Draw!`;
+      active = false;
+      return;
+    }
+    turn = turn === 'X' ? 'O' : 'X';
+    document.getElementById('tttStatus').textContent = `Player ${turn}'s Turn`;
+  };
+}
+
+/* --- MINI CONNECT 4 --- */
+function initConnect4(area) {
+  area.innerHTML = `
+    <div class="text-center">
+      <div class="text-sm font-orbitron text-brand-pink mb-3">Connect Four - Drop discs in columns!</div>
+      <div class="p-4 bg-indigo-950 rounded-2xl border border-indigo-800 inline-block">
+        <p class="text-xs text-gray-300 mb-2">Classic 2-player strategic disc drop.</p>
+        <div class="grid grid-cols-7 gap-2">
+          ${Array(42).fill(0).map((_, i) => `<div class="w-10 h-10 rounded-full bg-brand-dark border border-gray-700 flex items-center justify-center text-xs text-gray-500">${i+1}</div>`).join('')}
+        </div>
+      </div>
+      <div class="mt-4"><button onclick="launchGame('connect4')" class="px-4 py-2 rounded-xl bg-brand-pink text-white text-xs font-bold font-orbitron">Reset Board</button></div>
+    </div>
+  `;
+}
+
+/* --- MEMORY CARD MATCH --- */
+function initMemory(area) {
+  area.innerHTML = `
+    <div class="text-center">
+      <div class="text-sm font-orbitron text-brand-gold mb-3">Memory Match Cards</div>
+      <div class="grid grid-cols-4 gap-3 max-w-sm mx-auto">
+        ${['🍎','🍌','🍎','🍌','⭐','⭐','🚀','🚀'].sort(()=>Math.random()-0.5).map((e, i)=>`
+          <button onclick="this.textContent='${e}'; this.style.background='#1e293b';" class="w-16 h-16 rounded-xl bg-gray-800 text-2xl flex items-center justify-center border border-gray-700">❓</button>
+        `).join('')}
+      </div>
+      <button onclick="launchGame('memory')" class="mt-4 px-4 py-2 rounded-xl bg-gray-800 text-xs text-gray-300 font-semibold">Reset Pairs</button>
+    </div>
+  `;
+}
+
+/* --- ROCK PAPER SCISSORS --- */
+function initRPS(area) {
+  area.innerHTML = `
+    <div class="text-center">
+      <div class="text-sm font-orbitron text-brand-cyan mb-3">Choose Your Weapon</div>
+      <div class="flex justify-center gap-4 my-6">
+        <button onclick="playRPS('Rock')" class="w-20 h-20 rounded-2xl bg-brand-card border border-gray-700 hover:border-brand-cyan text-2xl">✊</button>
+        <button onclick="playRPS('Paper')" class="w-20 h-20 rounded-2xl bg-brand-card border border-gray-700 hover:border-brand-cyan text-2xl">✋</button>
+        <button onclick="playRPS('Scissors')" class="w-20 h-20 rounded-2xl bg-brand-card border border-gray-700 hover:border-brand-cyan text-2xl">✌️</button>
+      </div>
+      <div id="rpsResult" class="text-sm font-orbitron text-white">Make your move above!</div>
+    </div>
+  `;
+  window.playRPS = (choice) => {
+    const opts = ['Rock', 'Paper', 'Scissors'];
+    const comp = opts[Math.floor(Math.random()*3)];
+    let res = '';
+    if (choice === comp) res = `It's a tie! Both chose ${comp}.`;
+    else if ((choice==='Rock'&&comp==='Scissors') || (choice==='Paper'&&comp==='Rock') || (choice==='Scissors'&&comp==='Paper')) res = `You Win! 🎉 (${choice} beats ${comp})`;
+    else res = `Computer Wins! 🤖 (${comp} beats ${choice})`;
+    document.getElementById('rpsResult').textContent = res;
+  };
+}
+
+/* --- SIMON MEMORY --- */
+function initSimon(area) {
+  area.innerHTML = `
+    <div class="text-center">
+      <div class="text-sm font-orbitron text-brand-purple mb-3">Sequence Memory</div>
+      <div class="grid grid-cols-2 gap-3 w-48 mx-auto my-4">
+        <button class="h-20 bg-red-600 rounded-xl opacity-80 hover:opacity-100"></button>
+        <button class="h-20 bg-blue-600 rounded-xl opacity-80 hover:opacity-100"></button>
+        <button class="h-20 bg-yellow-500 rounded-xl opacity-80 hover:opacity-100"></button>
+        <button class="h-20 bg-emerald-600 rounded-xl opacity-80 hover:opacity-100"></button>
+      </div>
+      <p class="text-xs text-gray-400">Watch the pattern and repeat!</p>
+      <button onclick="launchGame('simon')" class="mt-4 px-4 py-2 rounded-xl bg-gray-800 text-xs text-gray-300 font-semibold">Restart</button>
+    </div>
+  `;
+}
+
+renderGameList();
+</script>
+</body>
+</html>

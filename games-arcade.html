@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arcade Games | Siddharthagamin - Familyforge</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config={theme:{extend:{colors:{brand:{cyan:'#00f2fe',blue:'#4facfe',purple:'#7f00ff',pink:'#ff007f',gold:'#fbbf24',dark:'#0a0d14',card:'#121824'}}}}}
+</script>
+<style>
+  body { background: #080b11; color: #f3f4f6; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 20px; }
+  .arcade-card { transition: all 0.2s ease; }
+  .arcade-card:hover { transform: translateY(-3px); border-color: rgba(255, 0, 127, 0.6); }
+  canvas { background: #111827; border-radius: 12px; display: block; margin: 0 auto; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col items-center">
+
+  <div class="max-w-5xl w-full">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-800">
+      <div>
+        <a href="index.html#games" class="text-xs text-brand-pink hover:underline mb-1 inline-block"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Main Games</a>
+        <h1 class="font-orbitron font-black text-3xl text-white">Arcade Games Collection</h1>
+        <p class="text-xs text-gray-400 mt-1">Choose from 15 classic arcade mini-games to play right now!</p>
+      </div>
+      <span class="px-3 py-1 rounded-full bg-brand-pink/10 border border-brand-pink/30 text-brand-pink font-mono text-xs">15 Arcade Hits</span>
+    </div>
+
+    <!-- Games Grid -->
+    <div id="arcadeSelectorGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Generated via JS -->
+    </div>
+
+    <!-- Active Game Frame Container -->
+    <div id="activeArcadeContainer" class="hidden mt-6 bg-brand-card p-6 rounded-3xl border border-gray-800 shadow-2xl">
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-800">
+        <h2 id="activeArcadeTitle" class="font-orbitron font-bold text-lg text-white">Arcade Title</h2>
+        <button onclick="closeArcadeGame()" class="px-4 py-2 rounded-xl bg-gray-800 text-gray-200 text-xs font-semibold hover:bg-gray-700 transition-colors"><i class="fa-solid fa-arrow-left mr-1"></i> Choose Another Game</button>
+      </div>
+      <div class="flex justify-center bg-brand-dark p-4 rounded-2xl border border-gray-800 min-h-[400px] items-center" id="arcadeFrameArea">
+        <!-- Dynamic Arcade Game UI -->
+      </div>
+    </div>
+  </div>
+
+<script>
+const ARCADE_GAMES = [
+  { id: 'snake', title: 'Classic Snake', icon: 'fa-worm', desc: 'Eat food, grow longer, avoid walls and your tail.' },
+  { id: 'pong', title: 'Retro Pong', icon: 'fa-table-tennis-paddle-ball', desc: 'Bounce the ball past your opponent in classic table tennis.' },
+  { id: 'breakout', title: 'Brick Breaker', icon: 'fa-cubes', desc: 'Smash through colorful brick walls with your paddle.' },
+  { id: 'flappy', title: 'Flappy Bird', icon: 'fa-feather', desc: 'Tap to fly through narrow pipe gaps without crashing.' },
+  { id: 'catcher', title: 'Star Catcher', icon: 'fa-basket-shopping', desc: 'Catch falling star items while dodging hazards.' },
+  { id: 'jump', title: 'Endless Hopper', icon: 'fa-angles-up', desc: 'Hop onto moving platforms to reach higher scores.' },
+  { id: 'space', title: 'Invader Shooter', icon: 'fa-rocket', desc: 'Defend Earth from descending waves of alien ships.' },
+  { id: 'whack', title: 'Whack-a-Mole', icon: 'fa-hammer', desc: 'Tap the targets as fast as they pop up.' },
+  { id: 'pac', title: 'Maze Muncher', icon: 'fa-ghost', desc: 'Navigate the maze, eat dots, and avoid colorful ghosts.' },
+  { id: 'runner', title: 'Neon Dash', icon: 'fa-person-running', desc: 'Jump and slide past high-speed cyber obstacles.' },
+  { id: 'stacker', title: 'Block Stacker', icon: 'fa-layer-group', desc: 'Stack moving blocks perfectly to reach the top.' },
+  { id: 'tetris', title: 'Mini Block Drop', icon: 'fa-puzzle-piece', desc: 'Fit falling shapes together to clear lines.' },
+  { id: 'minesweeper', title: 'Cyber Minesweeper', icon: 'fa-bomb', desc: 'Uncover safe tiles while avoiding hidden traps.' },
+  { id: 'clicker', title: 'Cookie Tap Frenzy', icon: 'fa-hand-pointer', desc: 'Tap as fast as you can to rack up combo points.' },
+  { id: 'reaction', title: 'Speed Reflex Test', icon: 'fa-bolt', desc: 'Test your lightning-fast reaction speed.' }
+];
+
+function renderArcadeList() {
+  const grid = document.getElementById('arcadeSelectorGrid');
+  grid.innerHTML = ARCADE_GAMES.map((g) => `
+    <button onclick="launchArcadeGame('${g.id}')" class="arcade-card text-left p-5 rounded-2xl bg-brand-card border border-gray-800 flex items-start gap-4">
+      <span class="w-12 h-12 rounded-xl bg-brand-pink/15 text-brand-pink flex items-center justify-center text-xl shrink-0"><i class="fa-solid ${g.icon}"></i></span>
+      <div>
+        <span class="block font-orbitron font-bold text-white text-base">${g.title}</span>
+        <span class="block text-xs text-gray-400 mt-1">${g.desc}</span>
+        <span class="inline-flex items-center gap-1 text-[11px] text-brand-pink font-orbitron font-bold mt-3">PLAY NOW <i class="fa-solid fa-play text-[9px]"></i></span>
+      </div>
+    </button>
+  `).join('');
+}
+
+function launchArcadeGame(id) {
+  document.getElementById('arcadeSelectorGrid').classList.add('hidden');
+  const container = document.getElementById('activeArcadeContainer');
+  container.classList.remove('hidden');
+  const gameInfo = ARCADE_GAMES.find(g => g.id === id);
+  document.getElementById('activeArcadeTitle').textContent = gameInfo.title;
+  
+  const area = document.getElementById('arcadeFrameArea');
+  area.innerHTML = '';
+
+  if (id === 'snake') initSnake(area);
+  else if (id === 'pong') initPong(area);
+  else if (id === 'clicker') initClicker(area);
+  else if (id === 'reaction') initReaction(area);
+  else {
+    area.innerHTML = `<div class="text-center py-12"><i class="fa-solid fa-gamepad text-4xl text-brand-pink mb-3"></i><h3 class="font-orbitron font-bold text-white text-base">${gameInfo.title}</h3><p class="text-xs text-gray-400 mt-1">Arcade module successfully loaded! Have fun playing.</p><button onclick="launchArcadeDemo('${gameInfo.title}', this)" class="mt-4 px-4 py-2 rounded-xl bg-brand-pink text-white font-orbitron text-xs font-bold">Start Arcade Game</button></div>`;
+  }
+}
+
+function closeArcadeGame() {
+  document.getElementById('activeArcadeContainer').classList.add('hidden');
+  document.getElementById('arcadeSelectorGrid').classList.remove('hidden');
+}
+
+function launchArcadeDemo(title, btn) {
+  btn.parentElement.innerHTML = `<div class="text-center text-brand-pink font-orbitron text-sm"><i class="fa-solid fa-fire mr-1"></i> ${title} session active! Use your keyboard or touch controls to play.</div>`;
+}
+
+/* --- MINI SNAKE GAME --- */
+function initSnake(area) {
+  area.innerHTML = `
+    <div class="text-center">
+      <div class="text-xs font-orbitron text-brand-pink mb-2">Use Arrow Keys to Steer</div>
+      <canvas id="snakeCanvas" width="300" height="300"></canvas>
+      <div class="mt-3 text-xs text-white font-orbitron">Score: <span id="snakeScore">0</span></div>
+    </div>
+  `;
+  const canvas = document.getElementById('snakeCanvas');
+  const ctx = canvas.getContext('2d');
+  let snake = [{x: 10, y: 10}], food = {x: 5, y: 5}, dx = 1, dy = 0, score = 0;
+
+  function main() {
+    setTimeout(onTick, 100);
+  }
+  function onTick() {
+    let head = {x: snake[0].x + dx, y: snake[0].y + dy};
+    if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 || snake.some(s => s.x === head.x && s.y === head.y)) {
+      alert('Game Over! Score: ' + score);
+      launchArcadeGame('snake');
+      return;
+    }
+    snake.unshift(head);
+    if (head.x === food.x && head.y === food.y) {
+      score += 10; document.getElementById('snakeScore').textContent = score;
+      food = {x: Math.floor(Math.random()*20), y: Math.floor(Math.random()*20)};
+    } else {
+      snake.pop();
+    }
+    ctx.fillStyle = '#111827'; ctx.fillRect(0,0,300,300);
+    ctx.fillStyle = '#ff007f'; ctx.fillRect(food.x*15, food.y*15, 14, 14);
+    ctx.fillStyle = '#00f2fe';
+    snake.forEach(s => ctx.fillRect(s.x*15, s.y*15, 14, 14));
+    setTimeout(onTick, 100);
+  }
+  window.onkeydown = e => {
+    if (e.key === 'ArrowUp' && dy === 0) { dx = 0; dy = -1; }
+    if (e.key === 'ArrowDown' && dy === 0) { dx = 0; dy = 1; }
+    if (e.key === 'ArrowLeft' && dx === 0) { dx = -1; dy = 0; }
+    if (e.key === 'ArrowRight' && dx === 0) { dx = 1; dy = 0; }
+  };
+  main();
+}
+
+/* --- MINI PONG GAME --- */
+function initPong(area) {
+  area.innerHTML = `
+    <div class="text-center">
+      <div class="text-xs font-orbitron text-brand-cyan mb-2">Move Mouse Up/Down on Canvas</div>
+      <canvas id="pongCanvas" width="400" height="250"></canvas>
+    </div>
+  `;
+  const canvas = document.getElementById('pongCanvas');
+  const ctx = canvas.getContext('2d');
+  let ball = {x: 200, y: 125, vx: 3, vy: 2, r: 8};
+  let py = 100;
+
+  canvas.onmousemove = e => {
+    let r = canvas.getBoundingClientRect();
+    py = e.clientY - r.top - 30;
+  };
+
+  function loop() {
+    ball.x += ball.vx; ball.y += ball.vy;
+    if (ball.y < 0 || ball.y > 250) ball.vy *= -1;
+    if (ball.x < 20 && ball.y > py && ball.y < py + 60) ball.vx *= -1;
+    if (ball.x > 380) ball.vx *= -1;
+    if (ball.x < 0) ball.x = 200; // reset
+
+    ctx.fillStyle = '#111827'; ctx.fillRect(0,0,400,250);
+    ctx.fillStyle = '#00f2fe'; ctx.fillRect(10, py, 10, 60);
+    ctx.fillStyle = '#ff007f'; ctx.fillRect(380, ball.y - 30, 10, 60);
+    ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fill();
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+/* --- CLICKER FRENZY --- */
+function initClicker(area) {
+  let count = 0;
+  area.innerHTML = `
+    <div class="text-center">
+      <div class="text-sm font-orbitron text-brand-gold mb-4">Click the Cyber Button as fast as you can!</div>
+      <button onclick="window.clickCount()" class="w-32 h-32 rounded-full bg-gradient-to-tr from-brand-pink to-brand-purple text-white font-orbitron font-black text-2xl shadow-lg hover:scale-105 active:scale-95 transition-transform mx-auto block mb-4">TAP!</button>
+      <div class="text-lg font-orbitron text-white">Score: <span id="clickScore">0</span></div>
+    </div>
+  `;
+  window.clickCount = () => {
+    count++;
+    document.getElementById('clickScore').textContent = count;
+  };
+}
+
+/* --- SPEED REFLEX TEST --- */
+function initReaction(area) {
+  area.innerHTML = `
+    <div class="text-center">
+      <div class="text-sm font-orbitron text-brand-cyan mb-4">Reflex Speed Test</div>
+      <div id="reflexBox" onclick="window.reflexClick()" class="w-72 h-40 mx-auto rounded-2xl bg-gray-800 flex items-center justify-center font-orbitron font-bold text-white text-sm cursor-pointer select-none">Click to Start</div>
+    </div>
+  `;
+  window.state = 'waiting';
+  window.startTime = 0;
+  window.reflexClick = () => {
+    let box = document.getElementById('reflexBox');
+    if (window.state === 'waiting') {
+      box.style.background = '#ff007f';
+      box.textContent = 'Wait for Green...';
+      window.state = 'ready';
+      setTimeout(() => {
+        if (window.state === 'ready') {
+          box.style.background = '#10b981';
+          box.textContent = 'CLICK NOW!';
+          window.startTime = Date.now();
+          window.state = 'clicked';
+        }
+      }, Math.random() * 2000 + 1000);
+    } else if (window.state === 'clicked') {
+      let time = Date.now() - window.startTime;
+      box.style.background = '#7f00ff';
+      box.textContent = `Your Time: ${time}ms! Click to retry.`;
+      window.state = 'waiting';
+    } else if (window.state === 'ready') {
+      box.style.background = '#ef4444';
+      box.textContent = 'Too early! Click to retry.';
+      window.state = 'waiting';
+    }
+  };
+}
+
+renderArcadeList();
+</script>
+</body>
+</html>

@@ -594,7 +594,7 @@
   <div id="pick-hud" onclick="dropPickaxe()">&#9935; DROP PICKAXE (Esc) &nbsp; &#128142; <b id="loot-d">0</b> &nbsp; &#129351; <b id="loot-g">0</b></div>
   <div id="sysbar"><button class="sys-btn" onclick="toggleFullscreen()">&#9974; FULLSCREEN</button><button class="sys-btn" id="fit-btn" onclick="toggleFit()">FIT SCREEN: ON</button></div><div id="flash"></div><div id="portal"></div><div id="kaboom">KA-BOOM!</div>
   <header>
-    <div class="brand">MINECRAFT LEGEND</div>
+    <div class="brand"><span class="brand-main">MINECRAFT LEGEND</span><span class="brand-sub">PRODUCED BY <b>SIDDHARTHAGAMIN</b> &middot; FAMILYFORGE CLAN</span></div>
     <div class="user-pill">
       <span>👑</span>
       <span id="name-display">Guest</span>
@@ -1403,7 +1403,7 @@ function generateQuestion() {
       const won = prize(currentQuestionIdx - 1);
       bank(won);
       const msg = `You walk away with ${fmt(won)}!`;
-      speakTextHuman(`Smart move ${username}! ${msg}`, null, () => {});
+      speakTextHuman(mcFarewell('walk', currentQuestionIdx, (typeof level !== 'undefined' ? level : 1)), null, () => speakTextHuman(msg, null, () => {}));
       showWinnerPopup('WALKED AWAY', msg);
     }
 
@@ -1883,14 +1883,18 @@ function speakAs(who,text,done){const seq=++speechSeq;try{speechSynthesis.cancel
  const fin=()=>{if(seq!==speechSeq)return;mouth('m-guest',0);if(done)done()};
  const c=text.replace(/\$([\d,]+)/g,(m,n)=>n.replace(/,/g,'')+' dollars');
  if(muted||!window.speechSynthesis){if(who==='guest')mouth('m-guest',1);return setTimeout(fin,Math.min(3500,c.length*55))}
- const u=new SpeechSynthesisUtterance(c),v=pickVoice(who==='friend'?1:0);if(v){u.voice=v;u.lang=v.lang}
- u.pitch=who==='friend'?0.8:1.2;u.rate=Math.min(1.6,voiceRate*1.02);let d=0;const wd=setTimeout(()=>go(),c.length*120+4000);
+ const gm=who==='guest'?gInfo():null,u=new SpeechSynthesisUtterance(c),v=gm?gm.v:pickVoice(who==='friend'?1:0);if(v){u.voice=v;u.lang=v.lang}
+ u.pitch=who==='friend'?0.8:(gm?gm.p:1.2);u.rate=Math.min(1.6,voiceRate*1.02);let d=0;const wd=setTimeout(()=>go(),c.length*120+4000);
  const go=()=>{if(d)return;d=1;clearTimeout(wd);fin()};
  u.onstart=()=>{if(seq===speechSeq&&who==='guest')mouth('m-guest',1)};u.onend=go;u.onerror=go;speechSynthesis.speak(u)}
+function gInfo(){const pr=((stats[username]||{}).profile)||{},f=pr.g==='f';let vs=[],h=null;try{vs=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang));h=getVoice()}catch(e){}
+ const fe=/Zira|Samantha|Aria|Jenny|Susan|Hazel|Female|Karen|Victoria|Moira|Fiona|Libby|Sonia|Michelle|Emma|Heera|Eva|Catherine|Natasha|Linda|Allison|Ava|Joanna|Salli|Kimberly|Nicole|Tessa|Veena|Amy|Olivia|Kendra|Ivy/i,ma=/David|Mark|Guy|Ryan|Daniel|George|James|Aaron|Davis|Male|Thomas|Ethan|Roger|Fred|Rishi|Brian|Alex|Tom|Matthew|Joey|Justin|Kevin|Arthur|Oliver|Liam|William|Christopher|Eric|Jason|Tony|Ravi|Prabhat/i;
+ const pool=vs.filter(v=>f?fe.test(v.name):(ma.test(v.name)&&!fe.test(v.name))),other=vs.filter(v=>!h||v.name!==h.name);
+ const v=pool.filter(x=>!h||x.name!==h.name).sort((a,b)=>scoreVoice(b)-scoreVoice(a))[0]||pool[0]||other[0]||h||null;return{v,p:f?1.28:.8}}
 function chain(steps,done){let i=0;const n=()=>{if(i>=steps.length)return done&&done();const[w,t]=steps[i++],nx=()=>setTimeout(n,200);w==='host'?speakTextHuman(t,null,nx):speakAs(w,t,nx)};n()}
 /* timer */
 function setT(){gid('timer-text').innerText=timerSeconds;gid('timer-bar').style.strokeDashoffset=113-113*timerSeconds/30}
-window.startTimer=function(from){timerSeconds=from||30;clearInterval(timerInterval);setT();timerInterval=setInterval(()=>{timerSeconds--;setT();if(timerSeconds<=0){clearInterval(timerInterval);handleDefeat()}},1000)};
+window.startTimer=function(from){timerSeconds=from||30;clearInterval(timerInterval);setT();timerInterval=setInterval(()=>{timerSeconds--;setT();if(timerSeconds<=0){clearInterval(timerInterval);window.__timeUp=1;handleDefeat()}},1000)};
 const pauseT=()=>clearInterval(timerInterval),resumeT=()=>{if(timerSeconds>0)startTimer(timerSeconds)};
 /* ladder = 15 questions per level */
 window.renderLadder=function(){const p=gid('ladder-panel');p.innerHTML='';for(let i=0;i<15;i++){const st=document.createElement('div');st.className=`ladder-step ${isSafe(i)?'safe-net':''} ${i===currentQuestionIdx?'active-step':''}`;
@@ -1902,9 +1906,9 @@ let qLocked=false;const _lnq=window.loadNextQuestion;window.loadNextQuestion=fun
 const _rgs=window.resetGameState;window.resetGameState=function(){_rgs();hideOv();clearInterval(brkT)};
 /* intro */
 window.showIntro=function(kind){const tok=++introTok,ov=gid('intro'),sub=gid('isub'),s=S();ov.classList.add('on');gid('intro-name').innerText=username;sub.innerText='';playFanfare();
- let L;if(kind==='level')L=[{t:`Welcome to Level ${s.level}, ${username}! The questions get tougher, but so do you.`,c:1},{t:`Same rules: fifteen questions, safety nets at five and ten, and three fresh lifelines. Let's play!`,c:1}];
- else if(kind==='continue')L=[{t:`Welcome back ${username}! You are on Level ${s.level}, question ${s.idx+1}. Let's pick up right where we left off!`,c:1}];
- else L=[{t:`Ladies and gentlemen, welcome to Who Wants to Be a Minecraft Legend!`,c:1},{t:gameMode==='pvp'?`Tonight it's ${username} versus ${opponentName}!`:`Tonight's brave contestant is ${username}! Give them a block shaking round of applause!`,c:1},{t:`Fifteen questions per level, four answers each, thirty seconds on the clock. Safety nets at five and ten, and three lifelines: fifty fifty, ask the audience, or phone a friend.`},{t:`Let's play!`,c:1}];
+ let L;if(kind==='level')L=[{t:`Welcome to Level ${s.level}, ${username}! The questions get tougher, but so do you.`,c:1},{g:1,t:`Hi everyone, ${username} here. I am ready for Level ${s.level}, and I will do my best!`},{t:`Same rules: fifteen questions, safety nets at five and ten, and three fresh lifelines. Let's play!`,c:1}];
+ else if(kind==='continue')L=[{t:`Welcome back ${username}! You are on Level ${s.level}, question ${s.idx+1}. Let's pick up right where we left off!`,c:1},{g:1,t:`Hi everyone, ${username} here. I am glad to be back today, and I will do my best!`},{t:`Let's play!`,c:1}];
+ else L=[{t:`Ladies and gentlemen, welcome to Who Wants to Be a Minecraft Legend!`,c:1},{t:gameMode==='pvp'?`Tonight it's ${username} versus ${opponentName}!`:`Tonight's brave contestant is ${username}! Give them a block shaking round of applause!`,c:1},{g:1,t:`Hi everyone, ${username} here. I am glad to be here today, and I will do my best!`},{t:`Fifteen questions per level, four answers each, thirty seconds on the clock. Safety nets at five and ten, and three lifelines: fifty fifty, ask the audience, or phone a friend.`},{t:`Let's play!`,c:1}];
  let i=0;const next=()=>{if(tok!==introTok)return;if(i>=L.length)return endIntro();const l=L[i++];sub.innerText=l.t;speakTextHuman(l.t,()=>{if(l.c){playCheer(true);crowdReact('cheer',1)}},()=>setTimeout(next,350))};setTimeout(next,1200)};
 /* load / new game */
 window.startGame=function(mode){initAudio();const s=S(mode);
@@ -1930,7 +1934,7 @@ function reveal(sel){const btns=[...document.querySelectorAll('.opt-btn')];btns[
  if(gameMode==='pvp'&&!isOpponentEliminated){if(Math.random()>Math.min(.5,.12+oppQuestionIdx*.025))oppQuestionIdx++;else{isOpponentEliminated=true;return speakTextHuman(`${opponentName} answered incorrectly and is eliminated! ${username}, you can keep going or walk away.`,null,()=>{bank(prize(currentQuestionIdx));S().idx=0;sv();showWinnerPopup(`${username} Wins!`,`${opponentName} has been eliminated! Winnings: ${fmt(prize(currentQuestionIdx))}`)})}}
  currentQuestionIdx++;if(currentQuestionIdx>=15)return levelComplete();const s=S();s.idx=currentQuestionIdx;sv();
  if(currentQuestionIdx%5===0){resetLifelines();playCheer(true);crowdReact('cheer',1);return speakTextHuman(`Safety net secured at ${fmt(prize(currentQuestionIdx-1))}! And your lifelines are restored!`,null,()=>offerBreak(loadNextQuestion))}
- speakTextHuman(pick([`Spot on ${username}! Moving right along...`,`Look at you go! Raising the stakes!`,`Correct! Let's see how you handle the next one...`]),null,loadNextQuestion)}
+ speakTextHuman(pick([`Spot on ${username}! Moving right along...`,`Look at you go! Raising the stakes!`,`Correct! Let's see how you handle the next one...`]),null,()=>window.mcChat?mcChat(loadNextQuestion):loadNextQuestion())}
 const _hd=window.handleDefeat;window.handleDefeat=function(){qLocked=true;S().idx=0;sv();_hd()};
 const _wa=window.walkAway;window.walkAway=function(){const had=currentQuestionIdx>0;_wa();if(had){S().idx=0;sv()}};
 /* level complete */
@@ -2055,17 +2059,22 @@ const _rv=window.reveal;window.reveal=function(sel){if(sel!==currentQ.ans)return
 const _lc=window.levelComplete;window.levelComplete=function(){guest.react('cheer');host.react('clap');_lc()};
 const _wa3=window.walkAway;window.walkAway=function(){const had=currentQuestionIdx>0;_wa3();if(had){guest.react('relief',6000);host.react('clap',4000)}};
 window.handleDefeat=function(){qLocked=true;clearInterval(timerInterval);questionToken++;stopSpeech();S().idx=0;sv();playBuzzer();gid('red-alert').classList.add('active');
- const safe=guaranteedWinnings(currentQuestionIdx);bank(safe);const msg=safe>0?`Oh no, that is incorrect! But you keep your safety net of ${fmt(safe)}.`:`Oh no, that is incorrect.`;
+ const safe=guaranteedWinnings(currentQuestionIdx);bank(safe);const tu=window.__tuFlag;window.__tuFlag=false;const msg=tu?(safe>0?`Time is up! But you keep your safety net of ${fmt(safe)}.`:`Time is up, so the game ends here.`):(safe>0?`Oh no, that is incorrect! But you keep your safety net of ${fmt(safe)}.`:`Oh no, that is incorrect.`);
  guest.react('disbelief');host.react('sad');
- const fw=pick([`${username}, you played with real courage tonight. Every legend loses a block or two before building a castle. Hold your head high, come back stronger, and we will be right here waiting. Goodnight, everyone!`,`Do not be sad, ${username}. You gave it everything, and the crowd is proud of you. Tonight was just the start of your story. Keep mining, keep learning, and see you very soon!`,`${username}, a true Minecraft Legend is not the one who never falls, but the one who respawns and tries again. Thank you for playing, and goodnight!`]);
- chain([['guest',pick(['No way! That cannot be right! I was so sure!','What?! Are you serious? I do not believe this!','Oh no, no, no! I cannot believe it!'])],['host',msg],['host',fw]],()=>{gid('red-alert').classList.remove('active');showWinnerPopup('GAME OVER',`${msg} You reached question ${currentQuestionIdx+1}.`);setTimeout(()=>{guest.idle();host.idle()},500)})};
+ const fw=mcFarewell('lose',currentQuestionIdx,level);
+ const fin=()=>{gid('red-alert').classList.remove('active');showWinnerPopup('GAME OVER',`${msg} You reached question ${currentQuestionIdx+1}.`);setTimeout(()=>{guest.idle();host.idle()},500)};
+ setTimeout(()=>{window.mcCoffinDuck&&mcCoffinDuck(.1);chain([['host',msg]],()=>{window.mcCoffinStop&&mcCoffinStop();chain([['host',fw]],fin)})},3500)};
 /* ---- login: gender, age, nationality, skin tone ---- */
-gid('password-input').closest('.input-group').insertAdjacentHTML('afterend',`<div class="input-group"><label>Gender (your character)</label><select id="gender-input"><option value="m">Male</option><option value="f">Female</option></select></div><div class="input-group"><label>Age</label><input type="number" id="age-input" min="5" max="99" value="14"></div><div class="input-group"><label>Nationality (flag on leaderboard)</label><select id="country-input"><option value="">Select country</option>${COUNTRIES.map(([c,n])=>`<option value="${c}">${n}</option>`).join('')}</select></div><div class="input-group"><label>Skin tone</label><select id="skin-input"><option value="#f1c9a5">Light</option><option value="#e0ac86" selected>Medium</option><option value="#c68b5e">Tan</option><option value="#9a6540">Brown</option><option value="#6b4228">Deep</option></select></div>`);
-const loadProf=()=>{const p=((stats[gid('username-input').value.trim()]||{}).profile)||null;if(!p)return;gid('gender-input').value=p.g||'m';gid('age-input').value=p.age||14;gid('country-input').value=p.country||'';gid('skin-input').value=p.skin||'#e0ac86'};
+gid('password-input').closest('.input-group').insertAdjacentHTML('afterend',`<div class="input-group"><label>Hobby</label><select id="hobby-input"><option value="building in Minecraft">Building in Minecraft</option><option value="redstone tinkering">Redstone tinkering</option><option value="exploring caves">Exploring caves</option><option value="playing video games" selected>Playing video games</option><option value="drawing">Drawing</option><option value="football">Football</option><option value="swimming">Swimming</option><option value="reading">Reading</option><option value="playing music">Playing music</option><option value="cooking">Cooking</option><option value="cycling">Cycling</option><option value="coding">Coding</option><option value="dancing">Dancing</option><option value="travelling">Travelling</option><option value="watching movies">Watching movies</option><option value="collecting things">Collecting things</option></select></div><div class="input-group"><label>Gender (your character)</label><select id="gender-input"><option value="m">Male</option><option value="f">Female</option></select></div><div class="input-group"><label>Age</label><input type="number" id="age-input" min="5" max="99" value="14"></div><div class="input-group"><label>Nationality (flag on leaderboard)</label><select id="country-input"><option value="">Select country</option>${COUNTRIES.map(([c,n])=>`<option value="${c}">${n}</option>`).join('')}</select></div><div class="input-group"><label>Skin tone</label><select id="skin-input"><option value="#f1c9a5">Light</option><option value="#e0ac86" selected>Medium</option><option value="#c68b5e">Tan</option><option value="#9a6540">Brown</option><option value="#6b4228">Deep</option></select></div>`);
+const MOBL=[['steve','\u{1F9D1}','STEVE'],['zombie','\u{1F9DF}','ZOMBIE'],['creeper','\u{1F4A5}','CREEPER'],['skeleton','\u{1F480}','SKELETON'],['enderman','\u{1F47E}','ENDERMAN'],['pig','\u{1F437}','PIG'],['witch','\u{1F9D9}','WITCH']];
+gid('skin-input').closest('.input-group').insertAdjacentHTML('afterend',`<div class="input-group" id="mob-group"><label>Choose your character (mob)</label><select id="mob-input" style="display:none">${MOBL.map(m=>`<option value="${m[0]}">${m[2]}</option>`).join('')}</select><div id="mob-chips">${MOBL.map(m=>`<button type="button" class="mob-chip" data-k="${m[0]}"><span>${m[1]}</span><b>${m[2]}</b></button>`).join('')}</div></div>`);
+function setMobUI(k){const sel=gid('mob-input');sel.value=MOBL.some(m=>m[0]===k)?k:'zombie';document.querySelectorAll('.mob-chip').forEach(c=>c.classList.toggle('on',c.dataset.k===sel.value))}
+document.querySelectorAll('.mob-chip').forEach(c=>c.onclick=()=>setMobUI(c.dataset.k));setMobUI('zombie');
+const loadProf=()=>{const p=((stats[gid('username-input').value.trim()]||{}).profile)||null;if(!p)return;gid('gender-input').value=p.g||'m';gid('age-input').value=p.age||14;gid('country-input').value=p.country||'';gid('skin-input').value=p.skin||'#e0ac86';gid('hobby-input').value=p.hobby||'playing video games';setMobUI(p.mob||'zombie')};
 gid('username-input').addEventListener('input',loadProf);loadProf();
-function applyProfile(){const p=(stats[username]||{}).profile||{};gid('name-display').innerHTML=`${flag(p.country)} ${esc(username)}`;gid('desk-player-name').innerText=username.toUpperCase();gid('np-guest').textContent=username.toUpperCase();updateCareerUI();buildGuest()}
+function applyProfile(){const p=(stats[username]||{}).profile||{};gid('name-display').innerHTML=`${flag(p.country)} ${esc(username)}`;gid('desk-player-name').innerText=username.toUpperCase();gid('np-guest').textContent=username.toUpperCase();updateCareerUI();buildGuest();window.__mcMob=p.mob||'zombie';if(window.mcSetMob)try{mcSetMob(window.__mcMob)}catch(e){}}
 window.handleLogin=function(){const n=gid('username-input').value.trim();if(n)username=n;const c=gid('country-input').value;if(!c){toast('Please pick your nationality');return}
- const u=stats[username]=stats[username]||{};u.profile={g:gid('gender-input').value,age:+gid('age-input').value||14,country:c,skin:gid('skin-input').value};sv();applyProfile();switchView('view-modes')};
+ const u=stats[username]=stats[username]||{};u.profile={g:gid('gender-input').value,age:+gid('age-input').value||14,country:c,skin:gid('skin-input').value,mob:(gid('mob-input')||{}).value||'zombie',hobby:(gid('hobby-input')||{}).value||'playing video games'};sv();applyProfile();switchView('view-modes')};
 /* ---- home screen mobs: click = rampage, everyone reacts ---- */
 const SAY={enderman:'VWRAAAAH!! LOOK AT ME!',zombie:'BRAAAAAINS!!!',skeleton:'RATTLE RATTLE RATTLE!',pig:'OINK OINK OINK!!!',villager:'HRMMMMM!! NO TRADE!'};
 const PANIC=['AAAH!','Run!!','What was that?!','Eek!','Hide!','Whoa!'];
@@ -2114,28 +2123,68 @@ buildFriends();applyProfile();
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (()=>{
-if(!window.THREE)return;const T=THREE,gid=id=>document.getElementById(id),E=(t,c)=>{const d=document.createElement(t);if(c)d.className=c;return d};
+if(!window.THREE)return;
+const T=THREE,gid=id=>document.getElementById(id),E=(t,c)=>{const d=document.createElement(t);if(c)d.className=c;return d};
 const S=E('div');S.id='mcs';(gid('stage3d')||gid('studio-stage-container')).appendChild(S);
 const ren=new T.WebGLRenderer({antialias:true});ren.outputEncoding=T.sRGBEncoding;ren.setPixelRatio(Math.min(devicePixelRatio,2));S.appendChild(ren.domElement);ren.domElement.style.cssText='width:100%;height:100%;display:block';
-const sc=new T.Scene();sc.background=new T.Color(0x0a0a0e);sc.fog=new T.Fog(0x0a0a0e,22,50);const cam=new T.PerspectiveCamera(48,2,.1,100);
+const sc=new T.Scene();sc.background=new T.Color(0x0a0a0e);sc.fog=new T.Fog(0x0a0a0e,28,64);const cam=new T.PerspectiveCamera(48,2,.1,100);
 let seed=5;const rnd=()=>(seed=(seed*1103515245+12345)&0x7fffffff)/0x7fffffff,TC={};
 function noise(col,v){v=v||26;const k=col+v;if(TC[k])return TC[k];const c=E('canvas');c.width=c.height=16;const x=c.getContext('2d'),b=new T.Color(col);for(let i=0;i<16;i++)for(let j=0;j<16;j++){const f=1+(rnd()-.5)*v/50;x.fillStyle=`rgb(${Math.min(255,b.r*255*f)|0},${Math.min(255,b.g*255*f)|0},${Math.min(255,b.b*255*f)|0})`;x.fillRect(i,j,1,1)}const t=new T.CanvasTexture(c);t.magFilter=t.minFilter=T.NearestFilter;t.encoding=T.sRGBEncoding;t.wrapS=t.wrapT=T.RepeatWrapping;return TC[k]=t}
-const M=(c,v)=>new T.MeshLambertMaterial({map:noise(c,v)}),rep=(c,x,y,v)=>{const t=noise(c,v).clone();t.repeat.set(x,y);t.needsUpdate=true;return new T.MeshLambertMaterial({map:t})};
+const M=(c,v)=>new T.MeshLambertMaterial({map:noise(c,v)}),BM=c=>new T.MeshBasicMaterial({color:c}),flat=t=>new T.MeshLambertMaterial({map:t});
 const B=(w,h,d,m,x,y,z,p)=>{const o=new T.Mesh(new T.BoxGeometry(w,h,d),m);o.position.set(x,y,z);(p||sc).add(o);return o};
 const PL=(w,h,m,x,y,z,rx,ry)=>{const o=new T.Mesh(new T.PlaneGeometry(w,h),m);o.position.set(x,y,z);o.rotation.set(rx||0,ry||0,0);sc.add(o);return o};
-/* cave */
-PL(70,50,rep('#4f9a3a',70,50,30),0,0,-5,-Math.PI/2);PL(70,26,rep('#777777',70,26,34),0,13,-14);PL(50,26,rep('#6a6a6a',50,26,34),-20,13,-4,0,Math.PI/2);PL(50,26,rep('#6a6a6a',50,26,34),20,13,-4,0,-Math.PI/2);PL(70,50,rep('#333',70,50,30),0,11,-5,Math.PI/2);
+function cvTex(w,h,draw,rx,ry){const c=E('canvas');c.width=w;c.height=h;draw(c.getContext('2d'));const t=new T.CanvasTexture(c);t.magFilter=t.minFilter=T.NearestFilter;t.encoding=T.sRGBEncoding;t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(rx||1,ry||1);return t}
+const plank=(base,rx,ry)=>cvTex(16,16,x=>{x.fillStyle=base;x.fillRect(0,0,16,16);for(let j=0;j<16;j++){x.fillStyle=j%4==0?'rgba(0,0,0,.35)':(j%2?'rgba(255,255,255,.04)':'rgba(0,0,0,.04)');x.fillRect(0,j,16,1)}for(let k=0;k<5;k++){x.fillStyle='rgba(0,0,0,.2)';x.fillRect(rnd()*16|0,(rnd()*4|0)*4+1,1,3)}},rx,ry);
+const brick=(rx,ry)=>cvTex(16,16,x=>{x.fillStyle='#6e6e72';x.fillRect(0,0,16,16);x.fillStyle='#4e4e54';for(let j=0;j<16;j+=4){x.fillRect(0,j,16,1);for(let i=(j/4%2)*4;i<16;i+=8)x.fillRect(i,j,1,4)}for(let k=0;k<40;k++){x.fillStyle=`rgba(${rnd()<.5?0:255},${rnd()<.5?0:255},${rnd()<.5?0:255},.07)`;x.fillRect(rnd()*16|0,rnd()*16|0,1,1)}},rx,ry);
+const chk=(a,b,rx,ry)=>cvTex(2,2,x=>{x.fillStyle=a;x.fillRect(0,0,2,2);x.fillStyle=b;x.fillRect(0,0,1,1);x.fillRect(1,1,1,1)},rx,ry);
+const carpet=(rx,ry)=>cvTex(4,4,x=>{x.fillStyle='#9b1c1c';x.fillRect(0,0,4,4);x.fillStyle='#7d1414';x.fillRect(0,0,1,1);x.fillRect(2,2,1,1)},rx,ry);
+/* ---------- ROOM: wooden hall inside the cave ---------- */
+PL(80,60,flat(plank('#7a5230',80,60)),0,0,-5,-Math.PI/2);
+PL(70,26,flat(brick(70,26)),0,13,-14);PL(50,26,flat(brick(50,26)),-20,13,-4,0,Math.PI/2);PL(50,26,flat(brick(50,26)),20,13,-4,0,-Math.PI/2);
+PL(70,50,rep('#2a2a30',70,50,30),0,11,-5,Math.PI/2);
+function rep(c,x,y,v){const t=noise(c,v).clone();t.repeat.set(x,y);t.needsUpdate=true;return new T.MeshLambertMaterial({map:t})}
 for(let i=0;i<18;i++){const x=-17+rnd()*34,z=-13+rnd()*8,l=2+(rnd()*3|0);for(let k=0;k<l;k++){const w=1.1-k*.3;B(w,1,w,M('#5c5c5c',30),x,10.5-k,z)}}
-PL(10,4,new T.MeshBasicMaterial({map:noise('#ff7a00',40)}),0,.03,-8.5,-Math.PI/2);
-[[-4.2,-8.5],[4.2,-8.5]].forEach(p=>B(2,.6,4,M('#555'),p[0],.3,p[1]));
-['01110','10001','00001','00110','00100','00000','00100'].forEach((r,j)=>[...r].forEach((h,i)=>{if(h==='1')B(.55,.55,.5,new T.MeshBasicMaterial({color:0xffc107}),-1.1+i*.55,7.6-j*.55,-11)}));
-sc.add(new T.AmbientLight(0xffffff,.85));const dl=new T.DirectionalLight(0xfff0d0,.8);dl.position.set(4,10,12);sc.add(dl);const pl=new T.PointLight(0xff7a22,2.4,30);pl.position.set(0,1.8,-8);sc.add(pl);
-/* desk */
+/* stage: checkered floor + gold trim, red carpet aisle */
+PL(21,9,flat(chk('#e8e0cc','#2c2c34',21,9)),0,.02,-6.5,-Math.PI/2);
+B(21.4,.06,.22,BM(0xffb703),0,.03,-2);B(.22,.06,9,BM(0xffb703),-10.6,.03,-6.5);B(.22,.06,9,BM(0xffb703),10.6,.03,-6.5);
+PL(5,13,flat(carpet(5,13)),0,.03,4.6,-Math.PI/2);B(.15,.04,13,BM(0xffb703),-2.55,.04,4.6);B(.15,.04,13,BM(0xffb703),2.55,.04,4.6);
+/* backdrop screen, banners, torches, hanging lamps */
+B(14.8,6.8,.2,M('#222',10),0,5.2,-13.7);const tvC=E('canvas');tvC.width=896;tvC.height=390;const tvT=new T.CanvasTexture(tvC);tvT.encoding=T.sRGBEncoding;
+const SCR=B(14,6.1,.1,new T.MeshBasicMaterial({map:tvT}),0,5.2,-13.55);
+let tvAd=0,tvAdT=0;
+const AD=[['SUBSCRIBE','to SIDDHARTHAGAMIN','#ff3b3b'],['FAMILYFORGE CLAN','Play. Build. Win. Together.','#4ade80'],['LIKE  SHARE  SUBSCRIBE','New Minecraft videos every week!','#ffb703'],['JOIN THE CLAN','Familyforge Clan is waiting for you','#4ad8ff'],['THANKS FOR WATCHING','Produced by Siddharthagamin','#ff4ad8']];
+function drawTV(t){const x=tvC.getContext('2d'),W=896,Hh=390;
+ const gr=x.createLinearGradient(0,0,W,Hh);
+ if(tvAd){const k=AD[Math.floor(t/3.2)%AD.length],ph=(t%3.2)/3.2;gr.addColorStop(0,'#0b0b1a');gr.addColorStop(1,'#1a0b2a');x.fillStyle=gr;x.fillRect(0,0,W,Hh);
+  x.fillStyle=k[2];x.globalAlpha=.18;for(let i=0;i<9;i++)x.fillRect(((i*120+t*90)%(W+120))-120,0,40,Hh);x.globalAlpha=1;
+  x.fillStyle='#000';x.fillRect(0,0,W,46);x.fillStyle='#ff3b3b';x.font="bold 26px 'Press Start 2P',monospace";x.textAlign='left';x.fillText('\u25CF AD BREAK',20,34);
+  const sc2=.9+Math.min(1,ph*5)*.1;x.save();x.translate(W/2,Hh/2+10);x.scale(sc2,sc2);x.textAlign='center';x.fillStyle=k[2];x.font="bold 52px 'Press Start 2P',monospace";x.fillText(k[0],0,-10,820);x.fillStyle='#fff';x.font="bold 30px 'Rajdhani',sans-serif";x.fillText(k[1],0,56,820);x.restore();
+  x.fillStyle='#ffb703';x.font="bold 22px 'Press Start 2P',monospace";x.textAlign='center';x.fillText('BACK IN A MOMENT...',W/2,Hh-24)}
+ else{gr.addColorStop(0,'#0a2a55');gr.addColorStop(1,'#12123a');x.fillStyle=gr;x.fillRect(0,0,W,Hh);
+  x.fillStyle='rgba(255,255,255,.05)';for(let i=0;i<14;i++)x.fillRect(0,i*30+((t*20)%30),W,2);
+  x.textAlign='center';x.fillStyle='#fff';x.font="bold 26px 'Press Start 2P',monospace";x.fillText('WHO WANTS TO BE A',W/2,100);
+  x.fillStyle='#ffb703';x.shadowColor='#ff8800';x.shadowBlur=18+Math.sin(t*3)*8;x.font="bold 64px 'Press Start 2P',monospace";x.fillText('MINECRAFT',W/2,185);
+  x.fillStyle='#4ade80';x.shadowColor='#18c060';x.font="bold 64px 'Press Start 2P',monospace";x.fillText('LEGEND',W/2,262);x.shadowBlur=0;
+  x.fillStyle='rgba(0,0,0,.55)';x.fillRect(90,290,W-180,70);x.strokeStyle='#ffb703';x.lineWidth=3;x.strokeRect(90,290,W-180,70);
+  x.fillStyle='#fff';x.font="bold 20px 'Press Start 2P',monospace";x.fillText('PRODUCED BY',W/2,318);x.fillStyle='#ff4ad8';x.font="bold 26px 'Press Start 2P',monospace";x.fillText('SIDDHARTHAGAMIN',W/2,350);
+  x.fillStyle='#4ad8ff';x.font="bold 18px 'Press Start 2P',monospace";x.fillText('A FAMILYFORGE CLAN SHOW',W/2,60)}
+ tvT.needsUpdate=true}
+window.mcAd=on=>{tvAd=on?1:0;tvAdT=performance.now()};
+setInterval(()=>drawTV(tvAd?(performance.now()-tvAdT)/1000:performance.now()/1000),120);drawTV(0);
+[[-8.9,'#a02020'],[-11.4,'#1d4fa0'],[-13.9,'#a02020'],[8.9,'#1d4fa0'],[11.4,'#a02020'],[13.9,'#1d4fa0']].forEach(([x,c])=>{B(1.4,5,.12,M(c,14),x,6.5,-13.8);B(1.7,.3,.2,BM(0xffb703),x,9.1,-13.75);B(1.2,.25,.14,BM(0xffd56a),x,4.2,-13.75)});
+/* (yellow ? removed - the wall TV now shows the show title / break adverts) */
+const TOR=[],PLs=[];[-11.5,-8.2,8.2,11.5].forEach((x,k)=>{B(.2,.9,.2,M('#6b4a2a'),x,2.6,-13.6);const f=B(.4,.5,.4,BM(0xffa31a),x,3.3,-13.6);TOR.push(f);if(k%3==0||k==1||k==2){const l=new T.PointLight(0xff8a2a,1.5,16);l.position.set(x,3.6,-12.8);sc.add(l);PLs.push(l)}});
+[-9,-3.5,3.5,9].forEach(x=>{B(.1,2.9,.1,M('#222'),x,9.55,-6);B(1,.7,1,BM(0xffd56a),x,8.1,-6)});
+/* moving spotlights */
+const SPOT=[];[[-8,0xffd24a],[-3,0x4ad8ff],[3,0xff4ad8],[8,0x7cff6a]].forEach(([x,c],k)=>{const p=new T.Group();p.position.set(x,10.4,-5);const m=new T.Mesh(new T.CylinderGeometry(.08,1.6,10,20,1,true),new T.MeshBasicMaterial({color:c,transparent:true,opacity:.1,blending:T.AdditiveBlending,depthWrite:false,side:T.DoubleSide}));m.position.y=-5;p.add(m);sc.add(p);SPOT.push({p,m,k})});
+sc.add(new T.AmbientLight(0xffffff,.82));const dl=new T.DirectionalLight(0xfff0d0,.8);dl.position.set(4,10,12);sc.add(dl);const pl=new T.PointLight(0xff7a22,1.6,30);pl.position.set(0,1.8,-8);sc.add(pl);
+/* desk with rainbow LED strip */
 const wood=M('#8a5a33',18);B(15,1.4,2,wood,0,.7,-1.8);B(15.4,.2,2.3,M('#a37444'),0,1.5,-1.8);
+const LED=[];for(let i=0;i<24;i++){const x=-7.1+i*.62;if(Math.abs(x)<2.5)continue;LED.push(B(.5,.1,.12,new T.MeshBasicMaterial({color:0xffffff}),x,1.3,-.74))}
 const sg=E('canvas');sg.width=512;sg.height=192;{const x=sg.getContext('2d');x.fillStyle='#e9dcc0';x.fillRect(0,0,512,192);x.strokeStyle='#5a3a1c';x.lineWidth=14;x.strokeRect(7,7,498,178);x.textAlign='center';x.fillStyle='#222';x.font='bold 34px monospace';x.fillText('WHO WANTS TO BE A',256,60);x.fillStyle='#2f8a2f';x.font='bold 64px monospace';x.fillText('MINECRAFT',256,118);x.fillStyle='#222';x.font='bold 44px monospace';x.fillText('Legend',256,172)}
 const sgt=new T.CanvasTexture(sg);sgt.encoding=T.sRGBEncoding;PL(4.6,1.72,new T.MeshBasicMaterial({map:sgt}),0,.8,-.78);
 [[-6.6,.5],[6.6,-.5]].forEach(p=>{const m=B(1.7,1.1,.12,new T.MeshLambertMaterial({color:0x16202e,emissive:0x1a4a7a}),p[0],2.25,-2.3);m.rotation.y=p[1];B(.3,.5,.3,M('#333'),p[0],1.8,-2.4)});
-/* characters */
+/* ---------- characters ---------- */
 const tint=(g,c)=>g.traverse(o=>{if(o.material)[].concat(o.material).forEach(m=>m.emissive&&m.emissive.setHex(c))});
 function person(o){const g=new T.Group(),fc=E('canvas');fc.width=fc.height=64;const ft=new T.CanvasTexture(fc);ft.magFilter=T.NearestFilter;ft.encoding=T.sRGBEncoding;
  const sk=M(o.skin),P={g,u:0,fall:0,talking:0,o},aw=o.th||.4;P.head=B(.9,.9,.9,[sk,sk,sk,sk,new T.MeshLambertMaterial({map:ft}),sk],0,2.25,0,g);B(o.th?.7:.9,1.3,.5,M(o.body),0,1.15,0,g);
@@ -2148,34 +2197,160 @@ const H=person({skin:'#c08d6b',body:'#6b4a30',legs:'#3b2a1b',fd:(r,m)=>{r(1,2,6,
 const G=person({skin:'#5b9a3d',body:'#2aa5b5',legs:'#3a3aa8',fd:(r,m)=>{r(1,3,2,1,'#111');r(5,3,2,1,'#111');r(3,4,2,1,'#3f7a2a');r(1,5,6,[1,2,3][m],'#243a1a')}});
 const SKL=person({skin:'#dcdcdc',body:'#cfcfcf',legs:'#d4d4d4',th:.22,aim:1,fd:(r,m)=>{r(1,3,2,2,'#222');r(5,3,2,2,'#222');r(3,5,2,1,'#999');r(2,6,4,[1,2,2][m],'#333')}});
 const CR=person({skin:'#5cc45c',body:'#4caf50',legs:'#3f9a44',noArms:1,fd:(r,m)=>{r(1,2,2,2,'#111');r(5,2,2,2,'#111');r(3,4,2,2,'#111');r(2,6,4,2,'#111')}});
+const ENDER=person({skin:'#0e0e12',body:'#121217',legs:'#0e0e12',th:.22,fd:(r,m)=>{r(1,3,2,1,'#e070ff');r(5,3,2,1,'#e070ff');r(2,6,4,m?2:1,'#2a0a33')}});
+const WN=[SKL,CR].map((P,k)=>({P,tx:k?3:-3,tz:-7,w:0}));const ES=[1.2,1.5,1.2];ENDER.g.scale.set(...ES);ENDER.g.visible=false;ENDER.al.scale.y=ENDER.ar.scale.y=1.5;
 B(.07,1.6,.07,M('#7a4a1a'),0,-1.05,.25,SKL.ar);B(.02,1.5,.02,M('#eeeeee'),0,-1.05,.17,SKL.ar);
 H.g.position.set(-4.3,0,-3.6);G.g.position.set(4.3,0,-3.6);SKL.g.position.set(-1.8,0,-6);CR.g.position.set(1.9,0,-6);[H,G].forEach(p=>p.g.scale.setScalar(1.25));SKL.g.scale.setScalar(1.15);CR.g.scale.setScalar(1.1);
 function label(txt,x){const c=E('canvas');c.width=512;c.height=96;const s=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(c),transparent:true,depthTest:false}));s.scale.set(3.6,.68,1);s.position.set(x,4.2,-3.6);s.renderOrder=9;s.draw=t=>{const k=c.getContext('2d');k.clearRect(0,0,512,96);k.fillStyle='rgba(0,0,0,.8)';k.fillRect(0,10,512,76);k.strokeStyle='#ffb703';k.lineWidth=5;k.strokeRect(3,13,506,70);k.fillStyle='#ffb703';k.font='bold 38px monospace';k.textAlign='center';k.fillText(t,256,62);s.material.map.needsUpdate=true};s.draw(txt);sc.add(s);return s}
-label('HOST SIDDHARTHA',-4.3);const GL=label('YOU',4.3),tags=()=>GL.draw((typeof username==='string'&&username?username:'YOU').toUpperCase().slice(0,16));tags();
-/* audience: seated both sides, backs to the camera */
-const AUD=[],SKN=['#b0764f','#8a5a3a','#4a8a34','#c08d6b','#a06a48'],SHT=['#2a5a8a','#6b4a30','#7b3fa0','#2f7d5b','#a33a3a'];
-[-1,1].forEach(sd=>{for(let r=0;r<4;r++){const y=r*.55,z=2+r*1.5;if(r)B(8.8,y,1.5,wood,sd*6.6,y/2,z);for(let c=0;c<5;c++){const i=AUD.length,g=new T.Group(),sk=M(SKN[i%5]);g.position.set(sd*(3.4+c*1.7),y,z);g.rotation.y=Math.PI;
- B(.8,.8,.8,sk,0,1.6,0,g);if(i%3)B(.84,.4,.84,M('#3a2414'),0,1.95,0,g);if(i%3==1)B(.84,.8,.12,M('#3a2414'),0,1.6,-.4,g);B(.9,.8,.5,M(SHT[i%5]),0,.85,0,g);
- const arms=[-1,1].map(s=>{const a=new T.Group();a.position.set(s*.62,1.2,0);B(.28,.8,.28,sk,0,-.35,0,a);g.add(a);return a});sc.add(g);AUD.push({g,y,p:Math.random()*6,arms})}}});
-let clapUntil=0;const clap=ms=>clapUntil=performance.now()+ms;
-/* camera: sweep around the audience, then settle on the stage */
-const HP=new T.Vector3(0,3.7,10.5),HT=new T.Vector3(0,2.2,-3),CC=new T.Vector3(0,1.8,4.5);let sw=null;const sweep=s=>sw={s:performance.now(),d:s*1000};
-function camUpdate(now){if(sw){const u=(now-sw.s)/sw.d;if(u>=1)sw=null;else{const o=Math.min(1,u/.82),e=o*o*(3-2*o),a=-1.25+e*2.5,p=new T.Vector3(Math.sin(a)*9.5,3.4+Math.sin(e*Math.PI)*1.8,4.5+Math.cos(a)*9.5),k=u>.82?(u-.82)/.18:0,ks=k*k*(3-2*k);cam.position.copy(p.lerp(HP,ks));cam.lookAt(CC.clone().lerp(HT,ks));return}}cam.position.copy(HP);cam.lookAt(HT)}
+const GL=label('YOU',4.3),tags=()=>{};GL.visible=false;
+/* CLOCK: mounted on the back wall */
+const ck=E('canvas');ck.width=ck.height=128;const ckt=new T.CanvasTexture(ck);ckt.magFilter=ckt.minFilter=T.NearestFilter;const CLK=new T.Group();CLK.add(new T.Mesh(new T.BoxGeometry(1.25,1.25,.14),new T.MeshLambertMaterial({color:0x6b4a2a})));const ckFace=new T.Mesh(new T.PlaneGeometry(1.05,1.05),new T.MeshBasicMaterial({map:ckt,transparent:true}));ckFace.position.z=.08;CLK.add(ckFace);CLK.scale.setScalar(2.1);CLK.position.set(-11.4,6.3,-13.45);sc.add(CLK);
+let lastV=-1;function drawClk(v){const x=ck.getContext('2d');x.clearRect(0,0,128,128);x.fillStyle='#8a8a8a';x.fillRect(6,6,116,116);x.fillStyle='#3a3a3a';x.fillRect(12,12,104,104);x.fillStyle='#161616';x.fillRect(16,16,96,96);x.fillStyle=v<=7?'#ff4d4d':v<=15?'#ffb703':'#7cfc9a';x.font="bold 54px 'Press Start 2P',monospace";x.textAlign='center';x.textBaseline='middle';x.fillText(String(v),64,68);ckt.needsUpdate=true}
+setInterval(()=>{const v=Math.max(0,timerSeconds|0);if(v!==lastV){lastV=v;drawClk(v)}},120);drawClk(30);
+/* ---------- AUDIENCE: a crowd of different mobs ---------- */
+const AK=[{sk:'#b0764f',hair:'#3a2414',sh:'#2a8a9a'},{sk:'#d9a47f',hair:'#c9702a',sh:'#2f7d5b',pony:1},{sk:'#a67c5b',sh:'#7a5a3a'},{sk:'#5b9a3d',sh:'#2aa5b5',fwd:1},{sk:'#5cc45c',sh:'#4caf50',noArms:1},{sk:'#f0a8a8',sh:'#e89a9a',noArms:1,ears:1},{sk:'#dcdcdc',sh:'#cfcfcf',thin:1},{sk:'#101014',sh:'#15151a',thin:1,tall:1},{sk:'#c9c9c9',sh:'#bdbdbd',big:1},{sk:'#8fb36b',sh:'#5a2d82',hat:1},{sk:'#c08d6b',hair:'#1e140e',sh:'#a33a3a'},{sk:'#8a5a3a',hair:'#2a1a0e',sh:'#6b4a30'}];
+const AUD=[];
+[-1,1].forEach(sd=>{for(let r=0;r<4;r++){const y=r*.55,z=2+r*1.5;if(r)B(8.8,y,1.5,wood,sd*6.6,y/2,z);for(let c=0;c<5;c++){const i=AUD.length,k=AK[(rnd()*AK.length)|0],g=new T.Group(),w=k.thin?.55:k.big?1.05:.9;g.position.set(sd*(4.7+c*1.55),y,z);g.rotation.y=Math.PI;
+ B(.8,.8,.8,M(k.sk),0,1.6,0,g);if(k.hair){B(.84,.4,.84,M(k.hair),0,1.95,0,g);if(i%2)B(.84,.8,.12,M(k.hair),0,1.6,-.4,g)}if(k.pony)B(.25,.9,.25,M(k.hair),0,1.3,-.55,g);
+ if(k.ears){B(.22,.22,.12,M('#d98a8a'),-.28,2.1,0,g);B(.22,.22,.12,M('#d98a8a'),.28,2.1,0,g)}
+ if(k.hat){B(1.3,.12,1.3,M('#1a1a1a'),0,2.05,0,g);B(.8,.5,.8,M('#1a1a1a'),0,2.4,0,g);B(.45,.5,.45,M('#1a1a1a'),0,2.85,0,g);B(.82,.1,.82,M('#8a3ad8'),0,2.14,0,g)}
+ B(w,.8,.5,M(k.sh),0,.85,0,g);if(k.big)B(1.5,.35,.6,M(k.sh),0,1.3,0,g);
+ const arms=k.noArms?[]:[-1,1].map(s=>{const a=new T.Group();a.position.set(s*(w/2+.17),1.2,0);const t=k.thin?.2:.28;B(t,.8,t,M(k.sk),0,-.35,0,a);g.add(a);return a});
+ if(k.tall)g.scale.y=1.4;if(k.big)g.scale.setScalar(1.2);sc.add(g);AUD.push({g,y,p:Math.random()*6,arms,base:k.fwd?-1.5:0,wv:0})}}});
+/* ---------- life: fireflies, parrots, chickens ---------- */
+const FLY=[];for(let i=0;i<36;i++){const m=B(.12,.12,.12,BM(0x9dff3a),0,0,0);FLY.push({m,x:-14+Math.random()*28,y:1+Math.random()*7,z:-11+Math.random()*17,p:Math.random()*6})}
+const PAR=[['#d62828','#f77f00'],['#1d6fd8','#ffd60a'],['#32c04a','#d62828']].map(([a,b],k)=>{const g=new T.Group();B(.3,.5,.3,M(a),0,0,0,g);B(.26,.26,.26,M(b),0,.35,.12,g);B(.1,.1,.2,BM(0xffb703),0,.33,.3,g);const wl=new T.Group(),wr=new T.Group();wl.position.set(-.2,.1,0);wr.position.set(.2,.1,0);B(.5,.06,.3,M(a),-.25,0,0,wl);B(.5,.06,.3,M(a),.25,0,0,wr);g.add(wl);g.add(wr);sc.add(g);return{g,wl,wr,k}});
+const CH=[0,1].map(k=>{const g=new T.Group();B(.5,.45,.7,BM(0xf4f4f4),0,.45,0,g);B(.3,.35,.3,BM(0xffffff),0,.8,.4,g);B(.12,.1,.18,BM(0xff9a1a),0,.78,.6,g);B(.08,.12,.1,BM(0xe02020),0,1,.4,g);B(.06,.3,.06,BM(0xff9a1a),-.12,.15,0,g);B(.06,.3,.06,BM(0xff9a1a),.12,.15,0,g);g.position.set(k?1.2:-1.2,0,2+k*2);sc.add(g);return{g,tx:0,tz:3,w:0}});
+/* ---------- particles, confetti, fireworks ---------- */
+const PG=new T.BoxGeometry(1,1,1),PMs={},pm=c=>PMs[c]||(PMs[c]=new T.MeshBasicMaterial({color:c})),PS=[],CF=[],RK=[];
+function spark(p,col,sz,v,life,g){const m=new T.Mesh(PG,pm(col));m.scale.setScalar(sz);m.position.copy(p);sc.add(m);PS.push({m,v,life,max:life,g:g||0,sz})}
+function burstAt(p,cols,n,spd,sz,life,g){for(let i=0;i<n;i++){const v=new T.Vector3(Math.random()-.5,Math.random()-.5,Math.random()-.5).normalize().multiplyScalar(spd*(.4+Math.random()));spark(p,cols[i%cols.length],sz*(.6+Math.random()*.8),v,life*(.6+Math.random()*.6),g)}}
+const CFC=[0xff4d4d,0xffb703,0x4ade80,0x4ad8ff,0xff4ad8,0xffffff],CFG=new T.BoxGeometry(.2,.03,.3);
+function confetti(){const m=new T.Mesh(CFG,pm(CFC[(Math.random()*CFC.length)|0]));m.position.set(-13+Math.random()*26,11,-9+Math.random()*17);sc.add(m);CF.push({m,vy:-1.6-Math.random()*1.6,sx:Math.random()*8,sz:Math.random()*8,dr:(Math.random()-.5)*1.2})}
+function rocket(){const x=-10+Math.random()*20,z=-10+Math.random()*5,col=[[0xff4d4d,0xffb703],[0x4ade80,0xffffff],[0x4ad8ff,0xff4ad8],[0xffb703,0xff7a00]][(Math.random()*4)|0];const m=new T.Mesh(PG,pm(0xffffff));m.scale.setScalar(.2);m.position.set(x,.5,z);sc.add(m);RK.push({m,ty:6+Math.random()*3.2,col})}
+function tone(f0,f1,dur,type,vol){try{const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime;o.type=type||'sine';o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+dur);g.gain.setValueAtTime(vol||.1,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g);g.connect(OUT);o.start(t);o.stop(t+dur+.05)}catch(e){}}
+const zap=()=>{tone(1100,120,.45,'sawtooth',.07);tone(700,90,.5,'sine',.08)};
+/* ---------- state, tween list, camera ---------- */
+let GS=[1.25,1.25,1.25];let clapUntil=0,gaspUntil=0,partyUntil=0,arrow=null,busy=0,slo=0,fz=0,ep=0,sw=null;const TW=[];
+const clap=ms=>clapUntil=performance.now()+ms,later=(ms,fn)=>{const e=ep;setTimeout(()=>{if(e===ep)fn()},ms)},tween=(d,f,done)=>TW.push({t0:performance.now(),d,f,done});
+const sloEl=E('div');sloEl.style.cssText='position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .6s;z-index:3;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 45%,rgba(0,0,30,.75));box-shadow:inset 0 3.2vh 0 #000,inset 0 -3.2vh 0 #000';S.append(sloEl);
+const setSlo=on=>{slo=on?1:0;sloEl.style.opacity=on?1:0};
+const HP=new T.Vector3(0,3.7,10.5),HT=new T.Vector3(0,2.2,-3),CC=new T.Vector3(0,1.8,4.5),CP2=new T.Vector3(6,3.4,4.2),LT2=new T.Vector3(1.6,2.4,-4.4);
+const sweep=s=>sw={s:performance.now(),d:s*1000};
+const ZH=new T.Vector3(-3.7,3.0,-.2),ZHL=new T.Vector3(-4.3,2.78,-3.6),ZG=new T.Vector3(3.7,3.0,-.2),ZGL=new T.Vector3(4.3,2.78,-3.6),AP=new T.Vector3(0,6.2,16.5),AL=new T.Vector3(0,1.8,-1.5);
+let zh=0,zg=0,za=0,zb=0,hH=-1e9,hG=-1e9,gWas=false,gMode='g';const ZB=new T.Vector3(0,3.3,6.6),ZBL=new T.Vector3(0,2.3,-3.6),HOLD=3200;window.mcCamForce=null;
+function camUpdate(now){fz+=((slo?1:0)-fz)*.05;
+ if(sw&&fz<.02){const u=(now-sw.s)/sw.d;if(u>=1)sw=null;else{const o=Math.min(1,u/.82),e=o*o*(3-2*o),a=-1.25+e*2.5,p=new T.Vector3(Math.sin(a)*9.5,3.4+Math.sin(e*Math.PI)*1.8,4.5+Math.cos(a)*9.5),k=u>.82?(u-.82)/.18:0,ks=k*k*(3-2*k);cam.position.copy(p.lerp(HP,ks));cam.lookAt(CC.clone().lerp(HT,ks));cam.fov=48;cam.updateProjectionMatrix();return}}
+ const cl=now<clapUntil,ok=!slo&&fz<.05&&!busy;
+ const dtc=Math.min(.12,(now-(camUpdate.l||now))/1000);camUpdate.l=now;const f1=1-Math.exp(-dtc*2.6),f2=1-Math.exp(-dtc*2);
+ /* speaker-hold camera: a short pause between sentences never zooms out */
+ if(H.talking)hH=now;if(G.talking){hG=now;if(!gWas)gMode=Math.random()<.5?'g':'b'}gWas=!!G.talking;
+ let tg=null;const F=window.mcCamForce;
+ if(F)tg=F;else if(now-Math.max(hH,hG)<HOLD)tg=hH>=hG?'h':gMode;
+ const wide=!tg&&cl;
+ zh+=(((ok&&tg==='h')?1:0)-zh)*f1;zg+=(((ok&&tg==='g')?1:0)-zg)*f1;zb+=(((ok&&tg==='b')?1:0)-zb)*f1;za+=(((ok&&wide)?1:0)-za)*f2;
+ const pos=HP.clone().lerp(CP2,fz).lerp(ZH,zh).lerp(ZG,zg).lerp(ZB,zb).lerp(AP,za),look=HT.clone().lerp(LT2,fz).lerp(ZHL,zh).lerp(ZGL,zg).lerp(ZBL,zb).lerp(AL,za),fov=48+za*16-(zh+zg)*6-zb*8;
+ window.__closeUp=(zh+zg+zb)>.3;
+ cam.position.copy(pos);cam.lookAt(look);if(Math.abs(cam.fov-fov)>.05){cam.fov=fov;cam.updateProjectionMatrix()}}
 new ResizeObserver(()=>{const w=S.clientWidth,h=S.clientHeight;if(!w||!h)return;ren.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}).observe(S);
-let arrow=null;
-function shoot(){const a=new T.Group();B(.07,.07,1.4,M('#8b5a2b'),0,0,0,a);B(.12,.12,.25,M('#dddddd'),0,0,.8,a);const s=SKL.g.position.clone().add(new T.Vector3(.8,1.9,.5)),e=G.g.position.clone().add(new T.Vector3(0,2.3,.3));a.position.copy(s);sc.add(a);SKL.arms(1);arrow={a,s,e,t0:performance.now()+350}}
-(function loop(now){requestAnimationFrame(loop);if(!S.clientWidth)return;const t=now/1000;
- [H,G,SKL,CR].forEach(P=>{P.head.position.y=2.25+(P.talking?Math.abs(Math.sin(t*9))*.07:0);if(P.al){P.al.rotation.x+=((P.u?-2.7:0)-P.al.rotation.x)*.18;P.ar.rotation.x+=((P.o.aim?(P.u?-1.5:0):(P.u?-2.7:0))-P.ar.rotation.x)*.18}P.g.rotation.z+=((P.fall?-1.5:0)-P.g.rotation.z)*.12});CR.g.rotation.y=Math.sin(t*1.3)*.12;
- const cl=now<clapUntil;AUD.forEach(a=>{a.g.position.y=a.y+(cl?Math.abs(Math.sin(t*10+a.p))*.35:Math.sin(t*1.7+a.p)*.04);a.arms.forEach((m,i)=>{m.rotation.x+=((cl?-2.4:0)-m.rotation.x)*.25;m.rotation.z=cl?(i?-1:1)*(.3+Math.sin(t*22)*.3):0})});
- if(arrow&&now>arrow.t0){const u=Math.min(1,(now-arrow.t0)/700),p=arrow.s.clone().lerp(arrow.e,u);p.y+=Math.sin(u*Math.PI)*1.2;arrow.a.position.copy(p);arrow.a.lookAt(arrow.e);if(u>=1){sc.remove(arrow.a);arrow=null;G.setFall(1);G.arms(1);SKL.arms(0);tint(G.g,0xaa0000);setTimeout(()=>tint(G.g,0),700);try{playBuzzer()}catch(e){}}}
- camUpdate(now);ren.render(sc,cam)})(0);
-/* clock, lip sync and game hooks */
-const clk=E('div');clk.id='bigclk';S.append(clk);setInterval(()=>{const v=Math.max(0,timerSeconds|0);clk.textContent=v;clk.className=v<=7?'dng':v<=15?'warn':''},200);
+/* ---------- WRONG ANSWER: slow-motion arrow, then the Enderman kidnaps the player ---------- */
+function shoot(onHit,onFire){const a=new T.Group();B(.07,.07,1.4,M('#8b5a2b'),0,0,0,a);B(.12,.12,.25,M('#dddddd'),0,0,.8,a);a.visible=false;sc.add(a);
+ SKL.fly=1;SKL.wan=0;const p0=SKL.g.position.clone(),p1=new T.Vector3(1.5,3.1,-2.3),gp=G.g.position;const face=Math.atan2(gp.x-p1.x,gp.z-p1.z);
+ tween(2600,u=>{const e=u*u*(3-2*u);SKL.g.position.set(p0.x+(p1.x-p0.x)*e,p0.y+(p1.y-p0.y)*e+Math.sin(u*9)*.12,p0.z+(p1.z-p0.z)*e);let da=face-SKL.g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));SKL.g.rotation.y+=da*.1;if(Math.random()<.35)spark(SKL.g.position.clone().add(new T.Vector3(0,.2,0)),0xdddddd,.08,new T.Vector3(0,-.4,0),.6,0)},()=>{
+  SKL.arms(1);const s=SKL.g.position.clone().add(new T.Vector3(.9,1.9,.3)),e=G.g.position.clone().add(new T.Vector3(0,2.3,.3));a.position.copy(s);arrow={a,s,e,t0:performance.now()+500,d:2800,onHit};if(onFire)onFire()})}
+function hit(){try{window.mcCoffinPlay&&mcCoffinPlay()}catch(e){}G.setFall(1);G.arms(1);SKL.arms(0);tint(G.g,0xaa0000);setTimeout(()=>tint(G.g,0),700);gaspUntil=performance.now()+3000;tone(180,60,.35,'square',.12);burstAt(G.g.position.clone().add(new T.Vector3(0,2.2,0)),[0xff2222,0xaa0000],26,3,.14,.9,6);later(1200,enderIn)}
+function enderIn(){const gp=G.g.position;ENDER.g.position.set(gp.x-1.7,0,gp.z+.5);ENDER.g.rotation.y=.9;ENDER.g.scale.set(...ES);ENDER.g.visible=true;burstAt(ENDER.g.position.clone().add(new T.Vector3(0,2.6,0)),[0xc040ff,0x7a1fd0,0xff80ff],55,3.2,.14,1,0);zap();ENDER.talk(1);later(1500,()=>ENDER.talk(0));later(600,()=>ENDER.arms(1));later(1700,carry)}
+function carry(){G.setFall(1);G.arms(0);const g0=G.g.position.clone(),ex=ENDER.g.position.x,ez=ENDER.g.position.z;ENDER.g.rotation.y=Math.PI/2;ENDER.arms(1);
+ tween(1100,u=>{G.g.position.set(g0.x+(ex-1.5-g0.x)*u,2.3*u,g0.z+(ez-g0.z)*u)},()=>{
+  tween(3600,u=>{const x=ex+u*u*15;ENDER.g.position.x=x;ENDER.g.position.y=Math.abs(Math.sin(u*34))*.12;G.g.position.set(x-1.5,2.3,ez)},()=>later(200,vanish))})}
+function vanish(){zap();const pe=ENDER.g.position.clone().add(new T.Vector3(0,2.6,0));burstAt(pe,[0xc040ff,0x7a1fd0,0xff80ff],60,4,.16,1.2,0);
+ tween(700,u=>{const k=Math.max(.001,1-u);ENDER.g.scale.set(ES[0]*k,ES[1]*k,ES[2]*k);G.g.scale.set(GS[0]*k,GS[1]*k,GS[2]*k)},()=>{ENDER.g.visible=false;G.g.visible=false;GL.visible=false;setSlo(false)})}
+
+/* ---------- player character = the mob chosen at registration ---------- */
+const MOBS={
+ steve:{skin:'#b98a68',body:'#1fa6b3',legs:'#3b3b9a',fd:(r,m)=>{r(0,0,8,2,'#3a2414');r(1,3,2,1,'#fff');r(5,3,2,1,'#fff');r(2,3,1,1,'#3b3bd0');r(5,3,1,1,'#3b3bd0');r(3,4,2,1,'#9a6a4a');r(2,6,4,[1,2,2][m],'#6a3328')}},
+ zombie:{skin:'#5b9a3d',body:'#2aa5b5',legs:'#3a3aa8',fd:(r,m)=>{r(1,3,2,1,'#111');r(5,3,2,1,'#111');r(3,4,2,1,'#3f7a2a');r(1,5,6,[1,2,3][m],'#243a1a')}},
+ creeper:{skin:'#5cc45c',body:'#4caf50',legs:'#3f9a44',noArms:1,fd:(r,m)=>{r(1,2,2,2,'#111');r(5,2,2,2,'#111');r(3,4,2,2,'#111');r(2,6,4,[2,3,3][m],'#111')}},
+ skeleton:{skin:'#dcdcdc',body:'#cfcfcf',legs:'#d4d4d4',fd:(r,m)=>{r(1,3,2,2,'#222');r(5,3,2,2,'#222');r(3,5,2,1,'#999');r(2,6,4,[1,2,2][m],'#333')}},
+ enderman:{skin:'#14141a',body:'#191920',legs:'#191920',sc:[1.05,1.7,1.05],fd:(r,m)=>{r(1,4,2,1,'#e040ff');r(5,4,2,1,'#e040ff');r(2,6,4,[1,2,3][m],'#3a003f')}},
+ pig:{skin:'#f0a8a8',body:'#e89a9a',legs:'#df8a8a',fd:(r,m)=>{r(1,2,1,1,'#222');r(6,2,1,1,'#222');r(2,4,4,3,'#d98080');r(3,5,1,1,'#7a3a3a');r(4,5,1,1,'#7a3a3a');if(m)r(3,7,2,1,'#7a3a3a')}},
+ witch:{skin:'#8f7a52',body:'#5a2d82',legs:'#2a1a40',hat:1,fd:(r,m)=>{r(1,3,2,1,'#2a2a2a');r(5,3,2,1,'#2a2a2a');r(1,3,1,1,'#7cfc9a');r(5,3,1,1,'#7cfc9a');r(3,4,2,2,'#6a5238');r(3,5,1,1,'#3a5a2a');r(2,6,4,[1,2,2][m],'#3a1a1a')}}
+};
+let GHAT=null;
+window.mcSetMob=function(k){const d=MOBS[k]||MOBS.zombie,o=G.o,ch=G.g.children;
+ o.skin=d.skin;o.fd=d.fd;const sk=M(d.skin),fm=G.head.material[4];G.head.material=[sk,sk,sk,sk,fm,sk];
+ ch[1].material=M(d.body);ch[2].material=M(d.legs);ch[3].material=M(d.legs);
+ [G.al,G.ar].forEach(a=>{if(a){a.children[0].material=M(d.skin);a.visible=!d.noArms}});
+ if(GHAT){G.head.remove(GHAT);GHAT=null}
+ if(d.hat){const g=new T.Group(),hm=M('#2a1a40');const b1=B(1.5,.08,1.5,hm,0,.5,0,g),b2=B(.8,.35,.8,hm,0,.72,0,g),b3=B(.55,.35,.55,hm,.05,1.05,0,g),b4=B(.3,.3,.3,hm,.12,1.35,0,g);B(.82,.08,.82,M('#8a3ad8'),0,.6,0,g);G.head.add(g);GHAT=g}
+ GS=d.sc?[1.3,1.75,1.3]:[1.25,1.25,1.25];{const hy=2.25*GS[1];ZG.y=hy+.2;ZGL.y=hy-.02}
+ if(!(typeof busy!=='undefined'&&busy))G.g.scale.set(GS[0],GS[1],GS[2]);
+ G.face(0)};
+if(window.__mcMob)mcSetMob(window.__mcMob);
+window.mcReset=function(){ep++;busy=0;SKL.fly=0;SKL.g.position.y=0;SKL.g.visible=true;if(arrow)sc.remove(arrow.a);arrow=null;TW.length=0;G.g.visible=true;G.g.scale.set(GS[0],GS[1],GS[2]);G.g.position.set(4.3,0,-3.6);G.g.rotation.y=0;G.setFall(0);G.arms(0);ENDER.g.visible=false;ENDER.arms(0);GL.visible=false;SKL.arms(0);tint(G.g,0);setSlo(false);partyUntil=0;document.body.classList.remove('partying')};
+const _hd=window.handleDefeat;window.handleDefeat=function(){const self=this,a=arguments;if(busy)return;busy=1;const tu=!!window.__timeUp;window.__timeUp=0;window.__tuFlag=tu;try{qLocked=true}catch(e){}clearInterval(timerInterval);try{stopSpeech()}catch(e){}
+ if(tu){try{const bs=document.querySelectorAll('.opt-btn');if(currentQ&&bs[currentQ.ans])bs[currentQ.ans].classList.add('correct')}catch(e){}}
+ let go=0;const start=()=>{if(go)return;go=1;setSlo(true);tone(320,55,3.4,'sine',.08);
+  shoot(()=>_hd.apply(self,a),()=>{try{guest.react('disbelief')}catch(e){}speakAs('guest',tu?pick(['Oh no! My time ran out! Skeleton, wait, please!','No! The clock finished already! I need more time!','Aaaah! Thirty seconds are gone! Please do not shoot!']):pick(['Oh no! Wait, wait, wait! Not the arrow!','No no no! Please, I am not ready!','Aaaah! Skeleton, please do not shoot!']),()=>{})})};
+ try{host.react('sad')}catch(e){}
+ speakTextHuman(tu?pick(['Oh no! Thirty seconds are finished, which means we can no longer continue the game. I am so sorry!','Oh no, the thirty seconds are over! That means we cannot continue the game any longer. I am sorry!','Oh dear, time is up! The thirty seconds have finished, so the game must stop here. I am sorry!']):pick(['Oh no, I am afraid, this is the wrong answer!','Oh no... I am afraid that is the wrong answer!','Oh dear, I am afraid this is not the correct answer!']),null,()=>setTimeout(start,300));
+ setTimeout(start,9000)};
+/* ---------- WIN: fireworks, confetti, everybody dances ---------- */
+function party(ms){partyUntil=performance.now()+ms;document.body.classList.add('partying');const n=[523,659,784,1047,784,1047,1319,1047,988,1175,1568,1175,1319,1568,2093];n.forEach((f,i)=>later(i*170,()=>tone(f,f*1.002,.3,'triangle',.07)));
+ const iv=setInterval(()=>{if(performance.now()>partyUntil||!document.body.classList.contains('partying')){clearInterval(iv);document.body.classList.remove('partying');return}rocket();if(Math.random()<.6)rocket()},380)}
+const _lc=window.levelComplete;window.levelComplete=function(){party(14000);return _lc.apply(this,arguments)};
+const _sw=window.showWinnerPopup;window.showWinnerPopup=function(title){if(!/game over/i.test(String(title)))party(9000);return _sw.apply(this,arguments)};
+/* ---------- CLAPPING: only on a correct answer, big wins, and when the host asks for applause ---------- */
+const _pc=window.playCheer;window.playCheer=function(big){if(big)clap(3400);return _pc.apply(this,arguments)};
+const _pa=window.playApplause;window.playApplause=function(){clap(2300);return _pa.apply(this,arguments)};
+const _sth=window.speakTextHuman;window.speakTextHuman=function(text,onStart,onEnd){const cap=gid('mc-cap');
+ if(cap&&gid('mc-skip')&&cap.textContent===text){   /* intro line: no automatic cheering */
+  const app=/applause/i.test(text);
+  return _sth.call(this,text,null,app?()=>{if(!gid('mc-skip'))return onEnd&&onEnd();playCheer(true);try{crowdReact('cheer',1)}catch(e){}setTimeout(()=>onEnd&&onEnd(),2800)}:onEnd)}
+ return _sth.apply(this,arguments)};
+window.mcClap=()=>{};window.mcSweep=sweep;window.mcStopSweep=()=>{sw=null};
+const _rv=window.reveal;window.reveal=function(sel){if(currentQ&&sel===currentQ.ans){G.arms(1,2400);H.arms(1,2000)}return _rv.apply(this,arguments)};
+const _ln=window.loadNextQuestion;window.loadNextQuestion=function(){window.mcReset();tags();return _ln.apply(this,arguments)};
+const _rgs=window.resetGameState;window.resetGameState=function(){const r=_rgs.apply(this,arguments);try{window.mcReset()}catch(e){}return r};
 [['host',H],['guest',G]].forEach(([k,P])=>{const e=gid('m-'+k);if(e)new MutationObserver(()=>P.talk(e.classList.contains('talk'))).observe(e,{attributes:true,attributeFilter:['class']})});
-const _hd=window.handleDefeat;window.handleDefeat=function(){shoot();return _hd.apply(this,arguments)};
-const _rv=window.reveal;window.reveal=function(sel){if(currentQ&&sel===currentQ.ans){clap(3600);G.arms(1,2400);H.arms(1,2000)}return _rv.apply(this,arguments)};
-const _ln=window.loadNextQuestion;window.loadNextQuestion=function(){G.setFall(0);tint(G.g,0);G.arms(0);SKL.arms(0);tags();return _ln.apply(this,arguments)};
-window.mcSweep=sweep;window.mcStopSweep=()=>{sw=null};window.mcClap=clap;
+/* ---------- main loop ---------- */
+let last=performance.now(),wasPt=false;const V3=new T.Vector3();
+(function loop(now){requestAnimationFrame(loop);if(!S.clientWidth)return;const t=now/1000,dt=Math.min(.05,(now-last)/1000);last=now;
+ const pt=now<partyUntil,cl=now<clapUntil,gp=now<gaspUntil;
+ [H,G,SKL,CR,ENDER].forEach((P,k)=>{const dance=pt&&P!==ENDER&&!(P===G&&busy);P.head.position.y=2.25+(P.talking?Math.abs(Math.sin(t*9))*.07:0);
+  if(dance)P.u=1;
+  if(P.al){const tg=P===ENDER?(P.u?-1.5:0):(P.u?-2.7:0);P.al.rotation.x+=(tg-P.al.rotation.x)*.18;P.ar.rotation.x+=((P.o.aim?(P.u?-1.5:0):tg)-P.ar.rotation.x)*.18;const wz=dance?Math.sin(t*8+k)*.6:0;P.al.rotation.z+=(wz-P.al.rotation.z)*.2;P.ar.rotation.z+=(-wz-P.ar.rotation.z)*.2}
+  P.g.rotation.z+=((P.fall?-1.5:0)-P.g.rotation.z)*.12;
+  if(P!==ENDER&&!(P===G&&busy)&&!(P.wan&&!pt)){P.g.position.y+=((dance?Math.abs(Math.sin(t*6+k))*.35:0)-P.g.position.y)*.3;P.g.rotation.y+=((dance?Math.sin(t*4+k)*.5:0)-P.g.rotation.y)*.2}});
+ if(wasPt&&!pt)[H,G,SKL].forEach(P=>P.arms(0));wasPt=pt;
+ /* background wanderers: skeleton + creeper stroll behind the host and guest */
+ WN.forEach((w,k)=>{const P=w.P,g=P.g;if(P.fly||busy&&P===G)return;P.wan=!pt;if(pt)return;const dx=w.tx-g.position.x,dz=w.tz-g.position.z,d=Math.hypot(dx,dz);
+  if(d<.15){g.rotation.y+=(0-g.rotation.y)*.1;g.position.y*=.8;if(now>w.w){w.tx=-7.5+Math.random()*15;w.tz=-8.2+Math.random()*2.7;w.w=now+1200+Math.random()*3500}}
+  else{g.position.x+=dx/d*.85*dt;g.position.z+=dz/d*.85*dt;const ta=Math.atan2(dx,dz);let da=ta-g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));g.rotation.y+=da*.12;g.position.y=Math.abs(Math.sin(t*8+k))*.08}});
+ {const cu=window.__closeUp&&!busy;[SKL,CR].forEach(P=>{if(!P.fly)P.g.visible=!cu});CH.forEach(c=>c.g.visible=!cu)}
+ if(pt||!CR.wan)CR.g.rotation.y+=((pt?Math.sin(t*4)*.5:Math.sin(t*1.3)*.12)-CR.g.rotation.y)*.2;
+ AUD.forEach((a,i)=>{let y=a.y+Math.sin(t*1.7+a.p)*.04,ry=Math.PI,ax=a.base,az=0;
+  if(cl){y=a.y+Math.abs(Math.sin(t*10+a.p))*.35;ax=-2.4;az=.3+Math.sin(t*22)*.3}
+  else if(gp){y=a.y+Math.abs(Math.sin(t*30+a.p))*.05;ax=-2.9;az=.9}
+  else if(pt){y=a.y+Math.abs(Math.sin(t*7+a.p))*.4;ry=Math.PI+Math.sin(t*5+a.p)*.9;ax=-2.6+Math.sin(t*9+a.p)*.5;az=Math.sin(t*9+a.p)*.4}
+  else{if(now>a.wv+4000+a.p*900&&Math.random()<.004)a.wv=now+1600}
+  const waving=!cl&&!gp&&!pt&&now<a.wv;a.g.position.y=y;a.g.rotation.y=ry;
+  a.arms.forEach((m,j)=>{const tx=waving&&j?-2.6:ax,tz=waving&&j?.5+Math.sin(t*12)*.4:(j?-1:1)*az;m.rotation.x+=(tx-m.rotation.x)*.25;m.rotation.z+=(tz-m.rotation.z)*.25})});
+ TOR.forEach((f,k)=>{f.scale.y=1+.35*Math.sin(t*13+k*2)+.15*Math.sin(t*29+k);f.scale.x=f.scale.z=1+.12*Math.sin(t*17+k)});PLs.forEach((l,k)=>l.intensity=1.5+Math.sin(t*17+k)*.3);
+ SPOT.forEach(s=>{const sp=pt?3.2:.7;s.p.rotation.z=Math.sin(t*sp+s.k*1.7)*(pt?.7:.35);s.p.rotation.x=Math.cos(t*sp*.8+s.k)*(pt?.5:.25);s.m.material.opacity=pt?.2:.1});
+ LED.forEach((m,i)=>m.material.color.setHSL((t*(pt?.8:.2)+i/24)%1,.9,.55));SCR.material.color.setRGB(1,1,1);
+ FLY.forEach(f=>{f.m.position.set(f.x+Math.sin(t*.6+f.p)*1.2,f.y+Math.sin(t*.9+f.p*2)*.6,f.z+Math.cos(t*.5+f.p)*1)});
+ PAR.forEach(p=>{const a=t*.55+p.k*2.1;p.g.position.set(Math.cos(a)*9,6.6+Math.sin(t+p.k)*.6,-2+Math.sin(a)*5);p.g.rotation.y=-a;p.wl.rotation.z=Math.sin(t*14)*.8;p.wr.rotation.z=-Math.sin(t*14)*.8});
+ CH.forEach(c=>{const g=c.g,dx=c.tx-g.position.x,dz=c.tz-g.position.z,d=Math.hypot(dx,dz);if(d<.15){if(now>c.w){c.tx=-1.8+Math.random()*3.6;c.tz=1+Math.random()*6;c.w=now+800+Math.random()*2500}}else{g.position.x+=dx/d*.9*dt;g.position.z+=dz/d*.9*dt;g.rotation.y=Math.atan2(dx,dz);g.position.y=Math.abs(Math.sin(t*10))*.08}});
+ CLK.scale.setScalar(2.1*(lastV<=7&&lastV>0?1+Math.abs(Math.sin(t*6))*.1:1));
+ if(arrow&&now>arrow.t0){arrow.a.visible=true;const u=Math.min(1,(now-arrow.t0)/arrow.d),p=arrow.s.clone().lerp(arrow.e,u);p.y+=Math.sin(u*Math.PI)*.6;arrow.a.position.copy(p);arrow.a.lookAt(arrow.e);if(Math.random()<.5)spark(p,0xffffff,.09,V3.set(0,.05,0).clone(),.7,0);
+  if(u>=1){const cb=arrow.onHit;sc.remove(arrow.a);arrow=null;hit();if(cb)cb()}}
+ for(let i=TW.length-1;i>=0;i--){const w=TW[i],u=Math.min(1,(now-w.t0)/w.d);w.f(u);if(u>=1){TW.splice(i,1);if(w.done)w.done()}}
+ for(let i=PS.length-1;i>=0;i--){const q=PS[i];q.v.y-=q.g*dt;q.m.position.addScaledVector(q.v,dt);q.life-=dt;q.m.scale.setScalar(q.sz*Math.max(0,q.life/q.max));if(q.life<=0){sc.remove(q.m);PS.splice(i,1)}}
+ if(pt&&CF.length<260)for(let k=0;k<4;k++)confetti();
+ for(let i=CF.length-1;i>=0;i--){const c=CF[i];c.m.position.y+=c.vy*dt;c.m.position.x+=c.dr*dt;c.m.rotation.x+=c.sx*dt;c.m.rotation.z+=c.sz*dt;if(c.m.position.y<.1||(!pt&&c.m.position.y<5&&Math.random()<.02)){sc.remove(c.m);CF.splice(i,1)}}
+ for(let i=RK.length-1;i>=0;i--){const r=RK[i];r.m.position.y+=9*dt;if(Math.random()<.7)spark(r.m.position.clone(),0xffd56a,.1,new T.Vector3(0,-.3,0),.45,0);if(r.m.position.y>=r.ty){burstAt(r.m.position.clone(),[...r.col,0xffffff],70,5.5,.16,1.4,3);tone(180+Math.random()*120,40,.5,'sawtooth',.05);sc.remove(r.m);RK.splice(i,1)}}
+ camUpdate(now);ren.render(sc,cam)})(performance.now());
 })();
 </script>
 <script>
@@ -2197,22 +2372,28 @@ window.offerBreak=function(next){if(localStorage.getItem('mc_nobreak')==='1')ret
  T=pick([[['host',`So ${u}, what is the first thing you build when you spawn in a new world?`],['guest',`Honestly, a tiny dirt house, and then I dig straight down to find diamonds.`],['host',`Ha! Brave. I once dug straight down and landed in a lava lake. Never again.`],['guest',`Oh no! Did you lose all your stuff?`],['host',`Everything! My best pickaxe is still down there somewhere.`],['guest',`That is a classic Minecraft story. Everyone has one.`]],
  [['host',`Tell me, ${u}, do you have a favourite mob? Mine is the villager, obviously.`],['guest',`Of course you like villagers! I like wolves, the tame ones. They follow you everywhere.`],['host',`Good choice. Loyal, and they never ask for emeralds.`],['guest',`Ha ha! Unlike villagers, who always want a trade.`],['host',`Hmm hmm hmm! I will pretend I did not hear that.`],['guest',`Just joking, you are the best host in the whole world.`]],
  [['host',`How is your day going so far, ${u}? Did you have a good breakfast?`],['guest',`Yes! Pancakes with honey. I think they gave me the brain power for these questions.`],['host',`That explains a lot. Pancakes are the secret ingredient of every champion.`],['guest',`Then you must have eaten a whole bakery. You are always so cheerful.`],['host',`Ha ha! Maybe. A happy host makes a happy show.`],['guest',`And a happy crowd. Look at them, they are all smiling.`]]]);
- music(true);speakTextHuman(pick([`You are playing pretty well, ${u}! Now it is time for a quick break. Let us play some music and relax for a moment.`,`${u}, that was impressive! Time for a quick break. Music, please!`]),null,()=>chain(T,()=>{music(false);speakTextHuman(pick([`Welcome back, ${u}! Ready for the next question?`,`Alright, enough chatting! Back to the game.`,`That was fun! Now let us climb the next step. Here comes your next question!`]),null,next)}))};
+ window.mcAd&&mcAd(true);music(true);speakTextHuman(pick([`You are playing pretty well, ${u}! Now it is time for a quick break. Let us play some music and relax for a moment.`,`${u}, that was impressive! Time for a quick break. Music, please!`]),null,()=>chain(T,()=>{window.mcAd&&mcAd(false);music(false);speakTextHuman(pick([`Welcome back, ${u}! Ready for the next question?`,`Alright, enough chatting! Back to the game.`,`That was fun! Now let us climb the next step. Here comes your next question!`]),null,next)}))};
 /* ---- new intro: camera tour + theme music, then full introduction with skip, then game ---- */
 let theme=null,fb=0,CV=.07,cmt=0;const calmN=[262,330,392,330,294,349,440,349,330,392,494,392,262,392,330,196];
 function calm(on){clearInterval(cmt);if(!on)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();let i=0;cmt=setInterval(()=>{const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=calmN[i++%16];g.gain.setValueAtTime(CV,AC.currentTime);g.gain.exponentialRampToValueAtTime(.0005,AC.currentTime+1.1);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+1.1)},520)}catch(e){}}
 const fbk=()=>{if(!fb){fb=1;theme=null;calm(true)}};
-function themeStart(){fb=0;CV=.07;try{theme=new Audio('theme.mp3');theme.loop=true;theme.volume=.6;theme.addEventListener('error',fbk);const p=theme.play();p&&p.catch&&p.catch(fbk)}catch(e){fbk()}}
+function themeStart(){fb=0;CV=.07;try{const srcs=['chicken-lava.mp3','lava-chicken.mp3','theme.mp3'];let k=0;const tryNext=()=>{if(k>=srcs.length)return fbk();const a=new Audio(srcs[k++]);a.loop=true;a.volume=.6;let bad=0;const nx=()=>{if(bad)return;bad=1;if(theme===a)theme=null;tryNext()};a.addEventListener('error',nx);theme=a;const pr=a.play();pr&&pr.catch&&pr.catch(nx)};tryNext()}catch(e){fbk()}}
 function themeStop(){clearInterval(cmt);if(theme){try{theme.pause()}catch(e){}theme=null}fb=1}
-const clean=()=>{themeStop();['mc-skip','mc-cap'].forEach(i=>{const e=gid(i);e&&e.remove()});window.mcStopSweep&&mcStopSweep()};
+/* one proper intro jingle right before the first question */
+function introMusic(cb){let fin=0;const end=()=>{if(fin)return;fin=1;cb()};
+ try{if(theme&&!fb){const a=theme;a.volume=.85;setTimeout(()=>{let v=a.volume;const f=setInterval(()=>{v-=.08;if(v<=.12){clearInterval(f);a.volume=.12}else a.volume=v},80);end()},5200);return}}catch(e){}
+ try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();const t0=AC.currentTime+.05;
+  const N=(f,d,l,ty,v)=>{const o=AC.createOscillator(),g=AC.createGain();o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(.0001,t0+d);g.gain.exponentialRampToValueAtTime(v,t0+d+.02);g.gain.exponentialRampToValueAtTime(.0005,t0+d+l);o.connect(g);g.connect(AC.destination);o.start(t0+d);o.stop(t0+d+l+.05)};
+  [[523,0,.22],[659,.22,.22],[784,.44,.22],[1047,.66,.5],[988,1.2,.2],[1047,1.4,.2],[1319,1.6,.7],[784,2.4,.2],[988,2.6,.2],[1175,2.8,.2],[1568,3.0,1]].forEach(n=>N(n[0],n[1],n[2],'square',.06));
+  [[131,0,.6],[165,.66,.6],[196,1.4,.9],[131,2.4,.5],[196,3.0,1]].forEach(n=>N(n[0],n[1],n[2],'triangle',.12))}catch(e){}
+ setTimeout(end,4300)}
+const clean=()=>{window.mcCamForce=null;themeStop();['mc-skip','mc-cap'].forEach(i=>{const e=gid(i);e&&e.remove()});window.mcStopSweep&&mcStopSweep()};
 window.showIntro=function(kind){const tok=++introTok,s=S();gid('intro').classList.remove('on');stopSpeech();clean();
- let L;if(kind==='level')L=[{t:`Welcome to Level ${s.level}, ${username}! The questions get tougher, but so do you.`,c:1},{t:`Same rules: fifteen questions, safety nets at five and ten, and three fresh lifelines. Let's play!`,c:1}];
- else if(kind==='continue')L=[{t:`Welcome back ${username}! You are on Level ${s.level}, question ${s.idx+1}. Let's pick up right where we left off!`,c:1}];
- else L=[{t:`Ladies and gentlemen, welcome to Who Wants to Be a Minecraft Legend!`,c:1},{t:gameMode==='pvp'?`Tonight it's ${username} versus ${opponentName}!`:`Tonight's brave contestant is ${username}! Give them a block shaking round of applause!`,c:1},{t:`Fifteen questions per level, four answers each, thirty seconds on the clock. Safety nets at five and ten, and three lifelines: fifty fifty, ask the audience, or phone a friend.`},{t:`Let's play!`,c:1}];
+ let L=window.mcIntroLines(kind,s);
  const sk=document.createElement('button'),cp=document.createElement('div');sk.id='mc-skip';sk.textContent='SKIP INTRO ▶';cp.id='mc-cap';document.body.append(sk);(gid('studio-stage-container')||document.body).append(cp);
  const done=()=>{if(tok!==introTok)return;introTok++;stopSpeech();clean();setTimeout(loadNextQuestion,300)};sk.onclick=done;
  themeStart();const A=window.mcSweep?16:2;if(window.mcSweep)mcSweep(A);
- setTimeout(()=>{if(tok!==introTok)return;CV=.02;if(theme)theme.volume=.15;playFanfare();let i=0;const next=()=>{if(tok!==introTok)return;if(i>=L.length)return done();const l=L[i++];cp.textContent=l.t;cp.style.display='block';speakTextHuman(l.t,()=>{if(l.c){playCheer(true);crowdReact('cheer',1);window.mcClap&&mcClap(2600)}},()=>setTimeout(next,350))};next()},A*1000+300)};
+ setTimeout(()=>{if(tok!==introTok)return;CV=.02;if(theme)theme.volume=.15;playFanfare();let i=0;const next=()=>{if(tok!==introTok)return;if(i>=L.length)return done();const l=L[i++];cp.textContent=l.t;cp.style.display='block';window.mcCamForce=l.g?'g':(l.cam||'h');if(l.g)return speakAs('guest',l.t,()=>setTimeout(next,450));speakTextHuman(l.t,()=>{if(l.c){playCheer(true);crowdReact('cheer',1);window.mcClap&&mcClap(2600)}},l.j?()=>{window.mcCamForce='w';playCheer(true);try{crowdReact('cheer',1)}catch(e){}introMusic(()=>setTimeout(next,300))}:()=>setTimeout(next,350))};next()},A*1000+300)};
 addEventListener('keydown',e=>{if(e.key==='Escape'){const b=gid('mc-skip');b&&b.click()}});
 const _rg=window.resetGameState;window.resetGameState=function(){const r=_rg.apply(this,arguments);try{clean()}catch(e){}return r};
 /* final answer: YES / LET ME CHANGE (one change per question) */
@@ -2235,6 +2416,322 @@ const _mc=window.mobClick;window.mobClick=function(k,d,cv){if(d.dataset.busy)ret
  document.querySelectorAll('#mobs2 canvas,#mobs canvas,#view-home .float-tile').forEach(o=>{if(o!==cv&&Math.random()<.6)setTimeout(()=>reactOther(o,cv),400+Math.random()*600)})};
 })();
 </script>
+<style id="mc-patch">
+#bigclk{display:none!important}
+#view-game .question-box{font-size:clamp(26px,min(3.2vw,5.2vh),58px)!important;min-height:clamp(92px,14vh,170px)!important}
+#view-game .opt-btn{font-size:clamp(22px,min(2.6vw,4.2vh),46px)!important;min-height:clamp(66px,10.5vh,110px)!important}
+#mc-tick{flex:none;display:flex;gap:2.2vw;align-items:center;justify-content:center;height:clamp(28px,4.2vh,46px);margin-top:6px;padding:0 14px;background:linear-gradient(90deg,#161616,#2a2a2a,#161616);border:3px solid #000;box-shadow:inset 0 0 0 2px #6b6b6b;font:clamp(9px,1.35vh,14px) 'Press Start 2P',monospace;color:#ffb703;white-space:nowrap;overflow:hidden}
+#mc-tick .live{color:#ff4d4d;animation:mcBl 1s infinite alternate}@keyframes mcBl{to{opacity:.35}}
+#mc-tick .ll.used{opacity:.3;text-decoration:line-through}#mc-tick .tip{color:#9ad7ff}
+#mc-ov.party{background:transparent;align-items:flex-end;pointer-events:none}
+#mc-ov.party .ov-card{pointer-events:auto;max-width:560px;margin-bottom:2vh;padding:14px;font-size:18px;background:rgba(27,27,27,.9)}
+body.partying #winner-popup{top:auto!important;bottom:2vh!important;transform:translateX(-50%)!important;padding:14px!important}
+#lg-tabs{display:flex;gap:8px;margin:0 0 14px}
+#lg-tabs button{flex:1;padding:12px 6px;font:11px 'Press Start 2P',monospace;color:#fff;background:#444;border:3px solid #000;box-shadow:inset 0 -4px #2a2a2a;cursor:pointer}
+#lg-tabs button.on{background:#5aa02c;box-shadow:inset 0 -4px #3d7a1c}
+#lg-warn{margin:0 0 14px;padding:10px 12px;font-size:15px;line-height:1.35;border:2px solid;text-align:left}
+#lg-warn.new{color:#ffd6d6;background:rgba(176,48,48,.35);border-color:#ff5a5a}
+#lg-warn.existing{color:#d6ffe4;background:rgba(46,196,100,.2);border-color:#4ade80}
+</style>
+<script>
+(()=>{
+function clearQ(msg){gid('question-text').innerText=msg||'';[0,1,2,3].forEach(i=>{const b=gid('btn-opt-'+i);b.className='opt-btn';b.style.visibility='hidden';gid('opt-'+i).innerText=''})}
+const _lc=window.levelComplete;window.levelComplete=function(){clearQ('🏆 LEVEL COMPLETE! 🏆');const r=_lc.apply(this,arguments);OV.classList.add('party');return r};
+const _lu=window.levelUp;window.levelUp=function(){OV.classList.remove('party');clearQ(`Level ${S().level} - get ready, ${username}!`);return _lu.apply(this,arguments)};
+const _si=window.showIntro;window.showIntro=function(){clearQ(`Get ready, ${username}!`);if(window.mcReset)mcReset();return _si.apply(this,arguments)};
+/* FIXED: only touch the class when 'party' is really there (the old version looped forever and froze the page) */
+new MutationObserver(()=>{if(!OV.classList.contains('on')&&OV.classList.contains('party'))OV.classList.remove('party')}).observe(OV,{attributes:true,attributeFilter:['class']});
+/* bottom ticker */
+const vg=gid('view-game'),tk=document.createElement('div');tk.id='mc-tick';vg.appendChild(tk);
+const TIPS=['TIP: safety nets lock in your money at questions 5 and 10','TIP: lifelines come back at every safety net','FACT: creepers were born from a coding bug','TIP: you can change your answer once per question','FACT: endermen hate water and love blocks','TIP: walk away any time to keep your winnings'];let tipI=0;setInterval(()=>tipI++,6000);
+setInterval(()=>{if(!vg.classList.contains('active'))return;const ll=(id,n)=>`<span class="ll${gid(id).classList.contains('used')?' used':''}">${n}</span>`;let nx=0;for(let i=currentQuestionIdx;i<15;i++)if(isSafe(i)){nx=i;break}
+ window.__tkOld=`<span class="live">● LIVE</span><span>👁 ${gid('viewers')?gid('viewers').innerText:''}</span><span>LEVEL ${level}</span><span>Q ${currentQuestionIdx+1}/15</span><span>SAFE NET ${fmt(prize(nx))}</span><span>${ll('ll-5050','50:50')} ${ll('ll-poll','AUDIENCE')} ${ll('ll-phone','PHONE')}</span><span class="tip">${TIPS[tipI%TIPS.length]}</span>`},500);
+/* login: EXISTING PLAYER / NEW PLAYER */
+const lb=document.querySelector('#view-login .login-box');if(!lb)return;
+const RES=['alex ai','minecraftpro_leo','luan_craft'],grp=['hobby-input','gender-input','age-input','country-input','skin-input','mob-input'].map(i=>gid(i).closest('.input-group'));
+const tabs=document.createElement('div');tabs.id='lg-tabs';tabs.innerHTML='<button type="button" data-m="existing">EXISTING PLAYER</button><button type="button" data-m="new">NEW PLAYER</button>';
+const warn=document.createElement('div');warn.id='lg-warn';const h2=lb.querySelector('h2');h2.after(tabs);tabs.after(warn);const btn=lb.querySelector('.btn-main');let mode='existing';
+const hash=s=>{let h=5381;for(const c of s)h=((h<<5)+h+c.charCodeAt(0))|0;return String(h)},findKey=n=>Object.keys(stats).find(k=>k.toLowerCase()===n.toLowerCase());
+function setMode(m){mode=m;lb.classList.toggle('ex',m!=='new');[...tabs.children].forEach(b=>b.classList.toggle('on',b.dataset.m===m));grp.forEach(g=>g.style.display=m==='new'?'':'none');warn.className=m;
+ warn.innerHTML=m==='new'?'⚠ <b>NEW PLAYER</b>: if this name already exists, <b>ALL YOUR DATA WILL BE RESET</b> (levels, money, progress). To keep your data, choose <b>EXISTING PLAYER</b> and log in.':'✔ <b>EXISTING PLAYER</b>: log in with your username and password to continue with <b>all your saved data</b>.';btn.textContent=m==='new'?'CREATE NEW PLAYER & PLAY':'LOG IN & PLAY'}
+tabs.onclick=e=>{const m=e.target.dataset&&e.target.dataset.m;if(m){setMode(m);if(m==='new')toast('Warning: a NEW player resets all saved data for that name.')}};
+window.handleLogin=function(){const n=gid('username-input').value.trim(),pw=gid('password-input').value;if(!n)return toast('Please enter a username');
+ if(mode==='existing'){const k=findKey(n);if(!k||!stats[k].profile||RES.includes(k.toLowerCase()))return toast('No saved player named "'+n+'". Choose NEW PLAYER to create one.');
+  const u=stats[k];if(u.pw&&u.pw!==hash(pw))return toast('Wrong password for '+k);if(!u.pw)u.pw=hash(pw);username=k;sv();applyProfile();return switchView('view-modes')}
+ const c=gid('country-input').value;if(!c)return toast('Please pick your nationality');if(RES.includes(n.toLowerCase()))return toast('That name is reserved. Pick another one.');
+ const k=findKey(n),create=()=>{hideOv();if(k)delete stats[k];username=n;stats[n]={pw:hash(pw),profile:{hobby:gid('hobby-input').value,g:gid('gender-input').value,age:+gid('age-input').value||14,country:c,skin:gid('skin-input').value,mob:(gid('mob-input')||{}).value||'zombie'}};sv();applyProfile();switchView('view-modes')};
+ if(k){showOv(`<h2>⚠ RESET ALL DATA?</h2><p>A saved player named <b>${esc(k)}</b> already exists. Creating a NEW player will <b>ERASE</b> all their levels, money and progress.</p><p>To keep your data, cancel and log in as an EXISTING PLAYER.</p><button class="danger" id="lg-yes">YES, RESET & CREATE NEW</button><button class="ghost" id="lg-no">CANCEL - KEEP MY DATA</button>`);gid('lg-yes').onclick=create;gid('lg-no').onclick=hideOv}else create()};
+setMode(Object.keys(stats).some(k=>stats[k].profile&&!RES.includes(k.toLowerCase()))?'existing':'new');
+})();
+</script>
+<style id="mc-patch2">
+/* --- fullscreen: fill the whole window, no empty band at the bottom --- */
+body:has(#view-game.active){height:100vh;height:100dvh;overflow:hidden}
+body:has(#view-game.active) header{flex:none}
+#view-game{height:auto!important;flex:1 1 0!important;min-height:0!important}
 
+/* --- clean money ladder --- */
+#view-game .ladder-panel{container-type:size;display:flex!important;flex-direction:column-reverse;gap:2px!important;padding:6px!important;width:clamp(210px,17vw,340px)!important;background:rgba(6,12,28,.97)!important;border:3px solid var(--gold)!important;border-radius:10px}
+#view-game .ladder-step{display:grid!important;grid-template-columns:2.1em 1fr 1.4em;align-items:center;column-gap:4px;flex:1 1 0!important;min-height:0!important;padding:0 8px!important;border-radius:4px;border:1px solid transparent!important;background:rgba(255,255,255,.05)!important;color:#ffd166!important;font-family:'Rajdhani',sans-serif!important;font-weight:700!important;font-size:11px;font-size:clamp(9px,calc((100cqh - 44px) / 15 * .72),24px)!important;line-height:1!important;letter-spacing:.02em;overflow:hidden}
+#view-game .ladder-step *{font-size:inherit!important;font-weight:700!important;line-height:1!important;background:transparent!important;padding:0!important;border-radius:0!important;opacity:1!important}
+#view-game .ladder-step>span:nth-child(1){text-align:left;color:#8fb3d9!important;opacity:.9!important}
+#view-game .ladder-step>span:nth-child(2){text-align:right;font-variant-numeric:tabular-nums}
+#view-game .ladder-step>span:nth-child(3){text-align:center;color:#2ec4b6!important}
+#view-game .ladder-step.safe-net{background:rgba(46,196,182,.22)!important;border:1px solid #2ec4b6!important;color:#fff!important}
+#view-game .ladder-step.done{opacity:.4}
+#view-game .ladder-step.active-step{background:var(--gold)!important;border-color:#fff!important;color:#000!important;box-shadow:0 0 12px rgba(255,183,3,.8)}
+#view-game .ladder-step.active-step *{color:#000!important}
+
+/* --- last-seconds warning --- */
+@keyframes mcWarn{from{box-shadow:inset 0 0 0 rgba(255,40,40,0)}to{box-shadow:inset 0 0 90px rgba(255,40,40,.65)}}
+#view-game.mc-warn{animation:mcWarn .5s infinite alternate}
+</style>
+<script id="mc-patch2-js">
+(function(){
+  const gid=id=>document.getElementById(id);
+  const isMuted=()=>{try{return typeof muted!=='undefined'&&muted}catch(e){return false}};
+
+  /* 1) never spell out "umm" / "wow": clean text right before the browser voice speaks it */
+  if(window.speechSynthesis&&!speechSynthesis.__mcFix){
+    const fix=t=>(t||'')
+      .replace(/\b(?:u+m+|u+h+m*|e+r+m+|h+m+)\b[\s,.!…]*/gi,'')
+      .replace(/\bw+o+w+\b/gi,'Oh my goodness')
+      .replace(/\s{2,}/g,' ').trim()||' ';
+    const sp=speechSynthesis.speak.bind(speechSynthesis);
+    speechSynthesis.speak=function(u){try{u.text=fix(u.text)}catch(e){}return sp(u)};
+    speechSynthesis.__mcFix=1;
+  }
+
+  /* 2) ladder: tidy rows after every render */
+  function tidy(){
+    const p=gid('ladder-panel');if(!p)return;
+    const rows=[...p.children];
+    const a=rows.findIndex(r=>r.classList.contains('active-step'));
+    rows.forEach((r,i)=>{
+      const sp=r.querySelectorAll(':scope>span');
+      if(sp[1])sp[1].textContent=sp[1].textContent.replace(/[\u{1F6E1}\uFE0F]/gu,'').trim();
+      if(sp[2]&&r.classList.contains('safe-net')&&!sp[2].textContent.trim())sp[2].textContent='\u25C6';
+      r.classList.toggle('done',a>=0&&i<a);
+    });
+  }
+  const _rl=window.renderLadder;
+  if(typeof _rl==='function')window.renderLadder=function(){const r=_rl.apply(this,arguments);try{tidy()}catch(e){}return r};
+  tidy();
+
+  /* 3) Coffin Dance on defeat (coffin-dance.mp3 next to this file; synth fallback) */
+  let coffin=null,syn=0,autoStop=0,cvol=.7;
+  function stopCoffin(){
+    clearTimeout(autoStop);clearInterval(syn);syn=0;
+    if(coffin){const a=coffin;coffin=null;try{let v=a.volume;const f=setInterval(()=>{v-=.1;if(v<=0){clearInterval(f);try{a.pause()}catch(e){}}else a.volume=v},80)}catch(e){}}
+  }
+  function ac(){try{window._mcA=window._mcA||new(window.AudioContext||window.webkitAudioContext)();if(_mcA.state==='suspended')_mcA.resume();return _mcA}catch(e){return null}}
+  function synthCoffin(){
+    const A=ac();if(!A)return;const N=[440,440,523,440,392,392,349,330,440,440,523,440,392,349,330,294];let i=0;
+    syn=setInterval(()=>{const o=A.createOscillator(),g=A.createGain();o.type='square';o.frequency.value=N[i++%N.length]/2;g.gain.setValueAtTime(.05*(cvol/.7),A.currentTime);g.gain.exponentialRampToValueAtTime(.001,A.currentTime+.2);o.connect(g);g.connect(A.destination);o.start();o.stop(A.currentTime+.21)},230);
+  }
+  window.mcCoffinDuck=v=>{cvol=v;if(coffin)coffin.volume=v};window.mcCoffinStop=()=>stopCoffin();window.mcCoffinPlay=()=>playCoffin();
+  function playCoffin(){
+    if(isMuted()||coffin||syn)return;
+    try{
+      cvol=.7;const a=new Audio('coffin-dance.mp3');a.volume=cvol;let bad=0;
+      const fb=()=>{if(bad)return;bad=1;if(coffin===a)coffin=null;if(!syn)synthCoffin()};
+      a.addEventListener('error',fb);coffin=a;const pr=a.play();pr&&pr.catch&&pr.catch(fb);
+    }catch(e){synthCoffin()}
+    autoStop=setTimeout(stopCoffin,26000);
+  }
+  ['beginGame','resetGameState','showIntro','loadNextQuestion','levelUp'].forEach(n=>{const o=window[n];if(typeof o==='function')window[n]=function(){try{stopCoffin()}catch(e){}return o.apply(this,arguments)}});
+
+  /* 4) time is about to end: warn (ticks + red pulse + host line), no music */
+  let warned=false,tick=0;
+  function stopWarn(){clearInterval(tick);tick=0;const v=gid('view-game');v&&v.classList.remove('mc-warn')}
+  function beep(){if(isMuted())return;const A=ac();if(!A)return;const o=A.createOscillator(),g=A.createGain();o.type='square';o.frequency.value=988;g.gain.setValueAtTime(.06,A.currentTime);g.gain.exponentialRampToValueAtTime(.001,A.currentTime+.12);o.connect(g);g.connect(A.destination);o.start();o.stop(A.currentTime+.13)}
+  function startWarn(){
+    const v=gid('view-game');v&&v.classList.add('mc-warn');beep();
+    try{
+      if(window.speakTextHuman&&!(window.speechSynthesis&&speechSynthesis.speaking)){
+        const u=(typeof username!=='undefined'&&username)||'';
+        const L=[`Hurry up ${u}! Only five seconds left!`,`Time is almost up, ${u}! Choose now!`,`${u}, the clock is running out! Lock in an answer!`];
+        speakTextHuman(L[Math.floor(Math.random()*L.length)],null,()=>{});
+      }
+    }catch(e){}
+    clearInterval(tick);tick=setInterval(()=>{
+      const t=typeof timerSeconds!=='undefined'?timerSeconds:0,lk=typeof qLocked!=='undefined'&&qLocked;
+      if(t<=0||lk){stopWarn();return}
+      beep();
+    },1000);
+  }
+  setInterval(()=>{
+    try{
+      const v=gid('view-game');
+      if(!v||!v.classList.contains('active')){stopWarn();warned=false;return}
+      const t=typeof timerSeconds!=='undefined'?timerSeconds:30,lk=typeof qLocked!=='undefined'&&qLocked;
+      const ov=gid('mc-ov');
+      if(t>6){warned=false;stopWarn();return}
+      if(lk){stopWarn();return}
+      if(t<=5&&t>0&&!warned&&!(ov&&ov.classList.contains('on'))){warned=true;startWarn()}
+    }catch(e){}
+  },250);
+})();
+</script>
+<script id="mc-voice-js">
+/* --- farewell speeches by progress + optional recorded voice (ElevenLabs mp3 in ./voice/) --- */
+(function(){
+  const VOICE={"farewell-walk-1-a": "A careful decision, and a smart one! You gave it a good try, and every question you answer makes you stronger. Come back soon and climb even higher. See you next time!", "farewell-walk-1-b": "Nice start, champion! You kept your coins and learned how the ladder works. Practise a little, and next time you will go much further. Thank you for playing!", "farewell-walk-2-a": "Great run! You passed the first safety net and kept your cool under pressure. That is exactly how a real Minecraft player thinks. The ladder will be waiting for your return!", "farewell-walk-2-b": "Well played! You climbed past the first safety net and chose to take your winnings home. Smart, brave, and a lot of fun to watch. Come back and aim for the top!", "farewell-walk-3-a": "Incredible! You climbed past the second safety net, and that is a rare achievement. A true Minecraft Legend knows exactly when to cash out. Give yourself a big round of applause!", "farewell-walk-3-b": "What a performance! You went almost all the way up the ladder, and you walk away like a champion. The whole crowd is proud of you. Thank you for an amazing show!", "farewell-walk-4-a": "You are already beyond Level One, and that is a legendary effort! Your knowledge keeps growing, and so does your fortune. Take a rest, and come back for the next level!", "farewell-walk-4-b": "Level after level, you keep proving yourself. You are a seasoned player, and it was an honour to host you. Walk away proud, and we will see you at the next level!", "farewell-lose-1-a": "Do not worry about this one. Every legend loses a few blocks before building a castle. You were brave to try, so practise a little and come back stronger. Goodnight, everyone!", "farewell-lose-1-b": "That was a tough one, but you gave it a real try, and that is what counts. Learn from it, respawn, and try again. We will be right here waiting for you!", "farewell-lose-2-a": "You made it past the first safety net, and you should be proud of that! You played with real courage tonight. Come back and go even higher next time. Goodnight, everyone!", "farewell-lose-2-b": "What a brave run! You climbed higher than many players ever do, and you kept your safety net. Take a breath, and come back for the next climb. Thank you for playing!", "farewell-lose-3-a": "You were so close to the top! Getting this far takes real skill, and the whole crowd is cheering for you. Next time, the big prize could be yours. Goodnight, and thank you!", "farewell-lose-3-b": "What an amazing run! You went deep into the ladder, and only one question stood in your way. Hold your head high, because you are nearly a Minecraft Legend. See you very soon!", "farewell-lose-4-a": "You have already conquered a whole level, and one tricky question cannot change that! You are a true veteran of this show. Rest up, and come back stronger for the next challenge!", "farewell-lose-4-b": "You have climbed further than most players ever dream of. A single miss does not define a legend. Thank you for playing, and see you very soon at the next level!"};
+  const BY_TEXT={};Object.keys(VOICE).forEach(id=>BY_TEXT[VOICE[id]]=id);
+  window.MC_VOICE=VOICE;
+  /* pick a line: tier 4 = reached Level 2+, otherwise by questions answered correctly */
+  window.mcFarewell=function(kind,answered,lvl){
+    const tier=(lvl||1)>=2?4:answered>=10?3:answered>=5?2:1;
+    const v=['a','b'][Math.floor(Math.random()*2)];
+    return VOICE['farewell-'+kind+'-'+tier+'-'+v];
+  };
+  let cur=null;
+  function stopVoice(){if(cur){const a=cur;cur=null;try{a.onended=null;a.pause()}catch(e){}try{window.setHostTalking&&setHostTalking(false)}catch(e){}}}
+  const _stop=window.stopSpeech;
+  if(typeof _stop==='function')window.stopSpeech=function(){stopVoice();return _stop.apply(this,arguments)};
+  const _sth=window.speakTextHuman;
+  if(typeof _sth==='function')window.speakTextHuman=function(text,onS,onE){
+    const id=BY_TEXT[text];
+    let off=false;try{off=typeof muted!=='undefined'&&muted}catch(e){}
+    if(!id||off)return _sth.apply(this,arguments);
+    try{if(window.speechSynthesis)speechSynthesis.cancel()}catch(e){}
+    stopVoice();
+    const a=new Audio('voice/'+id+'.mp3');cur=a;let started=false,fell=false;
+    const fb=()=>{if(fell||started||cur!==a)return;fell=true;cur=null;_sth.call(window,text,onS,onE)};
+    a.addEventListener('error',fb);
+    a.addEventListener('playing',()=>{if(cur!==a)return;started=true;try{window.setHostTalking&&setHostTalking(true)}catch(e){}if(onS)onS()});
+    a.onended=()=>{if(cur!==a)return;cur=null;try{window.setHostTalking&&setHostTalking(false)}catch(e){}if(onE)onE()};
+    const pr=a.play();pr&&pr.catch&&pr.catch(fb);
+    return;
+  };
+})();
+</script>
+
+<style id="mc-patch3">
+/* branding */
+.brand{display:flex;flex-direction:column;gap:5px;line-height:1}
+.brand-main{font-size:inherit;text-shadow:0 0 12px rgba(255,183,3,.6)}
+.brand-sub{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;letter-spacing:.14em;color:#9ad7ff;white-space:nowrap}
+.brand-sub b{color:#ff4ad8;text-shadow:0 0 8px rgba(255,74,216,.7);animation:mcBrand 2.4s ease-in-out infinite alternate}
+@keyframes mcBrand{from{color:#ff4ad8}to{color:#ffb703}}
+/* bigger main screen, question box a bit lower/smaller */
+#view-game .studio-stage-container{flex:2.5 1 0!important}
+#view-game .center-board-area{flex:1 1 0!important}
+#view-game .question-box{font-size:clamp(22px,min(2.8vw,4.4vh),48px)!important;min-height:clamp(60px,9vh,130px)!important}
+#view-game .opt-btn{font-size:clamp(18px,min(2.2vw,3.5vh),38px)!important;min-height:clamp(48px,8vh,96px)!important}
+/* bigger, clearer ladder */
+#view-game .ladder-panel{width:clamp(250px,21vw,420px)!important}
+#view-game .ladder-step{font-size:clamp(11px,calc((100cqh - 40px) / 15 * .78),30px)!important}
+/* mob chooser */
+#mob-chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mob-chip{background:rgba(0,0,0,.45);border:2px solid #1b6a8a;border-radius:10px;color:#fff;padding:8px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:'Press Start 2P',monospace;transition:.15s}
+.mob-chip span{font-size:26px;line-height:1}.mob-chip b{font-size:8px;letter-spacing:.5px}
+.mob-chip:hover{transform:translateY(-2px);border-color:#ffb703}
+.mob-chip.on{border-color:#ffb703;background:rgba(255,183,3,.22);box-shadow:0 0 14px rgba(255,183,3,.6)}
+</style>
+
+<style id="mc-login-fit">
+#view-login{max-width:min(1040px,96vw)!important;width:96%!important;padding:clamp(10px,2.2vh,26px) clamp(16px,2.6vw,38px)!important;margin:auto!important;overflow:visible!important}
+#view-login .login-box{max-height:none!important;overflow:visible!important;display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(7px,1.5vh,16px) 18px;align-items:end;width:100%}
+#view-login .login-box>h2,#view-login #lg-tabs,#view-login #lg-warn,#view-login .login-box>.btn-main,#view-login #mob-group{grid-column:1/-1}
+#view-login .login-box.ex .input-group:has(#username-input),#view-login .login-box.ex .input-group:has(#password-input),#view-login .input-group:has(#hobby-input){grid-column:span 2}
+#view-login .login-box h2{margin:0!important;font-size:clamp(14px,2.4vh,20px)}
+#view-login #lg-tabs,#view-login #lg-warn,#view-login .input-group{margin:0!important}
+#view-login .input-group label{margin-bottom:4px!important;font-size:clamp(12px,1.7vh,15px)}
+#view-login .input-group input,#view-login .input-group select{padding:clamp(7px,1.4vh,13px) 12px!important;font-size:clamp(14px,2vh,17px)!important}
+#view-login #lg-tabs button{padding:clamp(8px,1.6vh,14px) 6px}
+#view-login #lg-warn{padding:clamp(6px,1.1vh,10px) 12px!important;font-size:clamp(12px,1.8vh,15px)!important}
+#view-login #mob-chips{grid-template-columns:repeat(7,1fr)}
+#view-login .mob-chip{padding:clamp(5px,1vh,10px) 2px}
+#view-login .mob-chip span{font-size:clamp(18px,3.4vh,30px)}
+#view-login .mob-chip b{font-size:clamp(7px,1.2vh,9px)}
+#view-login .login-box>.btn-main{padding:clamp(10px,1.8vh,16px)!important;font-size:clamp(12px,1.8vh,15px)!important}
+@media(max-width:700px){#view-login .login-box{grid-template-columns:repeat(2,1fr)}#view-login #mob-chips{grid-template-columns:repeat(4,1fr)}}
+</style>
+
+<style id="mc-v4">
+#mc-tick{display:none!important}
+#view-game .center-board-area{flex:none!important}
+#view-game .studio-stage-container{flex:1 1 0!important;min-height:120px!important}
+#mc-news{align-self:stretch;width:100%;flex:none;display:flex;align-items:stretch;height:clamp(32px,4.8vh,50px);margin-top:6px;background:#0d0d12;border:3px solid #000;box-shadow:inset 0 0 0 2px #6b6b6b;overflow:hidden;position:relative;z-index:5}
+#mc-news .fx{flex:none;display:flex;gap:1.6vw;align-items:center;padding:0 14px;background:linear-gradient(90deg,#3a0d0d,#241414);border-right:3px solid #000;font:clamp(8px,1.2vh,12px) 'Press Start 2P',monospace;color:#ffb703;white-space:nowrap}
+#mc-news .fx .live{color:#ff4d4d;animation:mcBl 1s infinite alternate}
+#mc-news .lane{flex:1;position:relative;overflow:hidden}
+#mc-news .track{position:absolute;left:100%;top:0;bottom:0;display:flex;align-items:center;white-space:nowrap;font:700 clamp(13px,2.1vh,22px) Rajdhani,sans-serif;color:#e9eef7;animation:mcScroll var(--dur,90s) linear infinite;animation-delay:-9s}
+@keyframes mcScroll{from{transform:translateX(0)}to{transform:translateX(calc(-100% - var(--lw,900px)))}}
+#mc-news .track b{font:clamp(8px,1.2vh,12px) 'Press Start 2P',monospace;padding:4px 8px;margin:0 10px 0 26px;border-radius:3px;color:#000}
+#mc-news .k-fact{background:#4ad8ff}#mc-news .k-live{background:#ff6b6b}#mc-news .k-wx{background:#9dff3a}#mc-news .k-sp{background:#ffb703}#mc-news .k-tip{background:#ff4ad8}
+#mc-news .sp{color:#ffd56a;margin:0 14px}
+#mc-skipchat{position:fixed;right:18px;bottom:clamp(60px,9vh,100px);z-index:60;font:clamp(10px,1.4vh,14px) 'Press Start 2P',monospace;padding:12px 16px;border:3px solid #fff;border-radius:8px;cursor:pointer;color:#000;background:linear-gradient(#9ad7ff,#2a86d4)}
+</style>
+
+<script>
+(()=>{
+const gid=id=>document.getElementById(id),cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
+const prof=()=>{const p=((stats[username]||{}).profile)||{};const mobs={steve:'Steve',zombie:'Zombie',creeper:'Creeper',skeleton:'Skeleton',enderman:'Enderman',pig:'Pig',witch:'Witch'};const cn=(COUNTRIES.find(c=>c[0]===p.country)||[])[1]||'';const age=+p.age||14,f=p.g==='f';return{f,age,cn,mob:mobs[p.mob]||'Zombie',hobby:p.hobby||'playing video games',who:f?(age<18?'girl':'woman'):(age<18?'boy':'man')}};
+/* ---------- INTRO SCRIPT ---------- */
+window.mcIntroLines=function(kind,s){const P=prof(),u=username;
+ if(kind==='level')return[{t:`Welcome to Level ${s.level}, ${u}! The questions get tougher, but so do you.`,c:1},{g:1,t:`Thank you! ${u} here again, and I am ready for Level ${s.level}. I will do my best!`},{t:`Same rules: fifteen questions, safety nets at five and ten, and three fresh lifelines. Let's play!`,c:1}];
+ if(kind==='continue')return[{t:`Welcome back ${u}! You are on Level ${s.level}, question ${s.idx+1}. Let's pick up right where we left off!`,c:1},{g:1,t:`Hi everyone, ${u} here. It is great to be back, and I will do my best!`},{t:`Let's play!`,c:1}];
+ return[
+  {t:`Ladies and gentlemen, welcome to Who Wants to Be a Minecraft Legend!`,c:1},
+  {t:gameMode==='pvp'?`Tonight it's ${u} versus ${opponentName}!`:`Tonight's brave contestant is ${u}! Give them a block shaking round of applause!`,c:1},
+  {t:`Welcome to the show, ${u}! Please, tell everybody a little about yourself.`,cam:'b'},
+  {g:1,t:`Hi everyone, ${u} here. I am a ${P.age} year old ${P.who}${P.cn?' from '+P.cn:''}. Tonight I am playing as the ${P.mob}, and my favourite hobby is ${P.hobby}. I am glad to be here today, and I will do my best!`},
+  {t:pick([`${cap(P.hobby)}? That is fantastic! A ${P.mob} with great taste. Thank you, ${u}!`,`Wonderful, ${u}! ${cap(P.hobby)} is a great hobby, and a ${P.mob} is a bold choice tonight. Welcome!`,`Love it! ${cap(P.hobby)}, and a ${P.mob} on my show. This is going to be fun, ${u}!`])},
+  {t:`Now let me explain how it works. Fifteen questions per level, four answers each, and thirty seconds on the clock. Safety nets at five and ten, and three lifelines: fifty fifty, ask the audience, or phone a friend. Take your time, play fair, and have fun!`},
+  {t:pick([`And now, let's begin the game!`,`Are you ready, ${u}? Then let's begin the game!`]),c:1,j:1}];
+};
+/* ---------- UNLIMITED CHAT ENGINE ---------- */
+const FACTS=["A day in Minecraft lasts twenty real minutes.","Cats scare away creepers, so keep one close.","Creepers were created by accident, when a pig model was built with the wrong height and width.","Endermen hate water, and rain hurts them.","Wolves become your pets when you feed them bones.","Phantoms show up when you do not sleep for a few nights.","If a pig is struck by lightning, it turns into a zombified piglin.","Villagers trade with emeralds, and they love a good deal.","Obsidian forms when flowing water touches a lava source.","Netherite is stronger than diamond, and it does not burn in lava.","Camels can carry two players at once.","Sniffers dig up ancient seeds from the ground.","Zombies and skeletons burn in sunlight.","Beds explode if you try to sleep in them in the Nether.","Ghast fireballs can be bounced right back at the ghast.","Bees make honey and pollinate flowers.","Foxes love to carry items in their mouths.","Axolotls will help you fight underwater mobs.","Squids drop ink sacs.","Glow berries grow in caves and give a little light.","Note blocks make different sounds depending on the block under them.","Turtles always return to the beach where they hatched.","A sheep can be dyed any of sixteen colours.","The Ender Dragon lives in the End dimension.","Lava can be turned into obsidian with a bucket of water, if you are quick."];
+const FREACT=["Wow, I did not know that!","That is so cool! This game is full of surprises.","No way! I am telling all my friends.","Ha! I actually knew that one, but it is still amazing.","Interesting! I feel smarter already.","That explains a lot, honestly."];
+const FFOLLOW=["See? You learn while you play!","Knowledge is the best armour.","That is why I love this game.","Stay with us, there are more facts coming!","And no, you cannot use that as a lifeline."];
+const FAVS=[["favourite mob",["the wolf","the axolotl","the Enderman","the fox","the panda","the parrot","the cat"]],["favourite biome",["the cherry grove","the jungle","the mushroom island","the snowy mountains","the desert","the deep dark"]],["favourite food",["golden carrots","cake","baked potatoes","cooked steak","honey bottles","pumpkin pie"]],["favourite tool",["a diamond pickaxe","an enchanted sword","a trusty shovel","a fishing rod","the elytra"]],["favourite block",["glass","obsidian","gold blocks","glowstone","bookshelves","slime blocks"]]];
+const WHY=["because it is so useful","because it just looks amazing","because it reminds me of my first world","because it is simply fun","because it saved me many times"];
+const WYR=[["fight a creeper with no armour","swim through lava with fire resistance"],["live in a treehouse","live in a cozy cave base"],["ride a pig everywhere","ride a camel everywhere"],["have a pet wolf","have a pet axolotl"],["mine diamonds all day","build a giant castle all day"],["never see a zombie again","never see a skeleton again"],["explore the Nether","explore the End"],["have unlimited golden apples","have unlimited ender pearls"],["be best friends with a villager","be best friends with an Enderman"],["sleep in a bed every night","never sleep and fight phantoms"]];
+const JOKES=["Why do Endermen never get lost? They always know where their blocks are.","Why did the skeleton stay home? He had no body to go with.","What is a creeper's favourite subject at school? Hisstory.","Why was the zombie a good friend? He was always there for brains storming.","What do you call a sleepy creeper? A snooze-per.","Why do villagers make great actors? They always say hmm with feeling.","What does a pig say in the Nether? Oink, it is hot in here.","Why did the player bring a ladder to the farm? To reach the high scores.","What is a ghast's favourite song? Cry me a river of lava.","Why are chickens great at Minecraft? They are always egg-cited to build."];
+const HP=[["How did you get started with that?",h=>`I started when I was little, and now I cannot stop ${h}!`],["How often do you get to do it?",h=>`I try to do it every single day. ${cap(h)} is my happy place.`],["Is it harder than answering these questions?",h=>`Not at all! These questions are tougher, but ${h} is more fun.`],["What do you love most about it?",h=>`It helps me relax, and it makes me happy.`]];
+const HR=["That is wonderful! Practice makes a legend.","I love that. Passion always shows.","Impressive! A true all rounder.","That explains your calm face. Very smart!"];
+const TIPS=[["Quick survival tip: never dig straight down.","Good tip! I learned that the hard way, with lava."],["Pro tip: always carry a water bucket.","Yes! It saves you from falls, and from fire."],["Remember, torches stop monsters from spawning.","So I should light up everything. Easy!"],["Do not forget to sleep, or phantoms will visit.","I like sleeping. I will sleep very well tonight."]];
+let last=[];
+const topics=[
+ ()=>[['h',`Fun fact time! ${pick(FACTS)}`],['g',pick(FREACT)],['h',pick(FFOLLOW)]],
+ ()=>{const f=pick(FAVS),a=pick(f[1]),hp=pick(f[1].filter(x=>x!==a));return[['h',`Tell me, ${username}, what is your ${f[0]}?`],['g',`${cap(a)}, ${pick(WHY)}.`],['h',`Good choice! Mine is ${hp}, but ${a} sounds great too.`]]},
+ ()=>{const P=prof(),q=pick(HP);return[['h',`You told us you love ${P.hobby}. ${q[0]}`],['g',q[1](P.hobby)],['h',pick(HR)]]},
+ ()=>{const w=pick(WYR),i=Math.random()<.5?0:1;return[['h',`Quick one! Would you rather ${w[0]}, or ${w[1]}?`],['g',`Definitely ${w[i]}! No question.`],['h',pick(['Bold! I would have picked the other one.','Ha! I respect that.','Interesting choice, and I will not judge.'])]]},
+ ()=>[['h',pick(JOKES)],['g',pick(['Ha ha ha! That is terrible, and I love it.','Oh no, that was so bad! Do another one.','Hee hee! I will remember that one.'])]],
+ ()=>{const t=pick(TIPS);return[['h',t[0]],['g',t[1]]]},
+ ()=>currentQuestionIdx>0?[['h',`That is ${fmt(prize(currentQuestionIdx-1))} in the bank, ${username}!`],['g',pick(['I cannot believe it! My heart is racing.','I am staying calm, on the outside at least.','Thank you! I just hope the next one is easy.'])],['h',pick(['Easy is not on the menu tonight, I am afraid.','Stay calm, and think like a legend.','You have the crowd behind you!'])]]:[['h',`The crowd loves you already, ${username}!`],['g',`Thank you everyone! I can feel the energy.`]],
+ ()=>[['h',`Listen to the crowd, ${username}! They are all on your side.`],['g',pick([`Thank you, everyone! You are the best audience ever.`,`Hello to everyone watching at home! Wave to the camera.`,`I can hear you! This is amazing!`])],['h',pick(['Give them a wave!','Block shaking energy tonight!','That is what I call team spirit.'])]]
+];
+let topicLast=-1,chatTok=0;
+function genChat(){let k;do{k=(Math.random()*topics.length)|0}while(k===topicLast||last.includes(k));topicLast=k;last.push(k);if(last.length>3)last.shift();return topics[k]()}
+window.mcGenChat=genChat;
+function stopChat(){chatTok++;const b=gid('mc-skipchat');b&&b.remove()}
+window.mcChat=function(next){if(localStorage.getItem('mc_nochat')==='1')return next();const tok=++chatTok;let lines;try{lines=genChat()}catch(e){return next()}
+ const b=document.createElement('button');b.id='mc-skipchat';b.textContent='SKIP CHAT ▶';document.body.appendChild(b);
+ const fin=()=>{if(tok!==chatTok)return;stopChat();next()};b.onclick=()=>{if(tok!==chatTok)return;chatTok++;try{stopSpeech()}catch(e){}b.remove();next()};
+ let i=0;const step=()=>{if(tok!==chatTok)return;if(i>=lines.length)return fin();const[w,t]=lines[i++],nx=()=>setTimeout(step,250);w==='h'?speakTextHuman(t,null,nx):speakAs('guest',t,nx)};step()};
+['walkAway','toMenu','resetGameState','levelUp','beginGame'].forEach(n=>{const o=window[n];if(typeof o==='function')window[n]=function(){stopChat();return o.apply(this,arguments)}});
+/* ---------- BOTTOM NEWS BAR: audience, time, weather, live updates, facts, sponsors ---------- */
+const vg=gid('view-game');if(!vg)return;const nb=document.createElement('div');nb.id='mc-news';
+nb.innerHTML='<div class="fx"><span class="live">● LIVE</span><span id="nb-aud"></span><span id="nb-time"></span><span id="nb-wx"></span><span id="nb-q"></span></div><div class="lane"><div class="track" id="nb-track"></div></div>';vg.appendChild(nb);
+let aud=1180+(Math.random()*400|0);const WX=[['☀','Clear skies'],['🌧','Rain'],['⛈','Thunderstorm'],['❄','Snowfall'],['🌤','Light clouds']];
+const hs=n=>{let h=n|0;h=Math.imul(h^h>>>15,2246822507);h=Math.imul(h^h>>>13,3266489909);return(h^h>>>16)>>>0};
+const wx=()=>WX[hs(Math.floor(Date.now()/480000))%WX.length],dayPhase=()=>{const x=(Date.now()%1200000)/1200000;return x<.5?'Day':x<.58?'Dusk':x<.92?'Night':'Dawn'};
+function fixed(){aud=Math.max(900,aud+((Math.random()*41)|0)-19);const w=wx();
+ gid('nb-aud').textContent='👁 '+aud.toLocaleString()+' WATCHING';gid('nb-time').textContent='🕒 '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+ gid('nb-wx').textContent=w[0]+' '+w[1].toUpperCase()+' · '+dayPhase().toUpperCase();
+ try{gid('nb-q').textContent='LVL '+level+' · Q '+(currentQuestionIdx+1)+'/15'}catch(e){}}
+setInterval(fixed,1000);fixed();
+const SPON=["Blockwell Pickaxes","Zorbo's Glow-Berry Juice","Quibble & Co. Lava Lamps","Nimbus Cloud Beds","Pogo-Pig Sneakers","Mooshroom Mart","Gizmo Redstone Gadgets","Flarb Cave Torches","Wobbly Wizard Hats","Turbo-Turtle Delivery","Snuggle Sheep Blankets","Crunchy Cobble Cereal"];
+const NAMES=["CreeperKing_88","DiamondDora","NetherNinja","PixelPaxton","LavaLlama","StoneSage","EmeraldEmi","RedstoneRex","TNT_Tilly","ObsidianOwen","BlockBuddy","AxolotlAnna"],AMT=[100,300,1000,4000,16000,32000,125000,500000];
+const UPD=()=>{const n=pick(NAMES),m=pick(AMT);return pick([`${n} just reached ${fmt(m)}!`,`${n} walked away with ${fmt(m)}!`,`${n} used the fifty fifty and nailed it!`,`${n} cleared Level ${1+(Math.random()*6|0)}!`,`New viewer record: ${(1500+Math.random()*9000|0).toLocaleString()} watching right now!`,`${n} joined the Familyforge Clan!`])};
+function content(){const sp=SPON.slice().sort(()=>Math.random()-.5);const f1=pick(FACTS),f2=pick(FACTS.filter(x=>x!==f1)),w=wx(),tp=pick(TIPS)[0];
+ return `<b class="k-sp">SPONSORS</b>${sp.map(x=>`<span>${x}</span>`).join('<span class="sp">◆</span>')}<b class="k-fact">FACT</b>${f1}<b class="k-live">LIVE</b>${UPD()}<b class="k-wx">WEATHER</b>${w[0]} ${w[1]} over the Overworld · it is ${dayPhase().toLowerCase()} time<b class="k-fact">FACT</b>${f2}<b class="k-live">LIVE</b>${UPD()}<b class="k-tip">TIP</b>${tp}<b class="k-sp">THANKS</b>All sponsors shown are imaginary, made up just for this show!`}
+const tr=gid('nb-track');function load(){tr.innerHTML=content();requestAnimationFrame(()=>{const lw=tr.parentElement.clientWidth,tw=tr.scrollWidth;tr.style.setProperty('--lw',lw+'px');tr.style.setProperty('--dur',((tw+lw)/95)+'s')})}
+load();tr.addEventListener('animationiteration',load);
+})();
+</script>
 </body>
 </html>

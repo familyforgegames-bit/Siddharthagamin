@@ -89,7 +89,7 @@ iframe{border:none;overflow:hidden;}
     <div class="lg:col-span-7 space-y-4 text-gray-300 leading-relaxed max-w-prose">
       <p>The Forge Squad is a team of four who play, laugh and learn together. Our channel, Siddharthagamin - Familyforge, is where we share our games, our stories and our everyday fun.</p>
       <p>It all started with Lionforge, or Lio. His love of Minecraft began at the age of 5 and grew so big that it pulled the whole squad into the blocky world. Little brother Luanforge followed his Kuka. Dad, Fatherforge, added Minecraft to his PUBG and football. Mum, Motherforge, loves her Hay Day farm and joins us in Minecraft now and then for squad bonding time.</p>
-      <p>Memeber-friendly gaming for everyone. Come for the games, stay for the Minecraft crew.</p>
+      <p>Member-friendly gaming for everyone. Come for the games, stay for the Minecraft crew.</p>
     </div>
     <div class="lg:col-span-5 grid grid-cols-2 gap-3 content-start">
       <div class="p-4 rounded-xl bg-brand-card border border-gray-800"><div class="text-[11px] text-gray-500">Minecraft gamers</div><div class="text-white font-semibold">4</div></div>
@@ -192,7 +192,6 @@ iframe{border:none;overflow:hidden;}
         <div class="flex flex-wrap items-center gap-3 mb-4">
           <button onclick="closeGamePlayer()" class="px-4 py-2.5 rounded-xl bg-gray-800 text-gray-200 text-sm font-semibold hover:bg-gray-700"><i class="fa-solid fa-arrow-left mr-1"></i> Back to categories</button>
           <span id="gameName" class="font-orbitron font-bold text-white"></span>
-          <!-- In-Window Native Fullscreen Trigger -->
           <button id="gameFull" onclick="toggleGameFullscreen()" class="ml-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-cyan to-brand-blue text-brand-dark font-orbitron font-bold text-xs hover:opacity-90 active:scale-95 transition-all"><i class="fa-solid fa-expand mr-1"></i> Full screen</button>
         </div>
         <div id="gameContainer" class="rounded-2xl overflow-hidden border border-gray-800 bg-brand-card">
@@ -210,7 +209,6 @@ iframe{border:none;overflow:hidden;}
     <p class="text-gray-400 text-sm">Honoring our top TikTok supporters, daily achievements, and channel news.</p>
   </div>
 
-  <!-- GIFTER HALL OF FAME -->
   <div class="mb-12 p-6 rounded-3xl bg-brand-card border border-brand-purple/40 shadow-xl">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-gray-800">
       <div>
@@ -223,7 +221,6 @@ iframe{border:none;overflow:hidden;}
     </div>
 
     <div class="grid md:grid-cols-3 gap-5">
-      <!-- Top 1: Gold MVP -->
       <div class="p-5 rounded-2xl bg-gradient-to-b from-amber-500/10 via-brand-card to-brand-card border border-amber-500/40 text-center relative overflow-hidden">
         <div class="absolute -top-3 -right-3 w-12 h-12 bg-amber-500/20 rounded-full blur-xl"></div>
         <span class="w-10 h-10 mx-auto rounded-full bg-brand-gold text-brand-dark font-orbitron font-black flex items-center justify-center text-lg mb-3 shadow-lg">1</span>
@@ -232,7 +229,6 @@ iframe{border:none;overflow:hidden;}
         <p class="text-xs text-gray-400 mt-3">Special thanks for supporting our daily 5 PM Minecraft streams!</p>
       </div>
 
-      <!-- Top 2: Silver -->
       <div class="p-5 rounded-2xl bg-gradient-to-b from-gray-400/10 via-brand-card to-brand-card border border-gray-500/40 text-center">
         <span class="w-10 h-10 mx-auto rounded-full bg-gray-300 text-brand-dark font-orbitron font-black flex items-center justify-center text-lg mb-3 shadow-lg">2</span>
         <h4 class="font-orbitron font-bold text-white text-base">@AwesomeGifter</h4>
@@ -240,7 +236,6 @@ iframe{border:none;overflow:hidden;}
         <p class="text-xs text-gray-400 mt-3">Thank you for always bringing high energy to the TikTok live chat!</p>
       </div>
 
-      <!-- Top 3: Bronze -->
       <div class="p-5 rounded-2xl bg-gradient-to-b from-amber-700/10 via-brand-card to-brand-card border border-amber-700/40 text-center">
         <span class="w-10 h-10 mx-auto rounded-full bg-amber-700 text-white font-orbitron font-black flex items-center justify-center text-lg mb-3 shadow-lg">3</span>
         <h4 class="font-orbitron font-bold text-white text-base">@LoyalForgeFan</h4>
@@ -250,7 +245,6 @@ iframe{border:none;overflow:hidden;}
     </div>
   </div>
 
-  <!-- CHANNEL MILESTONES -->
   <div class="mb-12">
     <h3 class="font-orbitron font-bold text-xl text-white mb-4 flex items-center gap-2">
       <i class="fa-solid fa-trophy text-brand-cyan"></i> Channel Milestones
@@ -280,7 +274,6 @@ iframe{border:none;overflow:hidden;}
     </div>
   </div>
 
-  <!-- LATEST NEWS GRID -->
   <h3 class="font-orbitron font-bold text-xl text-white mb-4">Latest News</h3>
   <div class="grid md:grid-cols-3 gap-5" id="newsGrid"></div>
 </section>
@@ -299,7 +292,6 @@ iframe{border:none;overflow:hidden;}
   
   <div class="grid md:grid-cols-2 gap-6" id="storyGrid"></div>
 
-  <!-- Minecraft Story Picture Showcase -->
   <div class="mt-12 p-6 rounded-3xl bg-brand-card border border-brand-cyan/30 text-center">
     <h3 class="font-orbitron font-bold text-xl text-white mb-2">Our Blessed Minecraft Squad Today</h3>
     <p class="text-gray-300 text-sm max-w-xl mx-auto mb-6">Celebrating 8 years of happy marriage with our two wonderful boys (aged 7 and 3). We are forever thankful to the UAE for giving us career opportunities that turned out to be the absolute best gift of our lives.</p>
@@ -316,6 +308,29 @@ iframe{border:none;overflow:hidden;}
 
 </main>
 
+<!-- STORY LANDING MODAL POPUP -->
+<div id="storyModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/80 backdrop-blur-md px-4">
+  <div class="max-w-md w-full bg-brand-card border border-brand-purple/50 rounded-3xl p-6 sm:p-8 shadow-2xl text-center relative">
+    <button onclick="closeStoryModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+    <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-brand-cyan via-brand-purple to-brand-pink p-[2px] mb-4">
+      <div class="w-full h-full bg-brand-dark rounded-[14px] flex items-center justify-center">
+        <i class="fa-solid fa-book-open text-brand-cyan text-2xl"></i>
+      </div>
+    </div>
+    <h3 class="font-orbitron font-black text-xl text-white mb-2">Story of Familyforge</h3>
+    <p class="text-xs text-gray-300 leading-relaxed mb-5">This is the story of Familyforge! If you are interested to know about their family, please enter your gamer name below to continue.</p>
+    
+    <form onsubmit="submitStoryGate(event)" class="space-y-4">
+      <div>
+        <input type="text" id="storyGamerName" placeholder="Enter your Gamer Name" required class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-brand-cyan text-sm font-medium text-center">
+      </div>
+      <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-brand-cyan via-brand-blue to-brand-purple text-brand-dark font-orbitron font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-opacity">
+        Click Here to Read Story <i class="fa-solid fa-arrow-right ml-1"></i>
+      </button>
+    </form>
+  </div>
+</div>
+
 <footer id="foot" class="border-t border-gray-800 py-8 text-center text-xs text-gray-500">
   <p>&copy; 2026 The Forge Minecraft. Made with love for gaming and Minecraft.</p>
 </footer>
@@ -329,6 +344,24 @@ const TIKTOK_LINK='https://www.tiktok.com/@familyforge22';
 const YOUTUBE_LINK='https://www.youtube.com/@SiddharthaGamin-f8h';
 const FACEBOOK_LINK='https://www.facebook.com/DKLionelMjn/';
 const TELEGRAM_LINK='https://web.telegram.org/k/?account=2';
+
+/* ANALYTICS / VISIT TRACKER */
+function trackVisit(pageKey) {
+  let visits = JSON.parse(localStorage.getItem('familyforge_visits') || '{}');
+  visits[pageKey] = (visits[pageKey] || 0) + 1;
+  localStorage.setItem('familyforge_visits', JSON.stringify(visits));
+  console.log(`[Visit Tracker] ${pageKey} total visits: ${visits[pageKey]}`);
+  return visits[pageKey];
+}
+
+function getVisitStats() {
+  const visits = JSON.parse(localStorage.getItem('familyforge_visits') || '{}');
+  return {
+    games: visits['games'] || 0,
+    quiz: visits['quiz'] || 0,
+    story: visits['story'] || 0
+  };
+}
 
 const IQ_TESTS=[
  {title:'IQ Test 1',desc:'Challenge your brain with our classic IQ test',file:'iqtest.html'},
@@ -432,7 +465,7 @@ const paras=m=>m.story.map(p=>`<p>${p}</p>`).join('');
 
 const MENU=[
  ['home','Home','fa-house','text-brand-cyan','Back to the start'],
- ['members','Minecraft','fa-users','text-brand-cyan','Meet the four of us'],
+ ['members','Forge Squad','fa-users','text-brand-cyan','Meet the four of us'],
  ['quiz','Mine-quiz','fa-cube','text-brand-gold','Minecraft trivia'],
  ['legend','Minecraft legend','fa-crown','text-brand-gold','Become a legend'],
  ['iq','IQ test','fa-brain','text-brand-purple','Test your brain'],
@@ -450,6 +483,32 @@ function copyDiscord(){const ok=()=>toast('Discord username copied: '+DISCORD_US
  (navigator.clipboard?navigator.clipboard.writeText(DISCORD_USERNAME).then(ok):Promise.reject()).catch(()=>toast('Discord: '+DISCORD_USERNAME))}
 function imgFail(el,fb,icon,sz){if(fb&&el.dataset.t!=='1'){el.dataset.t='1';el.src=fb;return}el.replaceWith(Object.assign(document.createElement('i'),{className:'fa-solid '+icon+' '+sz+' text-white opacity-80'}))}
 const photo=(m,sz,src)=>`<img src="${src||m.photo}" alt="${esc(m.name)}" class="w-full h-full object-cover object-top" onerror="imgFail(this,'${src?m.photo:''}','${m.icon}','${sz}')">`;
+
+/* POPUP LANDING MODAL LOGIC */
+let storyUnlocked = false;
+
+function openStoryModal() {
+  const modal = $('storyModal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeStoryModal() {
+  const modal = $('storyModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function submitStoryGate(e) {
+  e.preventDefault();
+  const nameInput = $('storyGamerName').value.trim();
+  if (nameInput) {
+    localStorage.setItem('familyforge_gamername', nameInput);
+    storyUnlocked = true;
+    closeStoryModal();
+    location.hash = '#story';
+    route();
+    toast(`Welcome, ${nameInput}! Opening Familyforge Story.`);
+  }
+}
 
 /* ----- RENDER FUNCTIONS ----- */
 function renderNav(){
@@ -500,13 +559,14 @@ function renderMember(id){
   </div></div>`;
 }
 function renderStory(){
+ const savedName = localStorage.getItem('familyforge_gamername') || 'Gamer';
  const storyCards = [
   {
    title: "Ananda's Journey (Father)",
    subtitle: "From Nepal to UAE Hospitality",
    bg: "from-blue-600 to-indigo-900",
    icon: "fa-plane-departure",
-   text: "With dreams as vast as the Himalayas, Ananda left his home in Nepal to chase a brighter future in the United Arab Emirates. Immersed in the vibrant world of hospitality, he worked diligently in hotel management, crafting an inspiring path of hard work and dedication.",
+   text: `Welcome ${savedName}! With dreams as vast as the Himalayas, Ananda left his home in Nepal to chase a brighter future in the United Arab Emirates. Immersed in the vibrant world of hospitality, he worked diligently in hotel management, crafting an inspiring path of hard work and dedication.`,
    imgPlaceholder: "ananda-story.jpg",
    label: "[ Ananda Story Picture Placeholder ]"
   },
@@ -597,6 +657,8 @@ function renderConnect(){
 }
 
 function showQuizPicker(){
+ const v = trackVisit('quiz');
+ toast(`Quiz page visits: ${v}`);
  $('quizPlayer').classList.add('hidden');$('quizFrame').removeAttribute('src');
  $('quizPicker').classList.remove('hidden');
  $('quizCards').innerHTML=QUIZZES.map((q,n)=>`<button onclick="openQuiz(${n})" class="text-left p-6 rounded-3xl bg-brand-card border border-gray-800 hover:border-brand-cyan/60 transition-colors"><span class="w-12 h-12 rounded-xl bg-brand-gold/15 text-brand-gold flex items-center justify-center text-2xl mb-4"><i class="fa-solid fa-cube"></i></span><span class="block font-orbitron font-bold text-lg text-white">${esc(q.title)}</span><span class="block text-xs text-brand-cyan font-orbitron font-bold mt-4">START <i class="fa-solid fa-play ml-1"></i></span></button>`).join('');
@@ -648,6 +710,8 @@ function renderGameNav(sel){
   return `<button onclick="openGame(${i})" class="w-full shrink-0 flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap text-left ${on?'bg-brand-pink/15 text-white border border-brand-pink/50':'text-gray-300 border border-transparent hover:bg-gray-800/60 hover:text-white'}"><i class="fa-solid ${it.icon||'fa-gamepad'} w-5 text-center ${on?'text-brand-pink':'text-brand-purple'}"></i><span>${esc(it.title)}</span>${it.soon?'<span class="ml-auto text-[10px] text-gray-500">Soon</span>':''}</button>`}).join('')).join('');
 }
 function showGamePicker(){
+ const v = trackVisit('games');
+ toast(`Games page visits: ${v}`);
  history.pushState({subView: 'picker'}, '', '#games');
  $('gameFrame').removeAttribute('src');
  $('gamePlayer').classList.add('hidden');$('gameSoon').classList.add('hidden');$('gameWelcome').classList.remove('hidden');
@@ -677,9 +741,20 @@ function toggleGameFullscreen() {
 
 function route(){
  let h=(location.hash||'#home').slice(1),sub=null;
- if(h.startsWith('member-')){sub=h.slice(7);h='member'}
- if(!$(h))h='home';
+
+ if (h === 'story' && !storyUnlocked) {
+   openStoryModal();
+   return;
+ }
+
+ if(h.startsWith('member-')) {
+  sub=h.slice(7);
+  h='member';
+ }
+ if(!$(h)) h='home';
+
  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===h));
+ 
  if(h==='member')renderMember(sub);
  if(h==='quiz')showQuizPicker();
  if(h==='legend')openLegend();
@@ -690,6 +765,12 @@ function route(){
   }
  }
  if(h==='news')renderNews();
+ if(h==='story'){
+  const v = trackVisit('story');
+  toast(`Story page visits: ${v}`);
+  renderStory();
+ }
+ 
  const on=h==='member'?'members':h;
  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('on',b.dataset.v===on));
  $('mobileNav').classList.add('hidden');
@@ -711,16 +792,12 @@ window.addEventListener('popstate', (event) => {
 });
 
 document.addEventListener('DOMContentLoaded',()=>{
- renderNav();renderHome();renderMembers();renderStory();renderNews();renderConnect();startCountdown();
+ renderNav();renderHome();renderMembers();renderNews();renderConnect();startCountdown();
  $('menuBtn').onclick=()=>$('mobileNav').classList.toggle('hidden');
  window.addEventListener('hashchange',() => {
-  if((location.hash||'#home').slice(1) !== 'games') route();
- });
- if((location.hash||'#home').slice(1)==='games'){
-  showGamePicker();
- } else {
   route();
- }
+ });
+ route();
 });
 </script>
 </body>

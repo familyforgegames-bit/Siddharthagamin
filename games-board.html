@@ -15,15 +15,22 @@ tailwind.config={theme:{extend:{colors:{brand:{cyan:'#00f2fe',blue:'#4facfe',pur
   .board-card { transition: all 0.2s ease; }
   .board-card:hover { transform: translateY(-3px); border-color: rgba(0, 242, 254, 0.6); }
 </style>
+<style id="ff-mobile">
+/* Familyforge mobile fixes */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-x:hidden;overflow-x:clip}
+button,a,[role=button],input,select,summary,label{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media(max-width:820px){input,select,textarea{font-size:16px}} /* stops iOS zoom-on-focus */
+</style>
 </head>
 <body class="min-h-screen flex flex-col items-center">
 
   <div class="max-w-5xl w-full">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-800">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-6 pb-4 border-b border-gray-800">
       <div>
         <a href="index.html#games" class="text-xs text-brand-cyan hover:underline mb-1 inline-block"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Main Games</a>
-        <h1 class="font-orbitron font-black text-3xl text-white">Board &amp; Table Games Collection</h1>
+        <h1 class="font-orbitron font-black text-2xl sm:text-3xl text-white">Board &amp; Table Games Collection</h1>
         <p class="text-xs text-gray-400 mt-1">Choose from 15 classic board games to play right now!</p>
       </div>
       <span class="px-3 py-1 rounded-full bg-brand-cyan/10 border border-brand-cyan/30 text-brand-cyan font-mono text-xs">15 Games Available</span>
@@ -153,10 +160,10 @@ function initConnect4(area) {
   area.innerHTML = `
     <div class="text-center">
       <div class="text-sm font-orbitron text-brand-pink mb-3">Connect Four - Drop discs in columns!</div>
-      <div class="p-4 bg-indigo-950 rounded-2xl border border-indigo-800 inline-block">
+      <div class="p-3 sm:p-4 bg-indigo-950 rounded-2xl border border-indigo-800 inline-block max-w-full">
         <p class="text-xs text-gray-300 mb-2">Classic 2-player strategic disc drop.</p>
         <div class="grid grid-cols-7 gap-2">
-          ${Array(42).fill(0).map((_, i) => `<div class="w-10 h-10 rounded-full bg-brand-dark border border-gray-700 flex items-center justify-center text-xs text-gray-500">${i+1}</div>`).join('')}
+          ${Array(42).fill(0).map((_, i) => `<div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-brand-dark border border-gray-700 flex items-center justify-center text-[10px] sm:text-xs text-gray-500">${i+1}</div>`).join('')}
         </div>
       </div>
       <div class="mt-4"><button onclick="launchGame('connect4')" class="px-4 py-2 rounded-xl bg-brand-pink text-white text-xs font-bold font-orbitron">Reset Board</button></div>

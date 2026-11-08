@@ -14,7 +14,14 @@ tailwind.config={theme:{extend:{colors:{brand:{cyan:'#00f2fe',blue:'#4facfe',pur
   body { background: #080b11; color: #f3f4f6; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 20px; }
   .clicker-card { transition: all 0.2s ease; }
   .clicker-card:hover { transform: translateY(-3px); border-color: rgba(251, 191, 36, 0.6); }
-  canvas { background: #111827; border-radius: 16px; border: 2px solid rgba(0, 242, 254, 0.3); display: block; margin: 0 auto; cursor: pointer; max-width: 100%; }
+  canvas { background: #111827; border-radius: 16px; border: 2px solid rgba(0, 242, 254, 0.3); display: block; margin: 0 auto; cursor: pointer; max-width: 100%; height: auto; touch-action: manipulation; }
+</style>
+<style id="ff-mobile">
+/* Familyforge mobile fixes */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-x:hidden;overflow-x:clip}
+button,a,[role=button],input,select,summary,label{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media(max-width:820px){input,select,textarea{font-size:16px}} /* stops iOS zoom-on-focus */
 </style>
 </head>
 <body class="min-h-screen flex flex-col items-center">

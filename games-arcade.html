@@ -11,7 +11,7 @@
 tailwind.config={theme:{extend:{colors:{brand:{cyan:'#00f2fe',blue:'#4facfe',purple:'#7f00ff',pink:'#ff007f',gold:'#fbbf24',dark:'#0a0d14',card:'#121824'}}}}}
 </script>
 <style>
-  body { background: #080b11; color: #f3f4f6; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; min-height: 100vh; overflow-x: hidden; }
+  body { background: #080b11; color: #f3f4f6; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; min-height:100vh;min-height:100dvh; overflow-x: hidden; }
   .grid-games { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
   .tile { border: 1px solid #1f2937; border-radius: 18px; overflow: hidden; background: #121824; cursor: pointer; text-align: left; color: inherit; padding: 0; transition: transform .15s, border-color .15s; }
   .tile:hover { transform: translateY(-3px); border-color: #ff007f; }
@@ -22,7 +22,14 @@ tailwind.config={theme:{extend:{colors:{brand:{cyan:'#00f2fe',blue:'#4facfe',pur
   
   /* Fullscreen clean mode: hide top bar but KEEP leaderboard sidebar */
   body.fs-on #stageTopBar { display: none !important; }
-  body.fs-on #stage { width: 100vw; height: 100vh; background: #000; }
+  body.fs-on #stage { width: 100vw; height:100vh;height:100dvh; background: #000; }
+</style>
+<style id="ff-mobile">
+/* Familyforge mobile fixes */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-x:hidden;overflow-x:clip}
+button,a,[role=button],input,select,summary,label{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media(max-width:820px){input,select,textarea{font-size:16px}} /* stops iOS zoom-on-focus */
 </style>
 </head>
 <body class="flex flex-col">
@@ -96,7 +103,7 @@ tailwind.config={theme:{extend:{colors:{brand:{cyan:'#00f2fe',blue:'#4facfe',pur
 
     <div class="flex-1 flex overflow-hidden">
       <div class="flex-1 relative bg-black flex items-center justify-center">
-        <canvas id="cv" class="w-full h-full"></canvas>
+        <canvas id="cv" class="w-full h-full" style="touch-action:none"></canvas>
         
         <!-- Pause / Settings Modal -->
         <div id="pm" class="absolute inset-0 bg-brand-dark/90 backdrop-blur-md hidden items-center justify-center z-20">
@@ -337,6 +344,18 @@ cv.addEventListener('pointermove', e => {
   ptr.x = e.clientX - r.left; ptr.y = e.clientY - r.top;
   if(g && g.move) g.move(ptr.x, ptr.y);
 });
+
+/* Swipe -> arrow keys, so key-only games (Snake) work on phones */
+(()=>{let sx=0,sy=0,sid=null;
+ cv.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY;sid=e.pointerId});
+ cv.addEventListener('pointerup',e=>{
+  if(e.pointerId!==sid)return;sid=null;
+  const dx=e.clientX-sx,dy=e.clientY-sy;
+  if(Math.max(Math.abs(dx),Math.abs(dy))<30)return;
+  if(paused||state!=='play'||!g||!g.key)return;
+  g.key(Math.abs(dx)>Math.abs(dy)?(dx>0?'ArrowRight':'ArrowLeft'):(dy>0?'ArrowDown':'ArrowUp'));
+ });
+})();
 window.addEventListener('keydown', e => {
   if(e.key==='p'||e.key==='Escape') { paused ? resumeGame() : openSettings(); return; }
   if(paused) return;
@@ -588,6 +607,7 @@ function getGameEngine(id) {
     }
   };
 
+  // Fallback engine for remaining arcade games
   return {
     init() { this.x=W/2; this.y=H/2; this.target={x:R()*W,y:R()*H}; },
     tap(x,y) { if(Math.hypot(x-this.target.x, y-this.target.y)<50) { score+=15; this.target={x:50+R()*(W-100),y:50+R()*(H-100)}; } },

@@ -1,162 +1,731 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>3D Adventure Games</title>
-<style>
-*{box-sizing:border-box}html,body{margin:0;height:100%;background:#080b11;color:#f3f4f6;font-family:'Segoe UI',system-ui,sans-serif}
-button{font:inherit}
-#menu{padding:20px;max-width:1100px;margin:auto}h1{margin:0 0 4px;font-size:26px}.s{color:#9ca3af;margin:0 0 20px;font-size:14px}
-#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
-.tile{border:1px solid #1f2937;border-radius:18px;overflow:hidden;background:#121824;cursor:pointer;text-align:left;color:inherit;padding:0;transition:.15s}
-.tile:hover,.tile:focus-visible{transform:translateY(-3px);border-color:#00f2fe;outline:none}
-.th{height:120px;display:flex;align-items:center;justify-content:center;font-size:54px}.tx{padding:12px 14px}.tx b{display:block;font-size:15px}.tx span{font-size:12px;color:#9ca3af}
-#st{display:none;height:100%;flex-direction:column}
-#bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#0a0d14;border-bottom:1px solid #1f2937}
-#bar button,.pn button{background:#1f2937;color:#fff;border:0;padding:8px 12px;border-radius:10px;cursor:pointer}#bar button:hover,.pn button:hover{background:#334155}.sp{flex:1}
-#cw{flex:1;min-height:0;position:relative;background:#000}#cv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
-#hud{position:absolute;top:10px;left:14px;right:14px;display:flex;justify-content:space-between;font-weight:700;text-shadow:0 2px 4px #000;pointer-events:none}
-#msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px;background:rgba(5,8,14,.6);pointer-events:none}
-#msg h2{margin:0;font-size:34px;color:#00f2fe}#msg p{margin:0;color:#e5e7eb}#msg .y{color:#fbbf24}
-#pm{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(5,8,14,.8)}
-.pn{background:#121824;border:1px solid #2a3446;border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:10px;width:min(300px,90%)}.pn h2{margin:0;text-align:center;color:#00f2fe}
-</style></head><body>
-<div id="menu"><h1>🗺️ 3D Adventure Games</h1><p class="s">Pick a game and play. Best scores are saved on this device.</p><div id="grid"></div></div>
-<div id="st"><div id="bar"><button id="back">&larr; All games</button><b id="gn"></b><span class="sp"></span><button id="pb">⏸</button><button id="mb">🔊</button><button id="fb">⛶</button></div>
-<div id="cw"><canvas id="cv"></canvas><div id="hud"></div><div id="msg"></div>
-<div id="pm"><div class="pn"><h2>Paused</h2><button id="rs">▶ Resume</button><button id="rt">Restart</button><button id="ex">All games</button></div></div></div></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
-const $=i=>document.getElementById(i),R=Math.random,cl=(v,a,b)=>Math.max(a,Math.min(b,v)),T=THREE,cv=$('cv');
-const ren=new T.WebGLRenderer({canvas:cv,antialias:true}),cam=new T.PerspectiveCamera(60,1,.1,200),ray=new T.Raycaster();
-let scene,ground,M,C,gi,state='ready',score=0,bs=0,lv=0,t=0,W=1,H=1,PT=[],keys={},ptr={nx:0,ny:0,down:false,on:false},raf,last=0,overAt=0,paused=false,muted=false,ac,hs='';
-const HELP={run:'A/D or ←/→ switch lane · Space/↑ jump<br>Touch: tap left/right side to switch lane, middle to jump',exp:'WASD / arrows, or hold your finger to move<br>Collect the loot, escape the hunters',fly:'Mouse, finger or arrow keys to steer<br>Fly through rings, dodge hazards',shoot:'Click or tap monsters to destroy them<br>Don\'t let them reach the tower'};
-const TAG={run:'Runner',exp:'Explorer',fly:'Flight',shoot:'Siege'};
-const L=[
-{n:'Jungle Run',e:'🌴',m:'run',d:'Sprint through the jungle',k:0x8fd9a8,g:0x2e7d32,en:0x7b4a2a,pk:0xffd54f,ps:'s',es:'b'},
-{n:'Desert Dash',e:'🏜️',m:'run',d:'Outrun the sandstorm',k:0xf6d8a0,g:0xd9a441,en:0x8d5a2b,pk:0xffeb3b,ps:'d',es:'c'},
-{n:'Snow Slide',e:'⛷️',m:'run',d:'Weave through frozen pines',k:0xcfe8ff,g:0xf5faff,en:0x1b5e20,pk:0x4fc3f7,ps:'d',es:'c'},
-{n:'Lava Escape',e:'🌋',m:'run',d:'Run from the volcano',k:0x3a0d0d,g:0x4a1a12,en:0xff5722,pk:0xffc107,ps:'s',es:'b'},
-{n:'Temple Escape',e:'🏛️',m:'run',d:'Flee the ancient ruins',k:0x5b6b7a,g:0x6d6a5c,en:0x37474f,pk:0x00e5ff,ps:'d',es:'b'},
-{n:'Treasure Island',e:'🏝️',m:'exp',d:'Loot chests, dodge crabs',k:0x7fd1ff,g:0xe6cf8f,en:0xe53935,pk:0xffd700,ps:'b',es:'s'},
-{n:'Haunted Mansion',e:'👻',m:'exp',d:'Find the keys, flee ghosts',k:0x14122b,g:0x2b2a3d,en:0xe0e0ff,pk:0xffb300,ps:'d',es:'s'},
-{n:'Crystal Cave',e:'💎',m:'exp',d:'Mine gems, avoid golems',k:0x120a2b,g:0x2a1f4a,en:0x7e57c2,pk:0x18ffff,ps:'d',es:'c'},
-{n:'Forest Quest',e:'🍄',m:'exp',d:'Gather berries, escape wolves',k:0x9ad9a2,g:0x3f8f3a,en:0x5d4037,pk:0xff5252,ps:'s',es:'b'},
-{n:'Pirate Cove',e:'☠️',m:'exp',d:'Steal gold from the pirates',k:0x89c9e8,g:0x2f6f8f,en:0x263238,pk:0xffca28,ps:'b',es:'c'},
-{n:'Dragon Rider',e:'🐉',m:'fly',d:'Soar through fire rings',k:0xffa36b,g:0x5a2d2d,en:0x37474f,pk:0xffd740,ps:'t',es:'s'},
-{n:'Sky Islands',e:'☁️',m:'fly',d:'Glide between floating isles',k:0x9fd3ff,g:0x6fb7e9,en:0x8d6e63,pk:0x76ff03,ps:'t',es:'b'},
-{n:'Canyon Flight',e:'🦅',m:'fly',d:'Thread the red canyon',k:0xf2b880,g:0xb5652b,en:0x8d4a1f,pk:0x00e5ff,ps:'t',es:'c'},
-{n:'Monster Siege',e:'🏰',m:'shoot',d:'Defend your castle tower',k:0x2b3a67,g:0x3a5a40,en:0x8e24aa,pk:0,ps:'s',es:'s'},
-{n:'Zombie Village',e:'🧟',m:'shoot',d:'Hold the village at night',k:0x30403a,g:0x4a5d3a,en:0x6aa84f,pk:0,ps:'s',es:'b'},
-{n:'Skeleton Crypt',e:'💀',m:'shoot',d:'Smash the undead horde',k:0x1a1a24,g:0x33333f,en:0xeeeeee,pk:0,ps:'s',es:'c'}];
-const hx=n=>'#'+n.toString(16).padStart(6,'0');
-$('grid').innerHTML=L.map((g,i)=>`<button class="tile" onclick="launch(${i})"><div class="th" style="background:linear-gradient(135deg,${hx(g.k)},${hx(g.g)})">${g.e}</div><div class="tx"><b>${g.n}</b><span>${TAG[g.m]} · ${g.d}</span></div></button>`).join('');
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adventure & Exploration Studio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#080b11',
+                        cardBg: '#121824',
+                        cardHover: '#1c2436'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #080b11;
+            color: #f3f4f6;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-/* ---------- helpers ---------- */
-const mk=(sh,s,col,gl)=>{const g={s:()=>new T.SphereGeometry(s,16,12),b:()=>new T.BoxGeometry(s*1.6,s*1.6,s*1.6),c:()=>new T.ConeGeometry(s,s*2,7),d:()=>new T.OctahedronGeometry(s),t:()=>new T.TorusGeometry(s,s*.12,8,24)}[sh]();return new T.Mesh(g,new T.MeshLambertMaterial({color:col,emissive:gl?col:0,emissiveIntensity:.5}))};
-const A=(m,x,y,z)=>{m.position.set(x||0,y||0,z||0);scene.add(m);return m};
-function beep(f,d,ty){if(muted)return;try{ac=ac||new AudioContext();const o=ac.createOscillator(),g=ac.createGain();o.type=ty||'square';o.frequency.value=f;g.gain.value=.05;o.connect(g);g.connect(ac.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.stop(ac.currentTime+d)}catch(e){}}
-function boom(p,col,n){beep(n>8?120:300,.15,'sawtooth');for(let i=0;i<n;i++){const m=mk('b',.12,col,1);m.position.copy(p);scene.add(m);PT.push({m,v:new T.Vector3((R()-.5)*8,R()*6,(R()-.5)*8),l:.7})}}
-function best(i,v){try{const k='adv3d_'+i,b=+localStorage.getItem(k)||0;if(v>b){localStorage.setItem(k,v);return v}return b}catch(e){return v}}
-function showMsg(){const m=$('msg');if(state==='play'){m.style.display='none';return}m.style.display='flex';m.innerHTML=state==='ready'?`<h2>${C.e} ${C.n}</h2><p>${HELP[C.m]}</p><p class="y">Tap or press Space to start</p>`:`<h2 style="color:#ff007f">Game over</h2><p>Score ${score} · Best ${bs}</p><p class="y">Tap or press Space to play again</p>`}
-function end(){state='over';overAt=performance.now();bs=best(gi,score);beep(100,.4,'sawtooth');showMsg()}
-function build(){scene=new T.Scene();const c=new T.Color(C.k);scene.background=c;scene.fog=new T.Fog(c,30,95);scene.add(new T.HemisphereLight(0xffffff,0x445566,.9));const d=new T.DirectionalLight(0xffffff,.8);d.position.set(5,12,6);scene.add(d);
- ground=new T.Mesh(new T.PlaneGeometry(400,400),new T.MeshLambertMaterial({color:C.g}));ground.rotation.x=-Math.PI/2;scene.add(ground)}
-function reset(){score=0;t=0;lv=0;PT=[];build();M.init();M.update(0);state='ready';bs=best(gi,0);showMsg()}
-function size(){const r=$('cw').getBoundingClientRect();W=r.width||1;H=r.height||1;ren.setPixelRatio(Math.min(devicePixelRatio||1,2));ren.setSize(W,H,false);cam.aspect=W/H;cam.updateProjectionMatrix()}
-function pause(v){paused=v;$('pm').style.display=v?'flex':'none';if(v)keys={}}
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #080b11; }
+        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #374151; }
 
-/* ---------- RUNNER ---------- */
-const MR={init(){const b=mk('b',.6,0x3b82f6),h=mk('s',.4,0xffe0bd);b.scale.y=1.4;b.position.y=.7;h.position.y=1.7;this.P=new T.Group();this.P.add(b,h);scene.add(this.P);
- this.ln=0;this.py=0;this.vy=0;this.d=0;this.co=0;this.ob=[];this.dc=[];this.nx=20;
- const p=A(new T.Mesh(new T.PlaneGeometry(10,400),new T.MeshLambertMaterial({color:new T.Color(C.g).offsetHSL(0,0,-.08)})),0,.01,-150);p.rotation.x=-Math.PI/2;
- for(let z=-98;z<12;z+=5.5)this.deco(z)},
-deco(z){const s=R()<.5?-1:1,m=mk('c',1.2+R(),new T.Color(C.g).offsetHSL(0,.05,-.2));m.scale.y=1.6;A(m,s*(7+R()*12),m.geometry.parameters.height*.8,z);this.dc.push(m);
- for(const x of[-1.5,1.5]){const d=mk('b',.3,0xffffff);d.scale.set(.2,.04,5);A(d,x,.03,z);this.dc.push(d)}},
-spawn(){const x=(Math.floor(R()*3)-1)*3,r=R();
- if(r<.4){const m=mk('b',.5,C.en);m.scale.set(2.2,.9,.9);this.ob.push({m:A(m,x,.4,-95),t:'l'})}
- else if(r<.8){const m=mk(C.es,.9,C.en);m.scale.y=1.8;this.ob.push({m:A(m,x,1.5,-95),t:'t'})}
- else for(let i=0;i<5;i++)this.ob.push({m:A(mk('d',.4,C.pk,1),x,1,-95-i*2.5),t:'c'})},
-act(k){if(k==='l')this.ln=Math.max(-1,this.ln-1);else if(k==='r')this.ln=Math.min(1,this.ln+1);else if(k==='j'&&this.py===0){this.vy=15;beep(500,.1)}},
-update(dt){const s=14+Math.min(16,this.d/90),P=this.P;this.d+=s*dt;score=Math.floor(this.d/3)+this.co*10;
- P.position.x+=(this.ln*3-P.position.x)*Math.min(1,dt*12);this.vy-=42*dt;this.py=Math.max(0,this.py+this.vy*dt);if(!this.py)this.vy=0;P.position.y=this.py;
- cam.position.set(P.position.x*.6,4.5,8);cam.lookAt(P.position.x*.6,1.5,-8);
- for(const m of this.dc){m.position.z+=s*dt;if(m.position.z>12)m.position.z-=110}
- this.nx-=s*dt;if(this.nx<=0){this.nx=Math.max(9,17-this.d/150)+R()*6;this.spawn()}
- for(const o of this.ob){o.m.position.z+=s*dt;if(o.t==='c')o.m.rotation.y+=dt*4}
- for(const o of this.ob){const m=o.m,dx=Math.abs(m.position.x-P.position.x);
-  if(Math.abs(m.position.z)<.9&&dx<1.2){if(o.t==='c'){if(!o.u){o.u=1;this.co++;beep(880,.08)}}else if(o.t==='t'||this.py<.8){boom(P.position,C.en,14);end();return}}}
- this.ob=this.ob.filter(o=>{if(o.m.position.z>12||o.u){scene.remove(o.m);return false}return true})}};
+        /* Canvas & Grid animations */
+        .glow-cyan { filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.4)); }
+        .glow-amber { filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.4)); }
+        .pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    </style>
+<style id="ff-mobile">
+/* Familyforge mobile fixes */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-x:hidden;overflow-x:clip}
+button,a,[role=button],input,select,summary,label{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media(max-width:820px){input,select,textarea{font-size:16px}} /* stops iOS zoom-on-focus */
+</style>
+</head>
+<body class="h-screen w-screen flex flex-col p-3 md:p-5 box-border overflow-hidden bg-[#080b11]">
 
-/* ---------- EXPLORER ---------- */
-const ME={init(){const b=mk('b',.5,0xffb300),h=mk('s',.38,0xffe0bd);b.scale.y=1.3;b.position.y=.5;h.position.y=1.35;this.P=new T.Group();this.P.add(b,h);scene.add(this.P);
- this.pk=[];this.en=[];this.inv=0;lv=3;
- for(let i=0;i<30;i++){const m=mk(R()<.5?'c':'b',.8+R()*1.2,new T.Color(C.g).offsetHSL(0,.05,-.15));let x=(R()-.5)*50,z=(R()-.5)*50;if(Math.hypot(x,z)<6)x+=10;A(m,x,m.geometry.parameters.height/2,z)}
- for(let i=0;i<6;i++)this.sp();for(let i=0;i<2;i++)this.se()},
-sp(){A(this.pk[this.pk.push(mk(C.ps,.5,C.pk,1))-1],(R()-.5)*38,.9,(R()-.5)*38)},
-se(){const p=this.P.position;let x,z;do{x=(R()-.5)*40;z=(R()-.5)*40}while(Math.hypot(x-p.x,z-p.z)<14);const m=A(mk(C.es,.8,C.en),x,.8,z);m.userData.sp=2.6+R();this.en.push(m)},
-update(dt){let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dz=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
- if(ptr.down){dx=ptr.nx;dz=-ptr.ny;if(Math.hypot(dx,dz)<.12)dx=dz=0}
- const l=Math.hypot(dx,dz),k=l>1?1/l:1,P=this.P,p=P.position;
- p.x=cl(p.x+dx*k*9*dt,-22,22);p.z=cl(p.z+dz*k*9*dt,-22,22);if(l>.1)P.rotation.y=Math.atan2(dx,dz);
- cam.position.set(p.x,15,p.z+11);cam.lookAt(p.x,0,p.z);
- this.inv-=dt;P.visible=this.inv<=0||Math.floor(this.inv*10)%2==0;
- for(let i=this.pk.length-1;i>=0;i--){const m=this.pk[i];m.rotation.y+=dt*3;m.position.y=.9+Math.sin(t*4+m.position.x)*.2;
-  if(m.position.distanceTo(p)<1.5){scene.remove(m);this.pk.splice(i,1);score+=10;beep(900,.08);this.sp();const w=Math.min(10,2+Math.floor(score/60));while(this.en.length<w)this.se()}}
- for(const e of this.en){const v=Math.min(7,e.userData.sp+score/90),a=Math.atan2(p.x-e.position.x,p.z-e.position.z);
-  e.position.x+=Math.sin(a)*v*dt;e.position.z+=Math.cos(a)*v*dt;e.rotation.y+=dt*2;e.position.y=.8+Math.abs(Math.sin(t*6+v))*.3;
-  if(this.inv<=0&&Math.hypot(e.position.x-p.x,e.position.z-p.z)<1.4){lv--;this.inv=1.6;boom(p,C.en,12);if(lv<=0){end();return}}}}};
+    <!-- Header -->
+    <header class="mb-3 shrink-0 flex items-center justify-between gap-3 border-b border-gray-800/80 pb-2">
+        <div>
+            <div class="flex items-center space-x-2">
+                <h1 class="text-xl md:text-2xl font-black text-white tracking-tight">Adventure & Exploration</h1>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">12 Missions</span>
+            </div>
+            <p class="text-xs text-gray-400 mt-0.5">Survive realistic wilderness hazards, navigate ancient ruins, and solve deep space quests.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-xs font-mono text-gray-400 bg-gray-900 border border-gray-800 px-3 py-1 rounded-xl hidden sm:inline-block"><i class="fa-solid fa-trophy text-amber-400 mr-1.5"></i>Completed: <strong id="completedCount" class="text-cyan-400">0</strong>/12</span>
+        </div>
+    </header>
 
-/* ---------- FLIGHT ---------- */
-const MF={init(){const g=new T.Group(),b=mk('b',.4,0xeeeeee),w=mk('b',.4,0xff5252),tl=mk('b',.2,0xeeeeee);b.scale.set(1,.7,3.4);w.scale.set(5,.12,1.5);tl.scale.set(.2,2,.8);tl.position.set(0,.4,1.3);g.add(b,w,tl);
- this.P=A(g,0,3,0);this.ob=[];this.dc=[];this.tx=0;this.ty=3;this.nx=15;this.rg=0;this.inv=0;lv=3;ground.position.y=-2;
- for(let z=-98;z<12;z+=4){const m=mk('c',1.5+R()*2,new T.Color(C.g).offsetHSL(0,.05,-.2));m.scale.y=2+R()*2;A(m,(R()<.5?-1:1)*(9+R()*25),-2+m.geometry.parameters.height*m.scale.y/2,z);this.dc.push(m)}},
-update(dt){const s=18+Math.min(14,t*.3),P=this.P;
- const kx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),ky=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0);
- if(kx||ky){this.tx=cl(this.tx+kx*11*dt,-6.5,6.5);this.ty=cl(this.ty+ky*8*dt,.4,6.5)}else if(ptr.on){this.tx=ptr.nx*6.5;this.ty=cl(3.4+ptr.ny*3.2,.4,6.5)}
- const ox=P.position.x;P.position.x+=(this.tx-ox)*Math.min(1,dt*7);P.position.y+=(this.ty-P.position.y)*Math.min(1,dt*7);P.rotation.z=cl((ox-P.position.x)*4,-.7,.7);
- cam.position.set(P.position.x*.7,P.position.y*.6+2.5,9);cam.lookAt(P.position.x*.7,P.position.y*.6+.5,-12);
- this.inv-=dt;P.visible=this.inv<=0||Math.floor(this.inv*10)%2==0;score=this.rg*10+Math.floor(t);
- for(const m of this.dc){m.position.z+=s*dt;if(m.position.z>12)m.position.z-=110}
- this.nx-=s*dt;if(this.nx<=0){this.nx=11+R()*5;const rx=(R()-.5)*10,ry=1+R()*5,r=A(mk('t',1.9,C.pk,1),rx,ry,-100);r.userData={r:1};this.ob.push(r);
-  for(let i=0;i<2;i++){let x,y;do{x=(R()-.5)*13;y=.6+R()*6}while(Math.hypot(x-rx,y-ry)<3.6);const o=A(mk(C.es,1.1,C.en),x,y,-100-i*5-R()*4);o.userData={r:0};this.ob.push(o)}}
- for(let i=this.ob.length-1;i>=0;i--){const m=this.ob[i],u=m.userData;m.position.z+=s*dt;if(u.r)m.rotation.z+=dt*2;else m.rotation.y+=dt;
-  const z=m.position.z,d=Math.hypot(m.position.x-P.position.x,m.position.y-P.position.y);
-  if(!u.h&&z>-.8&&z<1){if(u.r){u.h=1;if(d<2.3){this.rg++;beep(1000,.1);m.material.color.set(0xffffff)}else m.material.color.set(0x555555)}
-   else if(d<1.7&&this.inv<=0){u.h=1;lv--;this.inv=1.5;boom(P.position,C.en,14);if(lv<=0){end();return}}}
-  if(z>14){scene.remove(m);this.ob.splice(i,1)}}}};
+    <!-- 1-Page Responsive Grid Container -->
+    <div class="flex-1 min-h-0 overflow-y-auto pr-1">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3.5" id="adventureGrid">
+            <!-- Dynamically populated -->
+        </div>
+    </div>
 
-/* ---------- SIEGE ---------- */
-const MS={init(){const b=mk('b',1.4,0x9aa5b1),r=mk('c',2,0xc0392b);b.position.y=1.1;r.position.y=4.2;r.scale.set(1.2,1,1.2);scene.add(b,r);this.en=[];this.nx=1;lv=5;
- for(let i=0;i<24;i++){const a=i/24*6.28,m=mk('c',.8+R(),new T.Color(C.g).offsetHSL(0,.05,-.15));A(m,Math.cos(a)*(27+R()*8),1,Math.sin(a)*(27+R()*8))}
- cam.position.set(0,20,17);cam.lookAt(0,0,0)},
-act(k){if(k!=='tap')return;ray.setFromCamera(new T.Vector2(ptr.nx,ptr.ny),cam);let bst=null,bd=9e9;
- for(const m of this.en){const d=ray.ray.distanceToPoint(m.position),c=cam.position.distanceTo(m.position);if(d<m.userData.r+1&&c<bd){bst=m;bd=c}}
- if(bst){const u=bst.userData;if(--u.hp<=0){score+=u.pt;boom(bst.position,C.en,12);scene.remove(bst);this.en.splice(this.en.indexOf(bst),1)}else boom(bst.position,0xffffff,5)}
- else{beep(200,.06);const v=new T.Vector3();if(ray.ray.intersectPlane(new T.Plane(new T.Vector3(0,1,0),0),v))boom(v,0xffffff,3)}},
-update(dt){this.nx-=dt;
- if(this.nx<=0){this.nx=Math.max(.4,1.3-score/350);const a=R()*6.283,big=score>120&&R()<.25,m=mk(C.es,big?1.3:.8,C.en);A(m,Math.cos(a)*21,big?1.3:.8,Math.sin(a)*21);m.userData={hp:big?3:1,r:big?1.5:1,sp:2.4+Math.min(3.5,score/100)+R()*.6,pt:big?30:10};this.en.push(m)}
- for(let i=this.en.length-1;i>=0;i--){const m=this.en[i],p=m.position,d=Math.hypot(p.x,p.z)||1,v=m.userData.sp*dt;p.x-=p.x/d*v;p.z-=p.z/d*v;m.rotation.y+=dt*2;p.y=(m.userData.r>1?1.3:.8)+Math.abs(Math.sin(t*7+i))*.3;
-  if(d<2.6){scene.remove(m);this.en.splice(i,1);lv--;boom(new T.Vector3(0,2,0),C.en,14);if(lv<=0){end();return}}}}};
-const MECH={run:MR,exp:ME,fly:MF,shoot:MS};
+    <!-- Active Game Modal Container -->
+    <div id="gameModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex flex-col hidden">
+        
+        <!-- Modal Top Title Toolbar -->
+        <div class="bg-slate-900 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between shrink-0">
+            <div class="flex items-center space-x-3">
+                <div id="modalGameIcon" class="w-8 h-8 rounded-xl flex items-center justify-center text-white text-base font-bold shrink-0 shadow-lg"></div>
+                <div>
+                    <h3 id="modalGameTitle" class="text-base font-bold text-white leading-tight">Game Title</h3>
+                    <p id="modalGameDesc" class="text-[11px] text-gray-400 hidden sm:block">Subtitle</p>
+                </div>
+            </div>
 
-/* ---------- main loop & input ---------- */
-function loop(ts){raf=requestAnimationFrame(loop);const dt=Math.min(.033,(ts-last)/1e3||0);last=ts;
- if(state==='play'&&!paused){t+=dt;M.update(dt)}
- const pd=paused?0:dt;for(let i=PT.length-1;i>=0;i--){const p=PT[i];p.l-=pd;p.v.y-=14*pd;p.m.position.addScaledVector(p.v,pd);p.m.scale.setScalar(Math.max(.01,p.l/.7));if(p.l<=0){scene.remove(p.m);PT.splice(i,1)}}
- ren.render(scene,cam);
- const h=`<span>Score ${score}</span><span>${lv>0?'❤️'.repeat(lv):''}</span><span>Best ${Math.max(bs,score)}</span>`;if(h!==hs){hs=h;$('hud').innerHTML=h}}
-function press(){if(state==='ready'){state='play';showMsg();beep(600,.1);return true}if(state==='over'&&performance.now()-overAt>600){reset();state='play';showMsg();return true}return false}
-function launch(i){gi=i;C=L[i];M=MECH[C.m];$('menu').style.display='none';$('st').style.display='flex';$('gn').textContent=C.e+' '+C.n;pause(false);size();reset();cancelAnimationFrame(raf);last=performance.now();loop(last)}
-function home(){pause(false);if(document.fullscreenElement)document.exitFullscreen();cancelAnimationFrame(raf);M=null;$('st').style.display='none';$('menu').style.display='block'}
-addEventListener('keydown',e=>{if(!M)return;const k=e.key.toLowerCase();keys[k]=1;if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();
- if((k==='p'||k==='escape')&&state==='play'){pause(!paused);return}if(paused||press())return;
- if(state==='play'&&M.act)M.act(k==='arrowleft'||k==='a'?'l':k==='arrowright'||k==='d'?'r':(k===' '||k==='arrowup'||k==='w')?'j':k)});
-addEventListener('keyup',e=>keys[e.key.toLowerCase()]=0);
-function pp(e){const r=cv.getBoundingClientRect();ptr.nx=(e.clientX-r.left)/r.width*2-1;ptr.ny=1-(e.clientY-r.top)/r.height*2}
-cv.addEventListener('pointerdown',e=>{pp(e);ptr.down=ptr.on=true;if(paused||press())return;if(state==='play'&&M.act)M.act(C.m==='run'?(ptr.nx<-.33?'l':ptr.nx>.33?'r':'j'):'tap')});
-cv.addEventListener('pointermove',e=>{pp(e);if(e.pointerType==='mouse')ptr.on=true});
-cv.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')ptr.on=false});
-addEventListener('pointerup',e=>{ptr.down=false;if(e.pointerType!=='mouse')ptr.on=false});
-addEventListener('resize',()=>{if(M)size()});try{new ResizeObserver(()=>{if(M)size()}).observe($('cw'))}catch(e){}
-$('back').onclick=$('ex').onclick=home;$('pb').onclick=()=>{if(state==='play')pause(!paused)};$('rs').onclick=()=>pause(false);$('rt').onclick=()=>{pause(false);reset()};
-$('mb').onclick=()=>{muted=!muted;$('mb').textContent=muted?'🔇':'🔊'};
-$('fb').onclick=()=>{const w=$('cw');document.fullscreenElement?document.exitFullscreen():(w.requestFullscreen||w.webkitRequestFullscreen).call(w)};
-</script></body></html>
+            <div class="flex items-center space-x-2">
+                <button id="pauseBtn" class="p-2 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl transition-colors text-xs" title="Pause"><i class="fa-solid fa-pause"></i></button>
+                <button id="settingsBtn" class="p-2 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl transition-colors text-xs" title="Settings"><i class="fa-solid fa-gear"></i></button>
+                <button id="closeModalBtn" class="p-2 bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white rounded-xl transition-colors border border-rose-500/30 text-xs" title="Close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+
+        <!-- Gameplay Controls & Mode Bar -->
+        <div class="bg-slate-950 border-b border-slate-800/80 px-4 py-2 flex flex-wrap items-center justify-between gap-2 shrink-0 text-xs">
+            <!-- Left Controls: Mode & Difficulty -->
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- Mode Toggle -->
+                <div class="flex items-center bg-slate-900 rounded-lg p-0.5 border border-slate-800">
+                    <button id="modeSoloBtn" onclick="setAdventureMode('solo')" class="px-2.5 py-1 rounded-md font-bold text-[11px] bg-cyan-500/20 text-cyan-400">Solo Explorer</button>
+                    <button id="modeSpeedBtn" onclick="setAdventureMode('speedrun')" class="px-2.5 py-1 rounded-md font-bold text-[11px] text-gray-400 hover:text-white">Speedrunner</button>
+                    <button id="modeHardcoreBtn" onclick="setAdventureMode('hardcore')" class="px-2.5 py-1 rounded-md font-bold text-[11px] text-gray-400 hover:text-white">Hardcore</button>
+                </div>
+                <div id="modeStatusTag" class="text-[10px] font-mono text-cyan-400 px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20 hidden md:block">NORMAL STATS</div>
+            </div>
+
+            <!-- START / RESET BUTTON -->
+            <button id="startGameBtn" onclick="startCurrentAdventure()" class="px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-cyan-500/20 flex items-center gap-1.5">
+                <i class="fa-solid fa-play"></i>
+                <span>Start Mission</span>
+            </button>
+        </div>
+
+        <!-- Game Stage Canvas Container -->
+        <div class="flex-1 flex items-center justify-center p-3 overflow-hidden relative bg-slate-950" id="gameCanvasStage">
+            <!-- Active Game UI Injected Here -->
+        </div>
+    </div>
+
+    <!-- Pause Modal -->
+    <div id="pauseModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl">
+            <div class="w-12 h-12 bg-cyan-500/10 text-cyan-400 rounded-2xl flex items-center justify-center text-xl mx-auto mb-3 border border-cyan-500/20">
+                <i class="fa-solid fa-pause"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-1">Mission Paused</h3>
+            <p class="text-xs text-gray-400 mb-5">Take a breath before resuming your expedition.</p>
+            <div class="space-y-2.5">
+                <button id="resumeBtn" class="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl text-xs">Resume Expedition</button>
+                <button id="restartInPauseBtn" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl text-xs border border-slate-700">Restart Mission</button>
+                <button id="quitInPauseBtn" class="w-full py-2.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 font-semibold rounded-xl text-xs border border-rose-900/50">Abandon Quest</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gear text-cyan-400"></i> Settings</h3>
+                <button id="closeSettingsBtn" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-semibold text-gray-400 block mb-2">Sound Audio Volume</label>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="80" class="w-full accent-cyan-400 bg-slate-800 rounded-lg cursor-pointer">
+                </div>
+                <div class="flex items-center justify-between pt-2">
+                    <span class="text-xs text-gray-300 font-medium">Ambient Audio & SFX</span>
+                    <button id="sfxToggleBtn" class="px-3 py-1 bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 rounded-lg text-xs font-bold">ENABLED</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result / Defeat Modal -->
+    <div id="resultModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl">
+            <div id="resultIconBox" class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3"></div>
+            <h3 id="resultTitle" class="text-xl font-bold text-white mb-1">Expedition Success!</h3>
+            <p id="resultDesc" class="text-gray-400 text-xs mb-5">You survived the elements.</p>
+            <button id="resultPlayAgainBtn" class="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl text-xs uppercase tracking-wider">Try Again</button>
+        </div>
+    </div>
+
+    <!-- Audio & Engine Code -->
+    <script>
+        // Synthesized Web Audio FX Engine
+        const AudioFX = {
+            ctx: null,
+            enabled: true,
+            volume: 0.8,
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) this.ctx = new AudioContext();
+                }
+            },
+            playTone(freq, type = 'sine', duration = 0.15) {
+                if (!this.enabled || this.volume === 0) return;
+                this.init();
+                if (!this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(0.12 * this.volume, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {}
+            },
+            playSuccess() {
+                this.playTone(440, 'sine', 0.1);
+                setTimeout(() => this.playTone(554.37, 'sine', 0.12), 90);
+                setTimeout(() => this.playTone(659.25, 'sine', 0.2), 180);
+            },
+            playError() {
+                this.playTone(180, 'sawtooth', 0.15);
+                setTimeout(() => this.playTone(130, 'sawtooth', 0.25), 120);
+            },
+            playClick() { this.playTone(500, 'sine', 0.04); },
+            playStep() { this.playTone(200, 'triangle', 0.06); },
+            playItem() { this.playTone(800, 'sine', 0.1); }
+        };
+
+        let currentAdventureMode = 'solo'; // 'solo', 'speedrun', 'hardcore'
+        let activeAdventure = null;
+        let currentGameMeta = null;
+        const completedGames = new Set();
+
+        function setAdventureMode(mode) {
+            currentAdventureMode = mode;
+            document.getElementById('modeSoloBtn').className = mode === 'solo' ? 'px-2.5 py-1 rounded-md font-bold text-[11px] bg-cyan-500/20 text-cyan-400' : 'px-2.5 py-1 rounded-md font-bold text-[11px] text-gray-400 hover:text-white';
+            document.getElementById('modeSpeedBtn').className = mode === 'speedrun' ? 'px-2.5 py-1 rounded-md font-bold text-[11px] bg-cyan-500/20 text-cyan-400' : 'px-2.5 py-1 rounded-md font-bold text-[11px] text-gray-400 hover:text-white';
+            document.getElementById('modeHardcoreBtn').className = mode === 'hardcore' ? 'px-2.5 py-1 rounded-md font-bold text-[11px] bg-rose-500/20 text-rose-400' : 'px-2.5 py-1 rounded-md font-bold text-[11px] text-gray-400 hover:text-white';
+            
+            const tag = document.getElementById('modeStatusTag');
+            if (mode === 'solo') { tag.textContent = 'SOLO EXPLORER'; tag.className = 'text-[10px] font-mono text-cyan-400 px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20 hidden md:block'; }
+            else if (mode === 'speedrun') { tag.textContent = 'SPEEDRUN TIMER'; tag.className = 'text-[10px] font-mono text-amber-400 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 hidden md:block'; }
+            else { tag.textContent = '1-LIFE HARDCORE'; tag.className = 'text-[10px] font-mono text-rose-400 px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/20 hidden md:block'; }
+
+            startCurrentAdventure();
+        }
+
+        const ADVENTURE_GAMES = [
+            { id: 'temple', title: 'Forgotten Temple Explorer', desc: 'Navigate ancient grids, disarm traps & collect relics', icon: 'fa-dungeon', bg: 'bg-gradient-to-br from-amber-700 to-amber-950' },
+            { id: 'desert', title: 'Desert Survival: Dunes', desc: 'Manage water, temperature & navigate night dunes', icon: 'fa-compass', bg: 'bg-gradient-to-br from-orange-600 to-amber-800' },
+            { id: 'cyberpunk', title: 'Cyberpunk Neon Runner', desc: 'Parkour grid traversal & hack security nodes', icon: 'fa-terminal', bg: 'bg-gradient-to-br from-purple-600 to-cyan-600' },
+            { id: 'island', title: 'Island Castaway', desc: 'Craft tools, fish for survival & set rescue signals', icon: 'fa-umbrella-beach', bg: 'bg-gradient-to-br from-emerald-600 to-teal-800' },
+            { id: 'realm', title: 'Lost Realm Quest', desc: 'Turn-based encounters & RPG item management', icon: 'fa-shield-halved', bg: 'bg-gradient-to-br from-indigo-700 to-purple-900' },
+            { id: 'abyssal', title: 'Deep Sea Abyssal Dive', desc: 'Manage oxygen, avoid trench creatures & gather gold', icon: 'fa-water', bg: 'bg-gradient-to-br from-blue-700 to-slate-900' },
+            { id: 'arctic', title: 'Arctic Expedition', desc: 'Battle freezing blizzards & fix emergency radio towers', icon: 'fa-snowflake', bg: 'bg-gradient-to-br from-sky-600 to-blue-900' },
+            { id: 'mars', title: 'Space Odyssey: Mars Base', desc: 'Power station grids & scan alien relics', icon: 'fa-shuttle-space', bg: 'bg-gradient-to-br from-red-600 to-rose-950' },
+            { id: 'pharaoh', title: 'Tomb of the Pharaoh', desc: 'Solve hieroglyph sequence locks & pressure plates', icon: 'fa-ankh', bg: 'bg-gradient-to-br from-amber-500 to-yellow-800' },
+            { id: 'stealth', title: 'Medieval Castle Escape', desc: 'Line-of-sight guard stealth & lockpick escape routes', icon: 'fa-user-ninja', bg: 'bg-gradient-to-br from-slate-700 to-slate-900' },
+            { id: 'canopy', title: 'Jungle Canopy Rescue', desc: 'Swing timed ropes & dodge canopy hazards', icon: 'fa-tree', bg: 'bg-gradient-to-br from-green-600 to-emerald-900' },
+            { id: 'summit', title: 'Mountain Peak Summit', desc: 'Anchor climbing ropes & brace changing weather', icon: 'fa-mountain', bg: 'bg-gradient-to-br from-cyan-700 to-slate-800' }
+        ];
+
+        function renderGrid() {
+            const grid = document.getElementById('adventureGrid');
+            grid.innerHTML = '';
+            ADVENTURE_GAMES.forEach(game => {
+                const card = document.createElement('div');
+                const isCompleted = completedGames.has(game.id);
+                card.className = `bg-cardBg hover:bg-cardHover border border-gray-800 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg group flex flex-col justify-between relative`;
+                card.innerHTML = `
+                    ${isCompleted ? '<span class="absolute top-2 right-2 bg-emerald-500 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-full z-10 shadow"><i class="fa-solid fa-check mr-1"></i>DONE</span>' : ''}
+                    <div class="h-28 ${game.bg} flex items-center justify-center p-4 relative">
+                        <i class="fa-solid ${game.icon} text-4xl text-white/90 drop-shadow-md group-hover:scale-110 transition-transform duration-300"></i>
+                    </div>
+                    <div class="p-3 flex flex-col justify-between flex-1">
+                        <div>
+                            <h3 class="font-bold text-white text-xs group-hover:text-cyan-400 transition-colors">${game.title}</h3>
+                            <p class="text-[10px] text-gray-400 mt-0.5 line-clamp-1">${game.desc}</p>
+                        </div>
+                        <div class="mt-2 flex items-center justify-end text-[10px] text-cyan-400 font-semibold pt-2 border-t border-gray-800/80">
+                            <span class="group-hover:translate-x-0.5 transition-transform flex items-center gap-1">Launch Expedition <i class="fa-solid fa-play text-[8px]"></i></span>
+                        </div>
+                    </div>
+                `;
+                card.onclick = () => openGameModal(game);
+                grid.appendChild(card);
+            });
+            document.getElementById('completedCount').textContent = completedGames.size;
+        }
+
+        function openGameModal(game) {
+            AudioFX.playClick();
+            currentGameMeta = game;
+
+            document.getElementById('modalGameTitle').textContent = game.title;
+            document.getElementById('modalGameDesc').textContent = game.desc;
+
+            const iconBox = document.getElementById('modalGameIcon');
+            iconBox.className = `w-8 h-8 rounded-xl flex items-center justify-center text-white text-base font-bold ${game.bg}`;
+            iconBox.innerHTML = `<i class="fa-solid ${game.icon}"></i>`;
+
+            document.getElementById('gameModal').classList.remove('hidden');
+            startCurrentAdventure();
+        }
+
+        function startCurrentAdventure() {
+            if (!currentGameMeta) return;
+            AudioFX.playClick();
+            const stage = document.getElementById('gameCanvasStage');
+            stage.innerHTML = '';
+
+            switch (currentGameMeta.id) {
+                case 'temple': activeAdventure = new TempleExplorerGame(stage); break;
+                case 'desert': activeAdventure = new DesertSurvivalGame(stage); break;
+                case 'cyberpunk': activeAdventure = new CyberpunkRunnerGame(stage); break;
+                case 'island': activeAdventure = new IslandCastawayGame(stage); break;
+                case 'realm': activeAdventure = new LostRealmQuestGame(stage); break;
+                case 'abyssal': activeAdventure = new AbyssalDiveGame(stage); break;
+                case 'arctic': activeAdventure = new ArcticExpeditionGame(stage); break;
+                case 'mars': activeAdventure = new MarsBaseGame(stage); break;
+                case 'pharaoh': activeAdventure = new PharaohTombGame(stage); break;
+                case 'stealth': activeAdventure = new CastleEscapeGame(stage); break;
+                case 'canopy': activeAdventure = new CanopyRescueGame(stage); break;
+                case 'summit': activeAdventure = new MountainSummitGame(stage); break;
+            }
+        }
+
+        function closeGame() {
+            document.getElementById('gameModal').classList.add('hidden');
+            document.getElementById('gameCanvasStage').innerHTML = '';
+            activeAdventure = null;
+            currentGameMeta = null;
+        }
+
+        function showResultModal(title, desc, isWin = true) {
+            if (isWin && currentGameMeta) completedGames.add(currentGameMeta.id);
+            renderGrid();
+
+            const iconBox = document.getElementById('resultIconBox');
+            iconBox.className = `w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 ${isWin ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}`;
+            iconBox.innerHTML = `<i class="fa-solid ${isWin ? 'fa-compass' : 'fa-skull'}"></i>`;
+            document.getElementById('resultTitle').textContent = title;
+            document.getElementById('resultDesc').textContent = desc;
+
+            const modal = document.getElementById('resultModal');
+            modal.classList.remove('hidden');
+
+            document.getElementById('resultPlayAgainBtn').onclick = () => {
+                modal.classList.add('hidden');
+                startCurrentAdventure();
+            };
+        }
+
+        // Global Event Listeners
+        document.getElementById('closeModalBtn').onclick = closeGame;
+        document.getElementById('pauseBtn').onclick = () => document.getElementById('pauseModal').classList.remove('hidden');
+        document.getElementById('resumeBtn').onclick = () => document.getElementById('pauseModal').classList.add('hidden');
+        document.getElementById('quitInPauseBtn').onclick = () => {
+            document.getElementById('pauseModal').classList.add('hidden');
+            closeGame();
+        };
+        document.getElementById('restartInPauseBtn').onclick = () => {
+            document.getElementById('pauseModal').classList.add('hidden');
+            startCurrentAdventure();
+        };
+
+        document.getElementById('settingsBtn').onclick = () => document.getElementById('settingsModal').classList.remove('hidden');
+        document.getElementById('closeSettingsBtn').onclick = () => document.getElementById('settingsModal').classList.add('hidden');
+
+        document.getElementById('volumeSlider').oninput = (e) => {
+            AudioFX.volume = parseInt(e.target.value, 10) / 100;
+        };
+        document.getElementById('sfxToggleBtn').onclick = () => {
+            AudioFX.enabled = !AudioFX.enabled;
+            const btn = document.getElementById('sfxToggleBtn');
+            btn.textContent = AudioFX.enabled ? 'ENABLED' : 'MUTED';
+            btn.className = AudioFX.enabled ? 'px-3 py-1 bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 rounded-lg text-xs font-bold' : 'px-3 py-1 bg-slate-800 text-gray-400 rounded-lg text-xs font-bold';
+        };
+
+        /* ==================== 1. FORGOTTEN TEMPLE EXPLORER ==================== */
+        class TempleExplorerGame {
+            constructor(c) {
+                this.c = c;
+                this.grid = [
+                    ['P', '.', 'T', '.', 'R'],
+                    ['.', '#', '.', '#', '.'],
+                    ['.', 'K', '.', '.', '.'],
+                    ['#', '.', '#', '.', 'E']
+                ];
+                this.px = 0; this.py = 0;
+                this.hasKey = false;
+                this.relics = 0;
+                this.init();
+            }
+            init() { this.render(); }
+            render() {
+                this.c.innerHTML = `
+                    <div class="flex flex-col items-center max-w-sm w-full">
+                        <div class="flex justify-between w-full text-xs font-mono text-gray-400 mb-2">
+                            <span>Key: <strong class="${this.hasKey?'text-emerald-400':'text-gray-500'}">${this.hasKey?'YES':'MISSING'}</strong></span>
+                            <span>Relics: <strong class="text-amber-400">${this.relics}/1</strong></span>
+                        </div>
+                        <div class="grid grid-cols-5 gap-2 bg-slate-900 border border-slate-800 p-3 rounded-2xl w-full aspect-video">
+                            ${this.grid.map((r, y) => r.map((cell, x) => {
+                                let icon = ''; let bg = 'bg-slate-800/80';
+                                if (x === this.px && y === this.py) { icon = '<i class="fa-solid fa-person-walking text-cyan-400 text-xl"></i>'; bg = 'bg-cyan-950 border border-cyan-500/50'; }
+                                else if (cell === '#') { bg = 'bg-slate-950'; }
+                                else if (cell === 'T') { icon = '<i class="fa-solid fa-burst text-rose-500 text-xs"></i>'; }
+                                else if (cell === 'K') { icon = '<i class="fa-solid fa-key text-yellow-400 text-xs"></i>'; }
+                                else if (cell === 'R') { icon = '<i class="fa-solid fa-gem text-amber-400 text-xs"></i>'; }
+                                else if (cell === 'E') { icon = '<i class="fa-solid fa-door-open text-emerald-400 text-base"></i>'; }
+                                return `<div class="rounded-xl flex items-center justify-center font-bold ${bg}">${icon}</div>`;
+                            }).join('')).join('')}
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 mt-4 w-40">
+                            <div></div>
+                            <button onclick="activeAdventure.move(0,-1)" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl"><i class="fa-solid fa-arrow-up"></i></button>
+                            <div></div>
+                            <button onclick="activeAdventure.move(-1,0)" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl"><i class="fa-solid fa-arrow-left"></i></button>
+                            <button onclick="activeAdventure.move(0,1)" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl"><i class="fa-solid fa-arrow-down"></i></button>
+                            <button onclick="activeAdventure.move(1,0)" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl"><i class="fa-solid fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+                `;
+            }
+            move(dx, dy) {
+                let nx = this.px + dx, ny = this.py + dy;
+                if (nx < 0 || nx >= 5 || ny < 0 || ny >= 4 || this.grid[ny][nx] === '#') return;
+                this.px = nx; this.py = ny;
+                const cell = this.grid[ny][nx];
+                AudioFX.playStep();
+                if (cell === 'T') { AudioFX.playError(); showResultModal('Trap Triggered!', 'You triggered ancient dart traps.', false); return; }
+                if (cell === 'K') { this.hasKey = true; this.grid[ny][nx] = '.'; AudioFX.playItem(); }
+                if (cell === 'R') { this.relics++; this.grid[ny][nx] = '.'; AudioFX.playItem(); }
+                if (cell === 'E') {
+                    if (this.hasKey) { AudioFX.playSuccess(); showResultModal('Temple Escaped!', 'Escaped with ancient treasures!', true); }
+                    else { AudioFX.playError(); }
+                }
+                this.render();
+            }
+        }
+
+        /* ==================== 2. DESERT SURVIVAL ==================== */
+        class DesertSurvivalGame {
+            constructor(c) {
+                this.c = c; this.water = 100; this.stamina = 100; this.distance = 5;
+                this.init();
+            }
+            init() { this.render(); }
+            render() {
+                this.c.innerHTML = `
+                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-sm w-full text-center">
+                        <div class="flex justify-around text-xs font-mono mb-4 text-gray-300">
+                            <div>Water: <strong class="text-cyan-400">${this.water}%</strong></div>
+                            <div>Stamina: <strong class="text-amber-400">${this.stamina}%</strong></div>
+                            <div>Distance: <strong class="text-emerald-400">${this.distance} km</strong></div>
+                        </div>
+                        <div class="h-28 bg-gradient-to-t from-amber-800 to-orange-950 rounded-xl flex items-center justify-center mb-4 relative overflow-hidden border border-amber-600/30">
+                            <i class="fa-solid fa-sun text-yellow-400 text-4xl pulse-slow"></i>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="activeAdventure.step()" class="py-2.5 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-xl text-xs"><i class="fa-solid fa-person-walking mr-1"></i> Walk Ahead</button>
+                            <button onclick="activeAdventure.drink()" class="py-2.5 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold rounded-xl text-xs"><i class="fa-solid fa-bottle-water mr-1"></i> Drink Water</button>
+                        </div>
+                    </div>
+                `;
+            }
+            step() {
+                this.water -= 15; this.stamina -= 10; this.distance -= 1;
+                AudioFX.playStep();
+                if (this.water <= 0 || this.stamina <= 0) { AudioFX.playError(); showResultModal('Dehydration Collapse', 'You collapsed in the desert dunes.', false); return; }
+                if (this.distance <= 0) { AudioFX.playSuccess(); showResultModal('Oasis Reached!', 'Safely navigated the desert dunes!', true); return; }
+                this.render();
+            }
+            drink() {
+                this.water = Math.min(100, this.water + 30);
+                AudioFX.playItem();
+                this.render();
+            }
+        }
+
+        /* ==================== 3. CYBERPUNK NEON RUNNER ==================== */
+        class CyberpunkRunnerGame {
+            constructor(c) { this.c = c; this.hacks = 0; this.init(); }
+            init() { this.render(); }
+            render() {
+                this.c.innerHTML = `
+                    <div class="bg-slate-900 border border-cyan-500/30 p-6 rounded-2xl max-w-sm w-full text-center">
+                        <div class="text-xs font-mono text-cyan-400 mb-2">CYBER TERMINAL HACK</div>
+                        <div class="text-2xl font-mono font-bold text-white mb-4">NODE SYSTEM: <span class="text-cyan-400">${this.hacks}/3</span></div>
+                        <div class="grid grid-cols-3 gap-2 mb-4">
+                            ${[1,2,3].map(i => `<button onclick="activeAdventure.hack(${i})" class="h-16 bg-slate-950 hover:bg-cyan-950 border border-cyan-500/40 rounded-xl flex items-center justify-center text-cyan-400 font-mono text-xl"><i class="fa-solid fa-microchip"></i></button>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            hack(i) {
+                this.hacks++;
+                AudioFX.playItem();
+                if (this.hacks >= 3) { AudioFX.playSuccess(); showResultModal('Security Overridden!', 'High-rise neon grid hacked!', true); return; }
+                this.render();
+            }
+        }
+
+        /* ==================== 4. ISLAND CASTAWAY ==================== */
+        class IslandCastawayGame {
+            constructor(c) { this.c = c; this.wood = 0; this.food = 0; this.init(); }
+            init() { this.render(); }
+            render() {
+                this.c.innerHTML = `
+                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-sm w-full text-center">
+                        <div class="flex justify-around text-xs font-mono text-gray-300 mb-4">
+                            <span>Wood: <strong class="text-amber-400">${this.wood}/3</strong></span>
+                            <span>Fish: <strong class="text-cyan-400">${this.food}/2</strong></span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 mb-3">
+                            <button onclick="activeAdventure.gather('w')" class="py-3 bg-amber-700 hover:bg-amber-600 text-white rounded-xl font-bold text-xs"><i class="fa-solid fa-tree mr-1"></i> Chop Wood</button>
+                            <button onclick="activeAdventure.gather('f')" class="py-3 bg-cyan-700 hover:bg-cyan-600 text-white rounded-xl font-bold text-xs"><i class="fa-solid fa-fish mr-1"></i> Catch Fish</button>
+                        </div>
+                        <button onclick="activeAdventure.signal()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold rounded-xl text-xs uppercase">Light Rescue Fire</button>
+                    </div>
+                `;
+            }
+            gather(t) {
+                if (t === 'w' && this.wood < 3) this.wood++;
+                if (t === 'f' && this.food < 2) this.food++;
+                AudioFX.playItem();
+                this.render();
+            }
+            signal() {
+                if (this.wood >= 3 && this.food >= 2) { AudioFX.playSuccess(); showResultModal('Rescued!', 'Ship saw your signal fire!', true); }
+                else { AudioFX.playError(); }
+            }
+        }
+
+        /* ==================== 5. LOST REALM QUEST ==================== */
+        class LostRealmQuestGame {
+            constructor(c) { this.c = c; this.hp = 30; this.enemyHp = 25; this.init(); }
+            init() { this.render(); }
+            render() {
+                this.c.innerHTML = `
+                    <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl max-w-sm w-full text-center">
+                        <div class="flex justify-between text-xs font-mono mb-4">
+                            <span class="text-cyan-400">Hero HP: <strong>${this.hp}</strong></span>
+                            <span class="text-rose-400">Goblin HP: <strong>${this.enemyHp}</strong></span>
+                        </div>
+                        <div class="h-24 bg-slate-950 rounded-xl flex items-center justify-around mb-4 border border-slate-800">
+                            <i class="fa-solid fa-user-shield text-cyan-400 text-3xl"></i>
+                            <span class="text-xs font-mono text-gray-500">VS</span>
+                            <i class="fa-solid fa-dragon text-rose-500 text-3xl"></i>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="activeAdventure.attack()" class="py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs"><i class="fa-solid fa-sword mr-1"></i> Attack</button>
+                            <button onclick="activeAdventure.heal()" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold rounded-xl text-xs"><i class="fa-solid fa-flask mr-1"></i> Potion</button>
+                        </div>
+                    </div>
+                `;
+            }
+            attack() {
+                this.enemyHp -= Math.floor(Math.random() * 8 + 5);
+                AudioFX.playClick();
+                if (this.enemyHp <= 0) { AudioFX.playSuccess(); showResultModal('Quest Victory!', 'Defeated the monster!', true); return; }
+                this.hp -= Math.floor(Math.random() * 6 + 3);
+                if (this.hp <= 0) { AudioFX.playError(); showResultModal('Defeated in Battle', 'Fell in battle.', false); return; }
+                this.render();
+            }
+            heal() {
+                this.hp = Math.min(30, this.hp + 10);
+                AudioFX.playItem();
+                this.render();
+            }
+        }
+
+        /* ==================== 6. DEEP SEA ABYSSAL DIVE ==================== */
+        class AbyssalDiveGame {
+            constructor(c) { this.c = c; this.oxygen = 100; this.depth = 0; this.init(); }
+            init() { this.render(); }
+            render() {
+                this.c.innerHTML = `
+                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-sm w-full text-center">
+                        <div class="flex justify-between text-xs font-mono mb-4 text-gray-300">
+                            <span>Oxygen: <strong class="text-cyan-400">${this.oxygen}%</strong></span>
+                            <span>Depth: <strong class="text-blue-400">${this.depth}m</strong></span>
+                        </div>
+                        <div class="h-28 bg-gradient-to-b from-blue-900 to-slate-950 rounded-xl flex items-center justify-center mb-4 border border-blue-800/40">
+                            <i class="fa-solid fa-water text-cyan-300 text-4xl pulse-slow"></i>
+                        </div>
+                        <button onclick="activeAdventure.dive()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs uppercase">Dive Deeper (-10% O2)</button>
+                    </div>
+                `;
+            }
+            dive() {
+                this.oxygen -= 20; this.depth += 100;
+                AudioFX.playStep();
+                if (this.depth >= 300) { AudioFX.playSuccess(); showResultModal('Abyssal Treasure Recovered!', 'Reached the deep oceanic trench!', true); return; }
+                if (this.oxygen <= 0) { AudioFX.playError(); showResultModal('Oxygen Depleted', 'Ran out of air in the abyss.', false); return; }
+                this.render();
+            }
+        }
+
+        /* ==================== 7. ARCTIC EXPEDITION ==================== */
+        class ArcticExpeditionGame {
+            constructor(c) { this.c = c; this.temp = -10; this.repaired = false; this.init(); }
+            init() { this.render(); }
+            render() {
+                this.c.innerHTML = `
+                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-sm w-full text-center">
+                        <div class="text-xs font-mono text-sky-400 mb-2">ARCTIC TEMPERATURE: ${this.temp}°C</div>
+                        <div class="h-24 bg-gradient-to-b from-sky-900 to-slate-950 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-tower-cell text-sky-300 text-3xl"></i>
+                        </div>
+                        <button onclick="activeAdventure.fix()" class="w-full py-3 bg-sky-600 hover:bg-sky-500 text-slate-950 font-bold rounded-xl text-xs uppercase">Repair Radio Tower</button>
+                    </div>
+                `;
+            }
+            fix() {
+                AudioFX.playSuccess(); showResultModal('Radio Tower Fixed!', 'Broadcasting Arctic rescue signal!', true);
+            }
+        }
+
+        /* ==================== 8. SPACE ODYSSEY: MARS BASE ==================== */
+        class MarsBaseGame {
+            constructor(c) { this.c = c; this.power = 30; this.init(); }
+            init() { this.render(); }
+            render() {
+                this.c.innerHTML = `
+                    <div class="bg-slate-900 border border-red-500/30 p-6 rounded-2xl max-w-sm w-full text-center">
+                        <div class="text-xs font-mono text-red-400 mb-2">MARS BASE POWER: ${this.power}%</div>
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <button onclick="activeAdventure.charge()" class="py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-xs"><i class="fa-solid fa-solar-panel mr-1"></i> Align Solar</button>
+                            <button onclick="activeAdventure.scan()" class="py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-xs"><i class="fa-solid fa-magnifying-glass mr-1"></i> Scan Relic</button>
+                        </div>
+                    </div>
+                `;
+            }
+            charge() {
+                this.power = Math.min(100, this.power + 35);
+                AudioFX.playItem();
+                if (this.power >= 100) { AudioFX.playSuccess(); showResultModal('Mars Base Online!', 'Full power restored to habitat!', true); return; }
+                this.render();
+            }
+            scan() { AudioFX.playClick(); }
+        }
+
+        /* ==================== 9. TOMB OF THE PHARAOH ==================== */
+        class PharaohTombGame {
+            constructor(c) { this.c = c; this.seq = []; this.target = [1, 3, 2]; this.init(); }
+            init() { this.render(); }
+            render() {
+                this.c.innerHTML = `
+                    <div class="bg-slate-900 border border-amber-500/40 p-6 rounded-2xl max-w-sm w-full text-center">
+                        <div class="text-xs font-mono text-amber-400 mb-3">HIEROGLYPH SEQUENCE PUZZLE</div>
+                        <div class="grid grid-cols-3 gap-2 mb-4">
+                            <button onclick="activeAdventure.press(1)" class="h-16 bg-amber-950 border border-amber-500/40 rounded-xl text-amber-400 font-bold text-xl">𓀀</button>
+                            <button onclick="activeAdventure.press(2)" class="h-16 bg-amber-950 border border-amber-500/40 rounded-xl text-amber-400 font-bold text-xl">𓁹</button>
+                            <button onclick="activeAdventure.press(3)" class="h-16 bg-amber-950 border border-amber-500/40 rounded-xl text-amber-400 font-bold text-xl">𓃭</button>
+                        </div>
+                    </div>
+                `;
+            }
+            press(num) {
+                this.seq.push(num);
+                AudioFX.playClick();
+                if (this.seq.length === 3) {
+                    if (this.seq.every((v, i) => v === this.target[i])) { AudioFX.playSuccess(); showResultModal('Tomb Chamber Opened!', 'Solved Pharaoh puzzle!', true); }
+                    else { AudioFX.playError(); this.seq = []; }
+                }
+            }
+        }
+
+        /* ==================== 10. MEDIEVAL CASTLE ESCAPE ==================== */
+        class CastleEscapeGame {
+            constructor(c) { this.c = c; this.pins = 0; this.init(); }
+            init() { this.render(); }
+            render() {
+                this.c.innerHTML = `
+                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-sm w-full text-center">
+                        <div class="text-xs font-mono text-gray-400 mb-2">STEALTH LOCKPICKING</div>
+                        <div class="text-2xl font-mono text-white mb-4">Tumblers: ${this.pins}/3</div>
+                        <button onclick="activeAdventure.pick()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-cyan-400 font-bold rounded-xl text-xs uppercase border border-slate-700">Pick Lock Tumbler</button>
+                    </div>
+                `;
+            }
+            pick() {
+                this.pins++;
+                AudioFX.playClick();
+                if (this.pins >= 3) { AudioFX.playSuccess(); showResultModal('Castle Escaped!', 'Bypassed guards and unlocked door!', true); return; }
+                this.render();
+            }
+        }
+
+        /* ==================== 11. JUNGLE CANOPY RESCUE ==================== */
+        class CanopyRescueGame {
+            constructor(c) { this.c = c; this.swings = 0; this.init(); }
+            init() { this.render(); }
+            render() {
+                this.c.innerHTML = `
+                    <div class="bg-slate-900 border border-emerald-500/30 p-6 rounded-2xl max-w-sm w-full text-center">
+                        <div class="text-xs font-mono text-emerald-400 mb-2">CANOPY ZIP-LINE PROGRESS</div>
+                        <div class="text-xl font-mono text-white mb-4">Rope Swings: ${this.swings}/4</div>
+                        <button onclick="activeAdventure.swing()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold rounded-xl text-xs uppercase">Timing Swing</button>
+                    </div>
+                `;
+            }
+            swing() {
+                this.swings++;
+                AudioFX.playItem();
+                if (this.swings >= 4) { AudioFX.playSuccess(); showResultModal('Canopy Crossed!', 'Reached jungle research outpost!', true); return; }
+                this.render();
+            }
+        }
+
+        /* ==================== 12. MOUNTAIN PEAK SUMMIT ==================== */
+        class MountainSummitGame {
+            constructor(c) { this.c = c; this.altitude = 2000; this.init(); }
+            init() { this.render(); }
+            render() {
+                this.c.innerHTML = `
+                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-sm w-full text-center">
+                        <div class="text-xs font-mono text-cyan-400 mb-2">ALTITUDE: ${this.altitude}m</div>
+                        <div class="h-24 bg-gradient-to-t from-slate-900 to-cyan-950 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-flag text-cyan-400 text-3xl"></i>
+                        </div>
+                        <button onclick="activeAdventure.climb()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold rounded-xl text-xs uppercase">Climb Ridge (+500m)</button>
+                    </div>
+                `;
+            }
+            climb() {
+                this.altitude += 500;
+                AudioFX.playStep();
+                if (this.altitude >= 4000) { AudioFX.playSuccess(); showResultModal('Summit Conquered!', 'Placed flag at mountain peak!', true); return; }
+                this.render();
+            }
+        }
+
+        // Initialize Standalone Page Grid
+        window.addEventListener('DOMContentLoaded', renderGrid);
+    </script>
+</body>
+</html>

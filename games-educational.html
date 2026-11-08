@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Educational Games</title>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Educational Games | Familyforge</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;height:100%;background:#080b11;color:#f3f4f6;font-family:'Segoe UI',system-ui,sans-serif}
-#menu{padding:20px;max-width:1100px;margin:auto}h1{font-size:26px;margin:0 0 4px}p.s{color:#9ca3af;margin:0 0 20px;font-size:14px}
+#menu{padding:20px;max-width:1100px;margin:auto}h1{font-size:26px;margin:0 0 4px;color:#00f2fe}p.s{color:#9ca3af;margin:0 0 20px;font-size:14px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
 .tile{border:1px solid #1f2937;border-radius:18px;overflow:hidden;background:#121824;cursor:pointer;text-align:left;color:inherit;padding:0;transition:transform .15s,border-color .15s}
 .tile:hover,.tile:focus-visible{transform:translateY(-3px);border-color:#00f2fe;outline:none}
@@ -35,16 +35,23 @@ body.fs-on #fsHud{display:flex}
 #side{width:300px;overflow-y:auto;flex:none}#side h3{margin:0 0 10px;font-size:16px}#sl{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .st{padding:0;overflow:hidden;background:#121824;border:1px solid #1f2937;border-radius:14px;color:inherit;cursor:pointer;text-align:left}.st:hover{border-color:#00f2fe}
 .se{display:flex;height:76px;align-items:center;justify-content:center;font-size:36px}.st b,.st i{display:block;padding:0 8px}.st b{font-size:13px;padding-top:6px}.st i{font-style:normal;font-size:11px;color:#9ca3af;padding-bottom:7px}
-@media(max-width:820px){#lay{flex-direction:column;overflow-y:auto}#pl{flex:none;height:64vh}#side{width:auto;overflow:visible}#tb u{display:none}}
-</style></head><body>
-<div id="menu"><h1>Educational Games</h1><p class="s">Learn while you play. Best scores are saved on this device.</p><div class="grid" id="grid"></div></div>
-<div id="stage"><div id="bar"><button id="back">&larr; All games</button></div>
+@media(max-width:820px){#lay{flex-direction:column;overflow-y:auto}#pl{flex:none;height:64vh;height:64dvh}#side{width:auto;overflow:visible}#tb u{display:none}}
+</style><style id="ff-mobile">
+/* Familyforge mobile fixes */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-x:hidden;overflow-x:clip}
+button,a,[role=button],input,select,summary,label{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media(max-width:820px){input,select,textarea{font-size:16px}} /* stops iOS zoom-on-focus */
+</style>
+</head><body>
+<div id="menu"><h1>Educational Games Hub</h1><p class="s">Interactive and entertaining learning games for kids. High scores are saved locally.</p><div class="grid" id="grid"></div></div>
+<div id="stage"><div id="bar"><button id="back">&larr; All educational games</button></div>
 <div id="lay"><div id="pl"><div id="cvw"><canvas id="cv"></canvas>
-<div id="pm"><div class="pn"><h2>Paused</h2>
-<label>🎵 Music<input type="range" id="vm" min="0" max="100"></label>
-<label>🔊 Sound effects<input type="range" id="vs" min="0" max="100"></label>
+<div id="pm"><div class="pn"><h2>Game Paused</h2>
+<label>🎵 Music Volume<input type="range" id="vm" min="0" max="100"></label>
+<label>🔊 Sound Effects<input type="range" id="vs" min="0" max="100"></label>
 <label class="ck"><input type="checkbox" id="mu"> Mute all sound</label>
-<div class="bt"><button id="rs" class="pri">▶ Resume</button><button id="rt">Restart</button><button id="ex">All games</button></div></div></div>
+<div class="bt"><button id="rs" class="pri">▶ Resume</button><button id="rt">Restart</button><button id="ex">Exit to Menu</button></div></div></div>
 <div id="fsHud">
  <button id="fsPause" title="Pause (P)">⏸</button>
  <button id="fsMute" title="Mute">🔊</button>
@@ -52,23 +59,22 @@ body.fs-on #fsHud{display:flex}
 </div>
 </div>
 <div id="tb"><b id="gn"></b><span class="sp"></span><button id="pb" title="Pause / Settings (P)">⏸ <u>Pause</u></button><button id="mb" title="Mute / unmute">🔊</button><button id="fb" title="Full screen">⛶ <u>Full screen</u></button></div></div>
-<div id="side"><h3>Play next</h3><div id="sl"></div></div></div></div>
+<div id="side"><h3>More Fun Games</h3><div id="sl"></div></div></div></div>
 <script>
 const $=i=>document.getElementById(i),cv=$('cv'),c=cv.getContext('2d'),cl=(v,a,b)=>Math.max(a,Math.min(b,v)),R=Math.random;
-/* To add a game: add a line here and a G.yourid={init,update,draw} block below. */
 const LIST=[
- {id:'math',name:'Math Blaster',desc:'Shoot the correct answer',e:'🧮',bg:'linear-gradient(135deg,#1e3a8a,#3b82f6)',help:'Move with mouse/finger or arrows. Auto-fires at answer bubbles. Hit the correct one!'},
- {id:'abc',name:'Letter Catch',desc:'Catch letters A to Z',e:'🔤',bg:'linear-gradient(135deg,#7c2d12,#f59e0b)',help:'Move left/right. Catch the next letter in order. Avoid wrong ones!'},
- {id:'mem',name:'Memory Match',desc:'Find the matching pairs',e:'🧠',bg:'linear-gradient(135deg,#4c1d95,#a855f7)',help:'Tap two cards to flip. Match all pairs. Fewer moves = higher score.'},
- {id:'seq',name:'Number Sequence',desc:'Collect numbers in order',e:'🔢',bg:'linear-gradient(135deg,#065f46,#10b981)',help:'Move and collect the next number (1,2,3...). Wrong numbers cost a life.'},
- {id:'spell',name:'Word Builder',desc:'Build the word letter by letter',e:'📝',bg:'linear-gradient(135deg,#9d174d,#ec4899)',help:'Tap the correct next letter. Finish the word to score!'},
- {id:'shape',name:'Shape Sorter',desc:'Match shapes to their slots',e:'🔷',bg:'linear-gradient(135deg,#0e7490,#06b6d4)',help:'Tap a shape then the matching slot. Clear the board!'},
- {id:'count',name:'Counting Zoo',desc:'Count the animals correctly',e:'🦁',bg:'linear-gradient(135deg,#854d0e,#eab308)',help:'Count the animals, then tap the correct number.'},
- {id:'planet',name:'Planet Hopper',desc:'Solar system facts quiz',e:'🪐',bg:'linear-gradient(135deg,#1e1b4b,#6366f1)',help:'Read the fact, then tap the correct planet. Learn the solar system!'},
- {id:'color',name:'Color Mixer',desc:'Mix primary colors',e:'🎨',bg:'linear-gradient(135deg,#be185d,#f472b6)',help:'Tap two colors to mix. Match the target color!'},
- {id:'clock',name:'Clock Master',desc:'Read and set the time',e:'⏰',bg:'linear-gradient(135deg,#1e40af,#60a5fa)',help:'Tap the clock face that shows the correct time.'},
- {id:'frac',name:'Fraction Pizza',desc:'Choose the right slice',e:'🍕',bg:'linear-gradient(135deg,#9a3412,#fb923c)',help:'Tap the pizza that matches the fraction shown.'},
- {id:'flag',name:'Flag Quest',desc:'Identify world flags',e:'🏳️',bg:'linear-gradient(135deg,#0f766e,#2dd4bf)',help:'Tap the correct flag for the country name.'}
+ {id:'math',name:'Math Blaster',desc:'Shoot the correct answer',e:'🧮',bg:'linear-gradient(135deg,#1e3a8a,#3b82f6)',help:'Move left/right or touch to steer. Auto-fires math result bubbles!'},
+ {id:'abc',name:'Letter Catch',desc:'Catch letters A to Z',e:'🔤',bg:'linear-gradient(135deg,#7c2d12,#f59e0b)',help:'Catch the next alphabetical letter in order. Avoid wrong letters!'},
+ {id:'mem',name:'Memory Match',desc:'Find the matching pairs',e:'🧠',bg:'linear-gradient(135deg,#4c1d95,#a855f7)',help:'Tap cards to uncover and match animal emoji pairs.'},
+ {id:'seq',name:'Number Sequence',desc:'Collect numbers in order',e:'🔢',bg:'linear-gradient(135deg,#065f46,#10b981)',help:'Steer your character to collect numbers sequentially (1, 2, 3...).'},
+ {id:'spell',name:'Word Builder',desc:'Build the word letter by letter',e:'📝',bg:'linear-gradient(135deg,#9d174d,#ec4899)',help:'Tap letter tiles in correct sequence to spell target words.'},
+ {id:'shape',name:'Shape Sorter',desc:'Match shapes to their slots',e:'🔷',bg:'linear-gradient(135deg,#0e7490,#06b6d4)',help:'Drag or tap shapes into matching outlines.'},
+ {id:'count',name:'Counting Zoo',desc:'Count the animals correctly',e:'🦁',bg:'linear-gradient(135deg,#854d0e,#eab308)',help:'Count the displayed zoo animals and select the right number.'},
+ {id:'planet',name:'Planet Hopper',desc:'Solar system facts quiz',e:'🪐',bg:'linear-gradient(135deg,#1e1b4b,#6366f1)',help:'Read space trivia facts and tap the correct planet.'},
+ {id:'color',name:'Color Mixer',desc:'Mix primary colors',e:'🎨',bg:'linear-gradient(135deg,#be185d,#f472b6)',help:'Combine primary paint colors to match the target color.'},
+ {id:'clock',name:'Clock Master',desc:'Read and set the time',e:'⏰',bg:'linear-gradient(135deg,#1e40af,#60a5fa)',help:'Match clock faces with their digital time values.'},
+ {id:'frac',name:'Fraction Pizza',desc:'Choose the right slice',e:'🍕',bg:'linear-gradient(135deg,#9a3412,#fb923c)',help:'Select the pizza slice graphic matching the given fraction.'},
+ {id:'flag',name:'Flag Quest',desc:'Identify world flags',e:'🏳️',bg:'linear-gradient(135deg,#0f766e,#2dd4bf)',help:'Match country names with their official national flags.'}
 ];
 $('grid').innerHTML=LIST.map((g,i)=>`<button class="tile" onclick="launch(${i})"><div class="th" style="background:${g.bg}">${g.e}</div><div class="tx"><b>${g.name}</b><span>${g.desc}</span></div></button>`).join('');
 let W,H,dpr=1,g,gi,state='ready',score=0,bs=0,t=0,shake=0,parts=[],keys={},ptr={x:0,y:0,down:false,on:false},raf,last=0,overAt=0;const G={};
@@ -90,11 +96,11 @@ cv.addEventListener('pointerdown',e=>{pp(e);ptr.down=ptr.on=true;if(press())retu
 cv.addEventListener('pointermove',e=>{pp(e);if(e.pointerType==='mouse')ptr.on=true});
 cv.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')ptr.on=false});
 addEventListener('pointerup',e=>{ptr.down=false;if(e.pointerType!=='mouse')ptr.on=false});
-function txt(s,x,y,sz,col,al){c.font='bold '+sz+'px Orbitron,Segoe UI,sans-serif';c.textAlign=al||'center';c.fillStyle=col||'#fff';c.fillText(s,x,y,W-24)}
-function hud(){txt('Score '+score,16,30,18,'#fff','left');txt('Best '+Math.max(bs,score),W-16,30,14,'#9ca3af','right');
- if(state!=='play'){c.fillStyle='rgba(0,0,0,.6)';c.fillRect(0,0,W,H);
-  if(state==='ready'){txt(LIST[gi].name,W/2,H/2-40,34,'#00f2fe');txt(LIST[gi].help,W/2,H/2,15,'#e5e7eb');txt('Tap or press Space to start',W/2,H/2+40,16,'#fbbf24')}
-  else{txt('Game over',W/2,H/2-40,36,'#ff007f');txt('Score '+score+'   Best '+bs,W/2,H/2,18);txt('Tap or press Space to play again',W/2,H/2+40,16,'#fbbf24')}}}
+function txt(s,x,y,sz,col,al){c.font='bold '+sz+'px Segoe UI,sans-serif';c.textAlign=al||'center';c.fillStyle=col||'#fff';c.fillText(s,x,y,W-24)}
+function hud(){txt('Score: '+score,16,30,18,'#fff','left');txt('Best: '+Math.max(bs,score),W-16,30,14,'#9ca3af','right');
+ if(state!=='play'){c.fillStyle='rgba(0,0,0,.75)';c.fillRect(0,0,W,H);
+  if(state==='ready'){txt(LIST[gi].name,W/2,H/2-50,32,'#00f2fe');txt(LIST[gi].help,W/2,H/2,16,'#e5e7eb');txt('Tap screen or press Space to play!',W/2,H/2+50,18,'#fbbf24')}
+  else{txt('Great Effort!',W/2,H/2-50,36,'#ff007f');txt('Score: '+score+'   Best: '+bs,W/2,H/2,18,'#fff');txt('Tap or press Space to play again',W/2,H/2+50,16,'#fbbf24')}}}
 function loop(ts){raf=requestAnimationFrame(loop);if(!g)return;const dt=Math.min(.033,(ts-last)/1e3||0);last=ts;
  const pd=paused?0:dt;if(state==='play'&&!paused){t+=dt;g.update(dt)}
  parts.forEach(p=>{p.x+=p.vx*pd;p.y+=p.vy*pd;p.l-=pd});parts=parts.filter(p=>p.l>0);shake=Math.max(0,shake-pd*30);
@@ -120,7 +126,6 @@ function fs(){
   if(d.fullscreenElement||d.webkitFullscreenElement)(d.exitFullscreen||d.webkitExitFullscreen).call(d);
   e.classList.remove('pfs');setFsUi(false);
  }else{
-  // Prefer true Fullscreen API on the whole stage area
   const target=$('stage')||e;
   const req=target.requestFullscreen||target.webkitRequestFullscreen||rq;
   if(req){
@@ -130,7 +135,6 @@ function fs(){
   setTimeout(()=>setFsUi(true),100);
  }
 }
-// Keep UI in sync when user presses Esc or browser exits fullscreen
 document.addEventListener('fullscreenchange',()=>setFsUi(!!document.fullscreenElement));
 document.addEventListener('webkitfullscreenchange',()=>setFsUi(!!document.webkitFullscreenElement));
 const AU={c:null,v:{m:.5,s:.7,mute:false},st:0,nx:0,tm:0,root:220,tp:0},BARS=[0,-4,-2,-5],SC=[0,3,5,7,10,12,15,12,10,7,5,3];
@@ -142,17 +146,17 @@ function aApply(){if(AU.c){AU.mg.gain.value=AU.v.mute?0:AU.v.m*.3;AU.sg.gain.val
 function tone(f,d,ty,v,dest,at,f2){const x=AU.c,o=x.createOscillator(),gn=x.createGain();at=at||x.currentTime;o.type=ty;o.frequency.setValueAtTime(f,at);if(f2)o.frequency.exponentialRampToValueAtTime(f2,at+d);gn.gain.setValueAtTime(v,at);gn.gain.exponentialRampToValueAtTime(.001,at+d);o.connect(gn);gn.connect(dest);o.start(at);o.stop(at+d+.02)}
 function noise(d,v,fr){const x=AU.c,s=x.createBufferSource(),f=x.createBiquadFilter(),gn=x.createGain();s.buffer=AU.nz;f.type='lowpass';f.frequency.value=fr;gn.gain.setValueAtTime(v,x.currentTime);gn.gain.exponentialRampToValueAtTime(.001,x.currentTime+d);s.connect(f);f.connect(gn);gn.connect(AU.sg);s.start();s.stop(x.currentTime+d)}
 const lastS={};
-function sfx(k){if(!AU.c||AU.v.mute||AU.v.s<=0)return;const n=performance.now();if(n-(lastS[k]||0)<(k==='shoot'?110:70))return;lastS[k]=n;const d=AU.sg,x=AU.c.currentTime;
- if(k==='shoot')tone(780,.07,'square',.07,d,0,300);else if(k==='hit')tone(240,.05,'triangle',.12,d,0,120);else if(k==='act')tone(380,.09,'square',.1,d,0,820);
- else if(k==='boom'){noise(.35,.5,900);tone(110,.3,'sawtooth',.18,d,0,35)}else if(k==='start')[392,523,659].forEach((f,i)=>tone(f,.15,'square',.1,d,x+i*.09));
+function sfx(k){if(!AU.c||AU.v.mute||AU.v.s<=0)return;const n=performance.now();if(n-(lastS[k]||0)<70)return;lastS[k]=n;const d=AU.sg,x=AU.c.currentTime;
+ if(k==='shoot')tone(780,.07,'square',.07,d,0,300);else if(k==='hit')tone(240,.05,'triangle',.12,d,0,120);else if(k==='act')tone(440,.08,'sine',.1,d,0,600);
+ else if(k==='boom'){noise(.35,.5,900);tone(110,.3,'sawtooth',.18,d,0,35)}else if(k==='start')[523,659,784].forEach((f,i)=>tone(f,.15,'triangle',.15,d,x+i*.09));
  else if(k==='over')[440,370,311,233].forEach((f,i)=>tone(f,.25,'sawtooth',.12,d,x+i*.16));
- else if(k==='good')[523,659,784].forEach((f,i)=>tone(f,.12,'sine',.1,d,x+i*.08));
- else if(k==='wrong')tone(180,.2,'sawtooth',.15,d,0,80)}
+ else if(k==='good')[523,659,784,1046].forEach((f,i)=>tone(f,.12,'sine',.2,d,x+i*.07));
+ else if(k==='wrong')tone(160,.25,'sawtooth',.15,d,0,70)}
 function mus(){if(!AU.c)return;const x=AU.c;while(AU.nx<x.currentTime+.3){const sd=60/(110+AU.tp)/2,s=AU.st,bar=Math.floor(s/16)%4,r=AU.root*Math.pow(2,BARS[bar]/12),at=Math.max(AU.nx,x.currentTime);
- if(s%4===0)tone(r/2,sd*3.5,'triangle',.5,AU.mg,at);
- if(s%2===0||s%8===7)tone(r*Math.pow(2,SC[(s*3+bar*2)%SC.length]/12),sd*1.6,'square',.12,AU.mg,at);
+ if(s%4===0)tone(r/2,sd*3.5,'triangle',.4,AU.mg,at);
+ if(s%2===0||s%8===7)tone(r*Math.pow(2,SC[(s*3+bar*2)%SC.length]/12),sd*1.6,'sine',.1,AU.mg,at);
  AU.nx+=sd;AU.st++}}
-function mStart(i){clearInterval(AU.tm);if(!AU.c)return;AU.root=[220,196,233,175,247,208,185,262,165,277,196,220,175,233,208][i%15];AU.tp=i%5*6;AU.st=0;AU.nx=AU.c.currentTime+.1;AU.tm=setInterval(mus,90)}
+function mStart(i){clearInterval(AU.tm);if(!AU.c)return;AU.root=[220,196,233,175,247,208,185,262,165,277,196,220,175,233,208][i%15];AU.tp=i%5*6;AU.st=0;AU.nx=AU.c.currentTime+.1;AU.tm=setInterval(mus,110)}
 function mStop(){clearInterval(AU.tm)}
 function sync(){$('mb').textContent=AU.v.mute?'🔇':'🔊';$('mu').checked=AU.v.mute;$('vm').value=AU.v.m*100;$('vs').value=AU.v.s*100}
 $('pb').onclick=()=>pause(!paused);$('fb').onclick=fs;
@@ -161,7 +165,6 @@ $('mu').onchange=e=>{AU.v.mute=e.target.checked;aApply();sync()};
 $('vm').oninput=e=>{aInit();AU.v.m=e.target.value/100;aApply()};
 $('vs').oninput=e=>{aInit();AU.v.s=e.target.value/100;aApply()};$('vs').onchange=()=>sfx('act');
 $('rs').onclick=()=>pause(false);$('rt').onclick=()=>{reset();pause(false)};$('ex').onclick=()=>$('back').click();
-// Floating fullscreen controls
 if($('fsPause'))$('fsPause').onclick=()=>pause(!paused);
 if($('fsMute'))$('fsMute').onclick=()=>{aInit();AU.v.mute=!AU.v.mute;aApply();sync()};
 if($('fsExit'))$('fsExit').onclick=()=>{if(isFs())fs()};
@@ -175,19 +178,18 @@ const hts=(n,m)=>{for(let i=0;i<m;i++)txt(i<n?'♥':'♡',W/2-30+i*30,30,22,'#ff
 function steer(p,s,dt,oy){if(keys.arrowleft||keys.a)p.x-=s*dt;if(keys.arrowright||keys.d)p.x+=s*dt;if(keys.arrowup||keys.w)p.y-=s*dt;if(keys.arrowdown||keys.s)p.y+=s*dt;
  if(ptr.on){const f=Math.min(1,dt*9);p.x+=(ptr.x-p.x)*f;p.y+=(ptr.y-(oy||0)-p.y)*f}p.x=cl(p.x,20,W-20);p.y=cl(p.y,40,H-30)}
 function bg(a,b){const q=c.createLinearGradient(0,0,0,H);q.addColorStop(0,a);q.addColorStop(1,b);c.fillStyle=q;c.fillRect(0,0,W,H)}
-function bar(v,m,x,y,w,col){c.fillStyle='#374151';c.fillRect(x,y,w,10);c.fillStyle=col||'#22c55e';c.fillRect(x,y,w*Math.max(0,v)/m,10)}
 function roundRect(x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
 
 /* ================================================================
    1. MATH BLASTER
    ================================================================ */
 G.math={
- init(){this.p={x:W/2,y:H-70};this.b=[];this.bub=[];this.cd=0;this.sp=1.2;this.lives=3;this.makeQ()},
+ init(){this.p={x:W/2,y:H-70};this.b=[];this.bub=[];this.cd=0;this.lives=3;this.makeQ()},
  makeQ(){const max=5+Math.floor(t/12)*2,a=1+Math.floor(R()*max),b=1+Math.floor(R()*max),op=R()<.6?'+':'-';
   let ans;if(op==='+')ans=a+b;else{const x=Math.max(a,b),y=Math.min(a,b);this.q=`${x} − ${y}`;ans=x-y;this.ans=ans;this.spawnBubs(ans);return}
   this.q=`${a} + ${b}`;this.ans=ans;this.spawnBubs(ans)},
  spawnBubs(ans){this.bub=[];const opts=new Set([ans]);while(opts.size<4)opts.add(Math.max(0,ans+Math.floor(R()*11)-5));
-  [...opts].forEach((v,i)=>this.bub.push({x:60+i*((W-120)/3),y:80+R()*60,v,vy:30+R()*40,vx:(R()-.5)*40,r:28+R()*6}))},
+  [...opts].forEach((v,i)=>this.bub.push({x:60+i*((W-120)/3),y:80+R()*60,v,vy:30+R()*40,vx:(R()-.5)*40,r:30+R()*4}))},
  update(dt){const p=this.p;if(keys.arrowleft||keys.a)p.x-=380*dt;if(keys.arrowright||keys.d)p.x+=380*dt;
   if(ptr.on)p.x+=(ptr.x-p.x)*Math.min(1,dt*10);p.x=cl(p.x,30,W-30);
   if((this.cd-=dt)<=0){this.cd=.28;this.b.push({x:p.x,y:p.y-20,vy:-620})}
@@ -197,17 +199,13 @@ G.math={
   this.b=this.b.filter(b=>!b.d&&b.y>-30);this.bub=this.bub.filter(o=>!o.dead&&o.y<H+40);
   if(this.bub.some(o=>o.y>H-40)){this.lives--;sfx('wrong');this.makeQ();if(this.lives<=0)end()}},
  draw(){bg('#0c1a3a','#1e3a8a');
-  // stars
   c.fillStyle='rgba(255,255,255,.4)';for(let i=0;i<40;i++)c.fillRect((i*97)%W,(i*53+t*10)%H,2,2);
   this.bub.forEach(o=>{const g=c.createRadialGradient(o.x-8,o.y-8,4,o.x,o.y,o.r);
    g.addColorStop(0,o.v===this.ans?'#86efac':'#93c5fd');g.addColorStop(1,o.v===this.ans?'#16a34a':'#2563eb');
    c.fillStyle=g;c.beginPath();c.arc(o.x,o.y,o.r,0,7);c.fill();
    c.fillStyle='#fff';c.font='bold 22px Segoe UI';c.textAlign='center';c.textBaseline='middle';c.fillText(o.v,o.x,o.y+1)});
   c.shadowBlur=10;c.shadowColor='#fbbf24';c.fillStyle='#fde68a';this.b.forEach(b=>c.fillRect(b.x-3,b.y,6,16));c.shadowBlur=0;
-  // player ship
   const p=this.p;c.fillStyle='#38bdf8';c.beginPath();c.moveTo(p.x,p.y-22);c.lineTo(p.x+18,p.y+12);c.lineTo(p.x-18,p.y+12);c.closePath();c.fill();
-  c.fillStyle='#0ea5e9';c.fillRect(p.x-4,p.y+4,8,10);
-  // question
   roundRect(W/2-90,12,180,44,12);c.fillStyle='rgba(15,23,42,.85)';c.fill();
   txt(this.q+' = ?',W/2,36,22,'#fbbf24');
   hts(this.lives,3)}
@@ -230,14 +228,11 @@ G.abc={
    if(l.y>H+20)l.dead=1});
   this.lets=this.lets.filter(l=>!l.dead)},
  draw(){bg('#3b1d0a','#92400e');
-  c.fillStyle='#78350f';c.fillRect(0,H-40,W,40);
-  // grass
-  c.fillStyle='#4d7c0f';c.fillRect(0,H-48,W,12);
+  c.fillStyle='#78350f';c.fillRect(0,H-40,W,40);c.fillStyle='#4d7c0f';c.fillRect(0,H-48,W,12);
   this.lets.forEach(l=>{c.fillStyle='#fef3c7';c.shadowColor='#fbbf24';c.shadowBlur=12;roundRect(l.x-18,l.y-22,36,40,8);c.fill();c.shadowBlur=0;
    c.fillStyle='#92400e';c.font='bold 24px Segoe UI';c.textAlign='center';c.textBaseline='middle';c.fillText(l.ch,l.x,l.y)});
-  // basket
   const p=this.p;c.fillStyle='#b45309';c.fillRect(p.x-28,H-58,56,18);c.fillStyle='#d97706';c.fillRect(p.x-24,H-70,48,14);
-  c.fillStyle='#fbbf24';c.font='bold 18px Segoe UI';c.textAlign='center';c.fillText('Next: '+this.alpha[this.next],W/2,H-18);
+  c.fillStyle='#fbbf24';c.font='bold 18px Segoe UI';c.textAlign='center';c.fillText('Next Letter: '+this.alpha[this.next],W/2,H-18);
   hts(this.lives,3)}
 };
 
@@ -246,8 +241,7 @@ G.abc={
    ================================================================ */
 G.mem={
  init(){const icons=['🐶','🐱','🐰','🦊','🐻','🐼','🦁','🐸','🐵','🦄','🐙','🦋'];
-  const n=Math.min(8,4+Math.floor(t/20)*2); // pairs
-  const pool=icons.slice(0,n);const cards=[];pool.forEach(ic=>{cards.push({ic,flip:0,match:0});cards.push({ic,flip:0,match:0})});
+  const n=Math.min(8,4+Math.floor(t/20)*2);const pool=icons.slice(0,n);const cards=[];pool.forEach(ic=>{cards.push({ic,flip:0,match:0});cards.push({ic,flip:0,match:0})});
   for(let i=cards.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]]}
   this.cards=cards;this.cols=Math.ceil(Math.sqrt(cards.length*1.2));this.rows=Math.ceil(cards.length/this.cols);
   this.sel=[];this.moves=0;this.lock=0;this.done=0},
@@ -268,8 +262,7 @@ G.mem={
   const cols=this.cols,cw=Math.min(90,(W-40)/cols),ch=Math.min(100,(H-80)/this.rows),ox=(W-cols*cw)/2,oy=50;
   this.cards.forEach((card,i)=>{const col=i%cols,row=Math.floor(i/cols),x=ox+col*cw+4,y=oy+row*ch+4,w=cw-8,h=ch-8;
    roundRect(x,y,w,h,12);
-   if(card.match){c.fillStyle='#22c55e';c.fill();c.font=(Math.min(w,h)*.55)+'px Segoe UI';c.textAlign='center';c.textBaseline='middle';c.fillText(card.ic,x+w/2,y+h/2)}
-   else if(card.flip){c.fillStyle='#f3e8ff';c.fill();c.font=(Math.min(w,h)*.55)+'px Segoe UI';c.textAlign='center';c.textBaseline='middle';c.fillText(card.ic,x+w/2,y+h/2)}
+   if(card.match||card.flip){c.fillStyle='#f3e8ff';c.fill();c.font=(Math.min(w,h)*.55)+'px Segoe UI';c.textAlign='center';c.textBaseline='middle';c.fillText(card.ic,x+w/2,y+h/2)}
    else{const g=c.createLinearGradient(x,y,x+w,y+h);g.addColorStop(0,'#7c3aed');g.addColorStop(1,'#4c1d95');c.fillStyle=g;c.fill();
     c.fillStyle='rgba(255,255,255,.3)';c.font='bold 28px Segoe UI';c.textAlign='center';c.textBaseline='middle';c.fillText('?',x+w/2,y+h/2)}});
   txt('Moves: '+this.moves,W/2,H-18,16,'#c4b5fd')}
@@ -288,15 +281,13 @@ G.seq={
     else{this.lives--;sfx('wrong');boom(n.x,n.y,'#ef4444',10);shake=6;n.dead=1;if(this.lives<=0)end()}}});
   this.nums=this.nums.filter(n=>!n.dead)},
  draw(){bg('#022c22','#065f46');
-  // grid dots
   c.fillStyle='rgba(16,185,129,.15)';for(let x=20;x<W;x+=40)for(let y=40;y<H;y+=40){c.beginPath();c.arc(x,y,2,0,7);c.fill()}
   this.nums.forEach(n=>{const g=c.createRadialGradient(n.x-6,n.y-6,2,n.x,n.y,n.r);
    g.addColorStop(0,n.v===this.next?'#86efac':'#a7f3d0');g.addColorStop(1,n.v===this.next?'#059669':'#047857');
    c.fillStyle=g;c.beginPath();c.arc(n.x,n.y,n.r,0,7);c.fill();
    c.fillStyle='#fff';c.font='bold 20px Segoe UI';c.textAlign='center';c.textBaseline='middle';c.fillText(n.v,n.x,n.y+1)});
-  // player
   const p=this.p;c.fillStyle='#34d399';c.beginPath();c.arc(p.x,p.y,16,0,7);c.fill();c.fillStyle='#ecfdf5';c.beginPath();c.arc(p.x-4,p.y-4,5,0,7);c.fill();
-  txt('Next: '+this.next,W/2,H-20,18,'#6ee7b7');hts(this.lives,3)}
+  txt('Collect Number: '+this.next,W/2,H-20,18,'#6ee7b7');hts(this.lives,3)}
 };
 
 /* ================================================================
@@ -318,12 +309,10 @@ G.spell={
     else{this.lives--;sfx('wrong');shake=6;if(this.lives<=0)end()}}})},
  update(dt){},
  draw(){bg('#4a044e','#9d174d');
-  // target word slots
   const w=this.word,sw=Math.min(50,(W-60)/w.length),sx=(W-w.length*sw)/2;
   for(let i=0;i<w.length;i++){roundRect(sx+i*sw+4,80,sw-8,56,10);c.fillStyle=i<this.built.length?'#f9a8d4':'rgba(255,255,255,.12)';c.fill();
    if(i<this.built.length){c.fillStyle='#831843';c.font='bold 28px Segoe UI';c.textAlign='center';c.textBaseline='middle';c.fillText(this.built[i],sx+i*sw+sw/2,108)}}
-  txt('Spell the word',W/2,50,16,'#fbcfe8');
-  // letter buttons
+  txt('Tap letters to spell word:',W/2,50,16,'#fbcfe8');
   const n=this.opts.length,bw=Math.min(70,(W-40)/n),ox=(W-n*bw)/2,oy=H*.55;
   this.opts.forEach((o,i)=>{const x=ox+i*bw+4,y=oy-30,ww=bw-8;
    roundRect(x,y,ww,60,12);c.fillStyle=o.used?'rgba(0,0,0,.3)':'#f472b6';c.fill();
@@ -339,14 +328,11 @@ G.shape={
   this.slots=shapes.map((s,i)=>({s,x:0,y:0,filled:0}));
   this.pieces=shapes.map((s,i)=>({s,x:0,y:0,placed:0,drag:0}));
   this.sel=-1;this.done=0;this.layout()},
- layout(){const n=5,sw=Math.min(90,(W-40)/n);
-  this.slots.forEach((s,i)=>{s.x=30+i*((W-60)/4);s.y=H*.28});
+ layout(){this.slots.forEach((s,i)=>{s.x=30+i*((W-60)/4);s.y=H*.28});
   this.pieces.forEach((p,i)=>{p.x=50+R()*(W-100);p.y=H*.65+R()*40;p.placed=0})},
  act(k){if(k!=='tap'||this.done)return;
-  // check pieces
   for(let i=0;i<this.pieces.length;i++){const p=this.pieces[i];if(p.placed)continue;
    if(Math.hypot(ptr.x-p.x,ptr.y-p.y)<36){this.sel=i;sfx('act');return}}
-  // check slots if selected
   if(this.sel>=0){const piece=this.pieces[this.sel];
    for(const slot of this.slots){if(slot.filled)continue;
     if(Math.hypot(ptr.x-slot.x,ptr.y-slot.y)<40){
@@ -363,12 +349,10 @@ G.shape={
   else if(type==='star'){for(let i=0;i<5;i++){const a=i*1.2566-1.57;c.lineTo(x+Math.cos(a)*sz,y+Math.sin(a)*sz);c.lineTo(x+Math.cos(a+.628)*sz*.4,y+Math.sin(a+.628)*sz*.4)}c.closePath()}
   c.fill()},
  draw(){bg('#083344','#0e7490');
-  txt('Match shapes to slots',W/2,28,16,'#a5f3fc');
-  // slots (outlines)
+  txt('Match shapes to outline slots',W/2,28,16,'#a5f3fc');
   this.slots.forEach(s=>{c.strokeStyle=s.filled?'#22c55e':'#67e8f9';c.lineWidth=3;c.setLineDash(s.filled?[]:[6,4]);
    c.beginPath();c.arc(s.x,s.y,38,0,7);c.stroke();c.setLineDash([]);
    if(!s.filled)this.drawShape(s.s,s.x,s.y,22,'rgba(103,232,249,.25)')});
-  // pieces
   this.pieces.forEach((p,i)=>{if(p.placed)return;
    const col=this.sel===i?'#fde047':'#22d3ee';this.drawShape(p.s,p.x,p.y,26,col);
    c.strokeStyle='#fff';c.lineWidth=2;c.stroke()})
@@ -392,14 +376,12 @@ G.count={
     else{this.lives--;sfx('wrong');shake=6;if(this.lives<=0)end();else setTimeout(()=>{this.answered=0},400)}}})},
  update(dt){},
  draw(){bg('#422006','#a16207');
-  txt('How many '+this.animal+' ?',W/2,36,20,'#fef3c7');
-  // animals grid
+  txt('How many '+this.animal+' do you see?',W/2,36,20,'#fef3c7');
   const cols=Math.ceil(Math.sqrt(this.n)),sz=Math.min(56,(W-60)/cols,(H*.5)/Math.ceil(this.n/cols));
   const ox=(W-cols*sz)/2,oy=70;
   for(let i=0;i<this.n;i++){const col=i%cols,row=Math.floor(i/cols);
    c.font=sz*.8+'px Segoe UI';c.textAlign='center';c.textBaseline='middle';
    c.fillText(this.animal,ox+col*sz+sz/2,oy+row*sz+sz/2)}
-  // answer buttons
   const bw=Math.min(90,(W-50)/4),bx=(W-4*bw)/2,by=H*.72;
   this.opts.forEach((v,i)=>{roundRect(bx+i*bw+6,by-28,bw-12,56,14);c.fillStyle='#fbbf24';c.fill();
    c.fillStyle='#78350f';c.font='bold 26px Segoe UI';c.textAlign='center';c.textBaseline='middle';c.fillText(v,bx+i*bw+bw/2,by)})
@@ -410,33 +392,14 @@ G.count={
    8. PLANET HOPPER
    ================================================================ */
 const PLANETS=[
- {n:'Mercury',c:'#a8a29e',r:14},
- {n:'Venus',c:'#fbbf24',r:20},
- {n:'Earth',c:'#3b82f6',r:22},
- {n:'Mars',c:'#ef4444',r:18},
- {n:'Jupiter',c:'#f59e0b',r:36},
- {n:'Saturn',c:'#fcd34d',r:30},
- {n:'Uranus',c:'#67e8f9',r:24},
- {n:'Neptune',c:'#6366f1',r:22}
+ {n:'Mercury',c:'#a8a29e',r:14},{n:'Venus',c:'#fbbf24',r:20},{n:'Earth',c:'#3b82f6',r:22},{n:'Mars',c:'#ef4444',r:18},
+ {n:'Jupiter',c:'#f59e0b',r:36},{n:'Saturn',c:'#fcd34d',r:30},{n:'Uranus',c:'#67e8f9',r:24},{n:'Neptune',c:'#6366f1',r:22}
 ];
-// Fact questions – answer is a planet name (player must know the fact)
 const PLANET_FACTS=[
- {q:'Which planet is closest to the Sun?',a:'Mercury'},
- {q:'Which planet is known as the Red Planet?',a:'Mars'},
- {q:'Which planet has famous rings?',a:'Saturn'},
- {q:'Which is the largest planet?',a:'Jupiter'},
- {q:'Which planet do we live on?',a:'Earth'},
- {q:'Which planet is hottest (thick atmosphere)?',a:'Venus'},
- {q:'Which planet is farthest from the Sun?',a:'Neptune'},
- {q:'Which planet spins on its side?',a:'Uranus'},
- {q:'Which planet is the smallest?',a:'Mercury'},
- {q:'Which planet is called the Blue Planet?',a:'Earth'},
- {q:'Which planet has the Great Red Spot?',a:'Jupiter'},
- {q:'Which planet is 2nd from the Sun?',a:'Venus'},
- {q:'Which planet is 4th from the Sun?',a:'Mars'},
- {q:'Which icy giant is 7th from the Sun?',a:'Uranus'},
- {q:'Which planet is named after the Roman god of war?',a:'Mars'},
- {q:'Which planet is named after the king of Roman gods?',a:'Jupiter'}
+ {q:'Which planet is closest to the Sun?',a:'Mercury'},{q:'Which planet is known as the Red Planet?',a:'Mars'},
+ {q:'Which planet has famous rings?',a:'Saturn'},{q:'Which is the largest planet?',a:'Jupiter'},
+ {q:'Which planet do we live on?',a:'Earth'},{q:'Which planet is hottest?',a:'Venus'},
+ {q:'Which planet is farthest from the Sun?',a:'Neptune'},{q:'Which planet spins completely on its side?',a:'Uranus'}
 ];
 G.planet={
  init(){this.lives=3;this.ang=0;this.newQ()},
@@ -457,16 +420,13 @@ G.planet={
  update(dt){this.ang+=dt*.3},
  draw(){bg('#0f0a1e','#1e1b4b');
   c.fillStyle='#fff';for(let i=0;i<50;i++){c.globalAlpha=.2+((i*17)%10)/20;c.fillRect((i*89)%W,(i*53)%H,1.5,1.5)}c.globalAlpha=1;
-  // sun + tiny orbiting dots (decoration only)
   c.fillStyle='#fde047';c.shadowColor='#fbbf24';c.shadowBlur=30;c.beginPath();c.arc(W/2,H*.2,26,0,7);c.fill();c.shadowBlur=0;
   PLANETS.forEach((p,i)=>{const a=this.ang+i*.8,rad=48+i*8;c.fillStyle=p.c;c.beginPath();c.arc(W/2+Math.cos(a)*rad,H*.2+Math.sin(a)*rad*.4,p.r*.3,0,7);c.fill()});
-  // Question is a FACT – not the planet name
   txt(this.fact.q,W/2,H*.4,17,'#c7d2fe');
   const bw=Math.min(140,(W-40)/2),bh=70,ox=(W-2*bw)/2,oy=H*.55;
   this.opts.forEach((idx,i)=>{const col=i%2,row=Math.floor(i/2),x=ox+col*bw+8,y=oy+row*(bh+12);
    roundRect(x,y,bw-16,bh,14);c.fillStyle='rgba(99,102,241,.3)';c.fill();
    c.fillStyle=PLANETS[idx].c;c.beginPath();c.arc(x+30,y+bh/2,PLANETS[idx].r*.55,0,7);c.fill();
-   // Saturn ring hint
    if(PLANETS[idx].n==='Saturn'){c.strokeStyle='rgba(252,211,77,.7)';c.lineWidth=2;c.beginPath();c.ellipse(x+30,y+bh/2,PLANETS[idx].r*.9,PLANETS[idx].r*.25,0,0,7);c.stroke()}
    c.fillStyle='#e0e7ff';c.font='bold 16px Segoe UI';c.textAlign='left';c.textBaseline='middle';c.fillText(PLANETS[idx].n,x+55,y+bh/2)});
   hts(this.lives,3)}
@@ -483,7 +443,7 @@ const MIXES={
 };
 G.color={
  init(){this.lives=3;this.sel=[];this.newQ()},
- newQ(){const keys=Object.keys(MIXES).filter(k=>k.split('+')[0]<k.split('+')[1]); // unique
+ newQ(){const keys=Object.keys(MIXES).filter(k=>k.split('+')[0]<k.split('+')[1]);
   const key=keys[Math.floor(R()*keys.length)];this.target=MIXES[key];this.need=key.split('+');this.sel=[];this.answered=0},
  act(k){if(k!=='tap'||this.answered)return;
   const bw=100,ox=(W-3*bw)/2,oy=H*.55;
@@ -497,13 +457,10 @@ G.color={
    }})},
  update(dt){},
  draw(){bg('#4a044e','#be185d');
-  txt('Mix to make',W/2,36,16,'#fbcfe8');
-  // target
+  txt('Mix paints to make:',W/2,36,16,'#fbcfe8');
   c.fillStyle=this.target.c;c.beginPath();c.arc(W/2,H*.28,50,0,7);c.fill();
   c.fillStyle='#fff';c.font='bold 20px Segoe UI';c.textAlign='center';c.textBaseline='middle';c.fillText(this.target.n,W/2,H*.28);
-  // selected
   if(this.sel.length){c.fillStyle='#fce7f3';c.font='16px Segoe UI';c.fillText(this.sel.join(' + '),W/2,H*.42)}
-  // primaries
   const bw=100,ox=(W-3*bw)/2,oy=H*.55;
   PRIMARIES.forEach((p,i)=>{const x=ox+i*bw+bw/2,sel=this.sel.includes(p.n);
    c.fillStyle=p.c;c.shadowColor=p.c;c.shadowBlur=sel?20:8;c.beginPath();c.arc(x,oy,38,0,7);c.fill();c.shadowBlur=0;
@@ -530,20 +487,16 @@ G.clock={
     else{this.lives--;sfx('wrong');shake=6;if(this.lives<=0)end();else setTimeout(()=>{this.answered=0},350)}}})},
  update(dt){},
  draw(){bg('#1e3a8a','#1e40af');
-  txt('What time is it?',W/2,30,18,'#bfdbfe');
-  // clock face
+  txt('What time does the clock show?',W/2,30,18,'#bfdbfe');
   const cx=W/2,cy=H*.32,r=Math.min(90,W*.22);
   c.fillStyle='#eff6ff';c.beginPath();c.arc(cx,cy,r,0,7);c.fill();
   c.strokeStyle='#1e40af';c.lineWidth=4;c.stroke();
-  // ticks
   for(let i=0;i<12;i++){const a=i*Math.PI/6-Math.PI/2;c.beginPath();c.moveTo(cx+Math.cos(a)*r*.85,cy+Math.sin(a)*r*.85);c.lineTo(cx+Math.cos(a)*r*.95,cy+Math.sin(a)*r*.95);c.stroke()}
-  // hands
   const ha=(this.h%12+this.m/60)*Math.PI/6-Math.PI/2,ma=this.m*Math.PI/30-Math.PI/2;
   c.strokeStyle='#1e3a8a';c.lineWidth=5;c.lineCap='round';
   c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+Math.cos(ha)*r*.5,cy+Math.sin(ha)*r*.5);c.stroke();
   c.lineWidth=3;c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+Math.cos(ma)*r*.7,cy+Math.sin(ma)*r*.7);c.stroke();
   c.fillStyle='#ef4444';c.beginPath();c.arc(cx,cy,5,0,7);c.fill();
-  // options
   const bw=Math.min(130,(W-40)/2),bh=56,ox=(W-2*bw)/2,oy=H*.62;
   this.opts.forEach((v,i)=>{const col=i%2,row=Math.floor(i/2),x=ox+col*bw+6,y=oy+row*(bh+14);
    roundRect(x,y,bw-12,bh,12);c.fillStyle='#3b82f6';c.fill();
@@ -561,7 +514,7 @@ G.frac={
   while(s.size<4){const d=dens[Math.floor(R()*dens.length)],n=1+Math.floor(R()*(d-1));s.add(n+'/'+d)}
   this.opts=[...s];this.answered=0},
  act(k){if(k!=='tap'||this.answered)return;
-  const n=4,bw=Math.min(120,(W-40)/2),bh=90,ox=(W-2*bw)/2,oy=H*.48;
+  const bw=Math.min(120,(W-40)/2),bh=90,ox=(W-2*bw)/2,oy=H*.48;
   this.opts.forEach((v,i)=>{const col=i%2,row=Math.floor(i/2),x=ox+col*bw+bw/2,y=oy+row*(bh+16);
    if(Math.abs(ptr.x-x)<bw/2-6&&Math.abs(ptr.y-y)<bh/2){this.answered=1;
     if(v===this.num+'/'+this.den){score+=15;sfx('good');boom(x,y,'#fb923c',14);setTimeout(()=>this.newQ(),450)}
@@ -574,7 +527,7 @@ G.frac={
   c.strokeStyle='#92400e';c.lineWidth=3;c.beginPath();c.arc(cx,cy,r,0,7);c.stroke()},
  update(dt){},
  draw(){bg('#7c2d12','#c2410c');
-  txt('Which pizza shows  '+this.num+'/'+this.den+'  ?',W/2,32,18,'#fed7aa');
+  txt('Which pizza shows fraction '+this.num+'/'+this.den+'?',W/2,32,18,'#fed7aa');
   const bw=Math.min(120,(W-40)/2),bh=90,ox=(W-2*bw)/2,oy=H*.48;
   this.opts.forEach((v,i)=>{const [n,d]=v.split('/').map(Number);const col=i%2,row=Math.floor(i/2);
    const x=ox+col*bw+bw/2,y=oy+row*(bh+16)+bh/2;
@@ -607,7 +560,7 @@ G.flag={
     else{this.lives--;sfx('wrong');shake=6;if(this.lives<=0)end();else setTimeout(()=>{this.answered=0},350)}}})},
  update(dt){},
  draw(){bg('#134e4a','#0f766e');
-  txt('Which flag is '+FLAGS[this.target].n+'?',W/2,32,18,'#99f6e4');
+  txt('Find the flag of '+FLAGS[this.target].n,W/2,32,18,'#99f6e4');
   const bw=Math.min(140,(W-40)/2),bh=80,ox=(W-2*bw)/2,oy=H*.42;
   this.opts.forEach((idx,i)=>{const col=i%2,row=Math.floor(i/2),x=ox+col*bw+10,y=oy+row*(bh+14);
    roundRect(x,y,bw-20,bh,10);c.fillStyle='#115e59';c.fill();

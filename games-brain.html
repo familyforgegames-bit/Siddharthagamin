@@ -1,916 +1,795 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brain & Puzzles Studio</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        darkBg: '#090d14',
-                        cardBg: '#111827',
-                        cardHover: '#1f2937'
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-    <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            font-family: 'Inter', sans-serif;
-            background-color: #090d14;
-            color: #f3f4f6;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3D Games Arena</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<style>
+:root{--c:#00f2fe;--bg:#05070c;--pn:#0c101a;--bd:#1e293b;--mut:#94a3b8}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:#e5e7eb;font-family:system-ui,-apple-system,Segoe UI,sans-serif;overflow:hidden;user-select:none}
+button,select,input{font:inherit}
+.b{padding:.5rem .9rem;border-radius:.7rem;border:1px solid #334155;background:var(--pn);color:#e5e7eb;font-size:.82rem;cursor:pointer;transition:.15s}
+.b:hover{border-color:var(--c);transform:translateY(-1px)}
+.b.on{background:var(--c);color:#05070c;font-weight:700;border-color:var(--c)}
+.b:disabled{opacity:.4;pointer-events:none}
+.b.big{width:100%;margin-top:14px;padding:.8rem;font-size:1rem}
+.in option{background:#0c101a;color:#fff}select.in{color-scheme:dark}
+.in{width:100%;padding:.65rem;border-radius:.6rem;background:var(--pn);border:1px solid #334155;color:#fff;margin-top:.5rem}
+.scr{position:fixed;inset:0;z-index:30}
+#login{display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 30%,#13203a,#05070c)}
+.lcard{width:min(340px,92vw);padding:28px;border-radius:20px;background:#0c101acc;border:1px solid var(--bd)}
+#menu{display:none;flex-direction:column;background:radial-gradient(ellipse at 30% 0,#10233f,#05070c 60%)}
+.mtop{display:flex;align-items:center;gap:8px;padding:12px 18px;border-bottom:1px solid var(--bd)}
+.logo{font-weight:900;letter-spacing:.12em;color:var(--c);font-size:18px}
+.sp{flex:1}
+.mwrap{flex:1;display:flex;min-height:0}
+.mmain{flex:1;overflow:auto;padding:20px}
+.mmain h2{margin:0 0 14px}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.gc{padding:20px;border-radius:18px;background:linear-gradient(160deg,color-mix(in srgb,var(--g) 22%,#0c101a),#0c101a 70%);border:1px solid color-mix(in srgb,var(--g) 45%,#1e293b);cursor:pointer;transition:.2s}
+.gc:hover{transform:translateY(-4px);box-shadow:0 10px 30px color-mix(in srgb,var(--g) 30%,transparent)}
+.ge{font-size:44px}.gc h3{margin:8px 0 4px}.gc p{margin:0 0 12px;font-size:12px;color:var(--mut);min-height:48px}
+.tags{display:flex;gap:6px;flex-wrap:wrap}.tags span{font-size:11px;padding:3px 8px;border-radius:99px;background:#ffffff14}
+.side{width:300px;overflow:auto;padding:16px;background:#0a0d16cc;border-left:1px solid var(--bd)}
+.side h3,.sl{font-size:11px;letter-spacing:.15em;color:var(--mut);margin:16px 0 8px;text-transform:uppercase}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;padding:6px 9px;border-radius:8px;background:#0f1422;margin-bottom:4px}
+.me{outline:1px solid var(--c)}.mut{font-size:12px;color:var(--mut)}
+.bar{height:8px;border-radius:6px;background:var(--bd);margin:8px 0 4px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#00f2fe,#7f00ff)}
+#portal{display:none;z-index:40;align-items:center;justify-content:center;background:#000a}
+.modal{width:min(720px,94vw);max-height:92vh;max-height:92dvh;overflow:auto;padding:22px;border-radius:20px;background:var(--pn);border:1px solid #334155}
+.mh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}.mt{font-size:24px;font-weight:800}.ms{font-size:12px;color:var(--mut)}
+.sg{margin-top:12px}.so{display:flex;gap:6px;flex-wrap:wrap}.sg .sl{margin:0 0 6px}
+.box{margin-top:12px;padding:12px;border-radius:12px;border:1px dashed #334155}.code{font-size:22px;letter-spacing:.2em;color:#fbbf24;margin-left:8px}
+#game{display:none;position:fixed;inset:0;z-index:20}
+#cv{position:absolute;inset:0;touch-action:none}
+#gbar{position:absolute;top:10px;left:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;z-index:5}
+#gtitle{font-weight:800;margin:0 8px}
+#ptop{position:absolute;top:58px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:5}
+.pc{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;background:#0c101acc;border:1px solid var(--bd);font-size:13px}
+.pc.act{border-color:var(--pc);box-shadow:0 0 16px color-mix(in srgb,var(--pc) 55%,transparent)}
+.pc small{display:block;color:var(--mut);font-size:10px}.dot{width:12px;height:12px;border-radius:50%;background:var(--pc)}
+.ck{font-family:ui-monospace,monospace;font-size:18px;font-weight:800;margin-left:6px}
+#gstat{position:absolute;left:12px;bottom:12px;z-index:5;padding:12px 16px;border-radius:14px;background:#0c101acc;border:1px solid var(--bd);max-width:420px}
+#status{color:var(--c);font-weight:600;margin-bottom:8px;font-size:14px}#acts{display:flex;gap:6px;flex-wrap:wrap}
+#gside{position:absolute;top:0;right:0;bottom:0;width:280px;overflow:auto;padding:14px;background:#0a0d16d9;border-left:1px solid var(--bd);z-index:4}
+#gside.hid{display:none}
+#res{display:none;position:absolute;inset:0;z-index:8;background:#0008;align-items:center;justify-content:center}
+.rb{margin:12vh auto 0;width:min(380px,92vw);text-align:center;padding:26px;border-radius:20px;background:var(--pn);border:1px solid var(--c)}
+.rb h2{margin:0 0 6px;font-size:28px}.rb .xp{color:#fbbf24;font-weight:800;font-size:20px}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:60;display:none;padding:10px 18px;border-radius:12px;background:#0c101af0;border:1px solid var(--c);font-weight:600}
+@media(max-width:800px){.mwrap{flex-direction:column;overflow:auto}.mmain{flex:none;overflow:visible}.side{display:block;width:auto;flex:none;border-left:0;border-top:1px solid var(--bd)}#gside{top:auto;left:0;right:0;width:auto;max-height:34vh;max-height:34dvh;border-left:0;border-top:1px solid var(--bd)}body:has(#gside:not(.hid)) #gstat{bottom:calc(34dvh + 8px)}#gstat{max-width:calc(100vw - 24px)}#ptop{flex-wrap:wrap;justify-content:center;width:96vw}#gbar{max-width:calc(100vw - 20px)}}
+</style><style id="ff-mobile">
+/* Familyforge mobile fixes */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-x:hidden;overflow-x:clip}
+button,a,[role=button],input,select,summary,label{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media(max-width:820px){input,select,textarea{font-size:16px}} /* stops iOS zoom-on-focus */
+</style>
+</head><body>
 
-        /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #090d14; }
-        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #374151; }
+<div id="login" class="scr">
+ <div class="lcard">
+  <h1 style="font-size:22px;font-weight:800;margin:0 0 4px;color:#00f2fe">3D GAMES ARENA</h1>
+  <p style="font-size:12px;color:#94a3b8;margin:0 0 14px">Sign in to track your level, records and rank.</p>
+  <div style="display:flex;gap:8px"><button class="b on" id="tNew" onclick="setTab('new')">New user</button><button class="b" id="tOld" onclick="setTab('old')">Existing user</button></div>
+  <input id="uName" class="in" placeholder="Username" maxlength="16" autocomplete="username">
+  <input id="uPass" class="in" type="password" placeholder="Password" autocomplete="current-password">
+  <select id="uCountry" class="in"></select>
+  <div id="err" style="color:#f87171;font-size:12px;min-height:16px;margin-top:8px"></div>
+  <button class="b on" style="width:100%;margin-top:6px" onclick="submitLogin()">Continue</button>
+ </div>
+</div>
 
-        /* Board Theme Classes */
-        /* Classic Slate */
-        .theme-slate .chess-sq-white { background-color: #cbd5e1; color: #0f172a; }
-        .theme-slate .chess-sq-black { background-color: #334155; color: #f8fafc; }
-        .theme-slate .board-bg { background-color: #1e293b; border-color: #334155; }
-        
-        /* Emerald Green */
-        .theme-emerald .chess-sq-white { background-color: #e2e8f0; color: #064e3b; }
-        .theme-emerald .chess-sq-black { background-color: #047857; color: #ecfdf5; }
-        .theme-emerald .board-bg { background-color: #064e3b; border-color: #059669; }
+<div id="menu" class="scr">
+ <div class="mtop"><div class="logo">3D GAMES ARENA</div><div class="sp"></div>
+  <button class="b" onclick="togMute()">🔊</button><button class="b" onclick="fs()">⛶ Full screen</button><button class="b" onclick="logout()">Log out</button></div>
+ <div class="mwrap"><div class="mmain"><h2>Choose a game</h2><div id="grid"></div></div><aside class="side" id="mside"></aside></div>
+</div>
 
-        /* Warm Wood */
-        .theme-wood .chess-sq-white { background-color: #fde68a; color: #451a03; }
-        .theme-wood .chess-sq-black { background-color: #92400e; color: #fef3c7; }
-        .theme-wood .board-bg { background-color: #78350f; border-color: #b45309; }
+<div id="portal" class="scr"><div class="modal" id="pbox"></div></div>
 
-        /* Neon Cyberpunk */
-        .theme-neon .chess-sq-white { background-color: #18181b; color: #38bdf8; border: 1px solid #0284c7; }
-        .theme-neon .chess-sq-black { background-color: #312e81; color: #f43f5e; border: 1px solid #818cf8; }
-        .theme-neon .board-bg { background-color: #0f172a; border-color: #38bdf8; }
+<div id="game">
+ <div id="cv"></div>
+ <div id="gbar"><button class="b" onclick="exitGame()">← Menu</button><span id="gtitle"></span><button class="b" onclick="fs()">⛶ Full screen</button><button class="b" onclick="togSide()">☰ Panel</button><button class="b" onclick="togMute()">🔊</button></div>
+ <div id="ptop"></div>
+ <div id="gstat"><div id="status"></div><div id="acts"></div></div>
+ <aside id="gside"></aside>
+ <div id="res"></div>
+</div>
+<div id="toast"></div>
 
-        /* Midnight Dark */
-        .theme-midnight .chess-sq-white { background-color: #334155; color: #e2e8f0; }
-        .theme-midnight .chess-sq-black { background-color: #0f172a; color: #94a3b8; }
-        .theme-midnight .board-bg { background-color: #020617; border-color: #1e293b; }
+<script>
+/* ================= helpers ================= */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const flag=c=>[...(c||'')].map(x=>String.fromCodePoint(127397+x.charCodeAt(0))).join('');
+const range=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
+const CN="AE:United Arab Emirates,US:United States,GB:United Kingdom,CA:Canada,AU:Australia,IN:India,PK:Pakistan,PH:Philippines,NG:Nigeria,ZA:South Africa,EG:Egypt,SA:Saudi Arabia,TR:Turkey,DE:Germany,FR:France,ES:Spain,IT:Italy,BR:Brazil,MX:Mexico,AR:Argentina,CN:China,JP:Japan,KR:South Korea,ID:Indonesia,RU:Russia,KE:Kenya,GH:Ghana,NZ:New Zealand,IE:Ireland,NL:Netherlands,SE:Sweden,NO:Norway,PL:Poland,UA:Ukraine,BD:Bangladesh,LK:Sri Lanka,NP:Nepal,MY:Malaysia,SG:Singapore,TH:Thailand,VN:Vietnam,QA:Qatar,KW:Kuwait,OM:Oman,BH:Bahrain,JO:Jordan,LB:Lebanon,MA:Morocco,DZ:Algeria,CO:Colombia,CL:Chile,PE:Peru".split(',').map(s=>s.split(':'));
+$('uCountry').innerHTML='<option value="">Country…</option>'+CN.map(([c,n])=>`<option value="${c}">${flag(c)} ${n}</option>`).join('');
+function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',2800)}
+function fs(){const d=document;if(!d.fullscreenElement){const p=d.documentElement.requestFullscreen&&d.documentElement.requestFullscreen();p&&p.catch&&p.catch(()=>toast('Full screen was blocked by the browser'))}else d.exitFullscreen()}
+let AC=null,mute=false;
+function snd(f=440,d=.08,t='sine',v=.1,f2){if(mute)return;try{AC=AC||new(window.AudioContext||webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime;o.type=t;o.frequency.setValueAtTime(f,n);if(f2)o.frequency.exponentialRampToValueAtTime(f2,n+d);g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(AC.destination);o.start(n);o.stop(n+d)}catch(e){}}
+function togMute(){mute=!mute;toast(mute?'Sound off':'Sound on')}
 
-        /* Highlights */
-        .chess-sq-selected { background-color: #0284c7 !important; color: #ffffff !important; }
-        .chess-sq-highlight { background-color: #38bdf8 !important; opacity: 0.85; }
-    </style>
-</head>
-<body class="h-screen w-screen flex flex-col p-3 md:p-5 box-border overflow-hidden bg-[#090d14]">
+/* ================= accounts ================= */
+let mem={},user=null,tab='new';
+const db=()=>{try{const s=localStorage.getItem('arena_db');return s?JSON.parse(s):mem}catch(e){return mem}};
+const sv=d=>{mem=d;try{localStorage.setItem('arena_db',JSON.stringify(d))}catch(e){}};
+async function H(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('arena:'+s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){let h=5381;for(const c of s)h=(h*33^c.charCodeAt(0))>>>0;return''+h}}
+const err=m=>$('err').textContent=m;
+function setTab(t){tab=t;$('uCountry').style.display=t==='new'?'block':'none';$('tNew').className='b'+(t==='new'?' on':'');$('tOld').className='b'+(t==='old'?' on':'');err('')}
+async function submitLogin(){
+ const u=$('uName').value.trim(),p=$('uPass').value,d=db(),k=u.toLowerCase();
+ if(!/^[A-Za-z0-9_]{3,16}$/.test(u))return err('Username: 3-16 letters, numbers or _');
+ if(p.length<4)return err('Password needs at least 4 characters');
+ if(tab==='new'){
+  if(d[k])return err('That username is taken');
+  if(!$('uCountry').value)return err('Please choose your country');
+  d[k]={name:u,hash:await H(p),country:$('uCountry').value,xp:0,stats:{}};sv(d);
+ }else if(!d[k]||d[k].hash!==await H(p))return err('Wrong username or password');
+ try{localStorage.setItem('arena_sess',k)}catch(e){}
+ enter(k);
+}
+function logout(){try{localStorage.removeItem('arena_sess')}catch(e){}location.reload()}
+setTab('new');
+const st=(u,g)=>{const s=u.stats[g]||(u.stats[g]={});for(const k of['w','l','d','xp'])s[k]=s[k]||0;if(s.best===undefined)s.best=null;return s};
+const lvl=xp=>Math.floor(Math.sqrt(xp/40))+1,lo=L=>40*(L-1)**2;
+const TITLES=['Rookie','Challenger','Tactician','Expert','Master','Grandmaster'];
+function prof(){
+ const u=db()[user],L=lvl(u.xp),a=lo(L),b=lo(L+1),pc=Math.round((u.xp-a)/(b-a)*100);
+ return `<div style="font-size:18px;font-weight:800">${flag(u.country)} ${esc(u.name)}</div>
+ <div style="color:#fbbf24;font-size:13px;font-weight:700;margin-top:2px">Level ${L} · ${TITLES[Math.min(5,Math.floor((L-1)/3))]}</div>
+ <div class="bar"><i style="width:${pc}%"></i></div><div class="mut">${u.xp} XP · ${b-u.xp} to Level ${L+1}</div>`;
+}
+function lb(g,n=8){
+ const d=db(),meName=d[user]&&d[user].name;
+ const rows=Object.values(d).map(u=>({u,s:u.stats[g]||{}})).filter(r=>(r.s.w||0)+(r.s.l||0)+(r.s.d||0)>0)
+  .sort((a,b)=>(b.s.xp||0)-(a.s.xp||0)||(b.s.w||0)-(a.s.w||0)).slice(0,n);
+ return rows.length?rows.map((r,i)=>`<div class="row ${r.u.name===meName?'me':''}"><span>${i+1}. ${flag(r.u.country)} ${esc(r.u.name)}</span><span>${r.s.w||0}W · ${r.s.xp||0} XP · Lv ${lvl(r.u.xp)}</span></div>`).join(''):'<div class="mut">No games played yet. Be the first!</div>';
+}
 
-    <!-- 1-Page Header -->
-    <header class="mb-3 shrink-0 flex items-center justify-between gap-3">
-        <div>
-            <div class="flex items-center space-x-2">
-                <h1 class="text-xl md:text-2xl font-black text-white tracking-tight">Brain & Puzzles</h1>
-                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700/60">15 Games</span>
-            </div>
-            <p class="text-xs text-slate-400 mt-0.5">Select mode, AI difficulty (Beginner to Grandmaster) & themes.</p>
-        </div>
-    </header>
+/* ================= game list ================= */
+const GM={
+ chess:{n:'Chess',e:'♞',c:'#00f2fe',d:'Castling, en passant, real clocks, pause and resign.',min:2,max:2,o:{t:10,inc:0}},
+ ttt:{n:'Tic-Tac-Toe',e:'❌',c:'#ff3d8b',d:'Neon 3D board with Classic, Big 5×5 and Misère modes.',min:2,max:2,o:{v:'classic'}},
+ c4:{n:'Connect Four',e:'🔴',c:'#3b82f6',d:'Drop discs into a glossy 3D board. Get four in a row!',min:2,max:2,o:{}},
+ reversi:{n:'Reversi',e:'⚫',c:'#22c55e',d:'Flip your opponent\'s discs. Easy to learn, hard to master.',min:2,max:2,o:{},high:1},
+ snakes:{n:'Snakes & Ladders',e:'🐍',c:'#fbbf24',d:'3D board, real dice, 2–4 players. A 6 gives another roll.',min:2,max:4,o:{}},
+ ludo:{n:'Ludo',e:'🎲',c:'#ef4444',d:'Full rules: captures, safe stars, home column. 2–4 players.',min:2,max:4,o:{}}
+};
+function enter(k){user=k;showMenu()}
+const hideAll=()=>['login','menu','portal','game'].forEach(i=>$(i).style.display='none');
+function showMenu(){hideAll();$('menu').style.display='flex';renderMenu()}
+function olHTML(){const ps=Object.values(NET.peers);return ps.length?ps.map(p=>`<div class="row"><span>🟢 ${flag(p.c)} ${esc(p.n)}</span><span>${p.g&&GM[p.g]?GM[p.g].n:'In menu'}</span></div>`).join(''):'<div class="mut">No one else online right now.</div>'}
+function renderMenu(){
+ const u=db()[user];
+ $('grid').innerHTML=Object.entries(GM).map(([k,g])=>{const s=st(u,k);return `<div class="gc" style="--g:${g.c}" onclick="openPortal('${k}')"><div class="ge">${g.e}</div><h3>${g.n}</h3><p>${g.d}</p><div class="tags"><span>${g.min===g.max?g.max+' players':g.min+'–'+g.max+' players'}</span><span>${s.w}W ${s.l}L ${s.d}D</span></div></div>`}).join('');
+ $('mside').innerHTML=prof()+'<h3>Players online</h3><div class="olist">'+olHTML()+'</div><h3>Your records</h3>'+Object.entries(GM).map(([k,g])=>{const s=st(u,k);return `<div class="row"><span>${g.e} ${g.n}</span><span>${s.w}W ${s.l}L ${s.d}D · ${s.xp} XP</span></div>`}).join('');
+}
 
-    <!-- 1-Page Responsive Grid Container -->
-    <div class="flex-1 min-h-0 overflow-y-auto pr-1">
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3" id="gamesGrid">
-            <!-- Dynamically populated -->
-        </div>
-    </div>
+/* ================= online layer (BroadcastChannel) ================= */
+const NET={id:Math.random().toString(36).slice(2,9),ch:null,peers:{},rooms:{},sig:'',
+ init(){try{this.ch=new BroadcastChannel('arena_v2');this.ch.onmessage=e=>this.recv(e.data)}catch(e){}setInterval(()=>this.tick(),2000);this.tick()},
+ send(o){o.from=this.id;try{this.ch&&this.ch.postMessage(o)}catch(e){}},
+ tick(){
+  const now=Date.now();
+  for(const k in this.peers)if(now-this.peers[k].t>7000)delete this.peers[k];
+  for(const k in this.rooms)if(now-this.rooms[k].t>7000)delete this.rooms[k];
+  if(user&&db()[user]){const u=db()[user];this.send({k:'hi',n:u.name,c:u.country,g:S?S.g:''});
+   if(P&&P.mode==='online'&&P.role==='host'&&P.room&&$('portal').style.display!=='none')this.send({k:'room',room:P.room,g:P.g,h:u.name,c:u.country,need:needN(),have:P.lobby.length})}
+  document.querySelectorAll('.olist').forEach(e=>e.innerHTML=olHTML());
+  const sg=Object.keys(this.rooms).join()+Object.keys(this.peers).length;
+  if(sg!==this.sig){this.sig=sg;if(P&&$('portal').style.display!=='none'&&P.mode==='online')renderPortal()}
+ },
+ recv(m){
+  if(!m||m.from===this.id)return;
+  if(m.k==='hi')this.peers[m.from]={n:m.n,c:m.c,g:m.g,t:Date.now()};
+  else if(m.k==='room')this.rooms[m.from]={...m,t:Date.now()};
+  else if(m.k==='join'&&P&&P.role==='host'&&P.mode==='online'&&P.room===m.room&&!P.lobby.some(x=>x.id===m.from)&&P.lobby.length<needN()){
+   P.lobby.push({id:m.from,n:m.n,c:m.c});this.send({k:'lobby',room:P.room,l:P.lobby.map(x=>({n:x.n,c:x.c})),need:needN()});renderPortal()}
+  else if(m.k==='lobby'&&P&&P.joined===m.room){P.lobbyInfo=m;renderPortal()}
+  else if(m.k==='start'&&P&&P.joined===m.room){
+   const seats=m.seats.map(s=>({n:s.n,c:s.c,id:s.id,kind:s.id===this.id?'me':'remote'}));
+   if(!seats.some(s=>s.kind==='me'))return;
+   const cfg={g:m.g,mode:'online',diff:m.diff,o:m.o,seats,online:true,room:m.room};$('portal').style.display='none';P=null;begin(cfg)}
+  else if(S&&S.online&&m.room===S.room){
+   if(m.k==='mv'){S.q.push(m.m);drain()}
+   else if(m.k==='ctl'){if(m.t==='pause'){S.paused=m.v;pauseUI();if(!m.v)kick()}else if(m.t==='resign')doResign(m.seat)}
+   else if(m.k==='leave'&&!over){toast('Opponent left the game');finish(S.me,'Opponent left the game')}}
+ }};
 
-    <!-- Active Game Modal Container -->
-    <div id="gameModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex flex-col hidden">
-        
-        <!-- Modal Top Title & System Toolbar -->
-        <div class="bg-slate-900 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between shrink-0">
-            <div class="flex items-center space-x-3">
-                <div id="modalGameIcon" class="w-8 h-8 rounded-xl flex items-center justify-center text-white text-base font-bold shrink-0"></div>
-                <div>
-                    <h3 id="modalGameTitle" class="text-base font-bold text-white leading-tight">Game Title</h3>
-                    <p id="modalGameDesc" class="text-[11px] text-slate-400 hidden sm:block">Subtitle</p>
-                </div>
-            </div>
+/* ================= setup portal ================= */
+let P=null;
+function openPortal(g){P={g,mode:'ai',diff:2,n:GM[g].min,role:'host',st:[],o:{...GM[g].o},room:null,lobby:[],joined:null,lobbyInfo:null};$('portal').style.display='flex';renderPortal()}
+function closePortal(){if(P&&P.joined)NET.send({k:'leave',room:P.joined});P=null;$('portal').style.display='none'}
+const needN=()=>{if(!P)return 0;const n=GM[P.g].max>2?P.n:2;let c=0;for(let i=1;i<n;i++)if((P.st[i]||'online')==='online')c++;return c};
+function mkRoom(){P.room=Math.random().toString(36).slice(2,6).toUpperCase();P.lobby=[]}
+function setP(k,v){
+ if(k==='mode'){P.mode=v;P.joined=null;if(v==='online'&&P.role==='host')mkRoom();else if(v!=='online')P.room=null}
+ else if(k==='role'){P.role=v;P.joined=null;P.lobbyInfo=null;if(v==='host')mkRoom();else P.room=null}
+ else if(k==='n'){P.n=v;P.lobby=P.lobby.slice(0,needN())}
+ else if(k.startsWith('o.'))P.o[k.slice(2)]=v;
+ else if(k.startsWith('st:')){P.st[+k.slice(3)]=v;P.lobby=P.lobby.slice(0,needN())}
+ else P[k]=v;
+ renderPortal();
+}
+function joinRoom(from,room){const u=db()[user];P.joined=room;NET.send({k:'join',room,n:u.name,c:u.country});renderPortal()}
+const seg=(lb,opts,cur,key)=>`<div class="sg"><div class="sl">${lb}</div><div class="so">${opts.map(([v,t])=>`<button class="b ${v===cur?'on':''}" onclick='setP(${JSON.stringify(key)},${JSON.stringify(v)})'>${t}</button>`).join('')}</div></div>`;
+function onlineBox(){
+ const g=GM[P.g];let h=seg('Online role',[['host','Host a room'],['join','Join a room']],P.role,'role');
+ if(P.role==='host'){
+  h+=`<div class="box">Room code <b class="code">${P.room}</b><div class="mut">Your room now appears in "Join a room" for other players.</div>`;
+  if(g.max>2)for(let i=1;i<P.n;i++)h+=seg('Seat '+(i+1),[['online','Human (online)'],['ai','AI bot']],P.st[i]||'online','st:'+i);
+  h+=`<div class="sl" style="margin-top:12px">Players joined (${P.lobby.length}/${needN()})</div>`+(P.lobby.map(x=>`<div class="row"><span>${flag(x.c)} ${esc(x.n)}</span><span>ready</span></div>`).join('')||'<div class="mut">Waiting for players…</div>')+'</div>';
+ }else if(P.joined){
+  h+=`<div class="box">Joined room <b class="code">${P.joined}</b><div class="mut">Waiting for the host to start…</div>`+(P.lobbyInfo?P.lobbyInfo.l.map(x=>`<div class="row"><span>${flag(x.c)} ${esc(x.n)}</span></div>`).join(''):'')+'</div>';
+ }else{
+  const rs=Object.entries(NET.rooms).filter(([,r])=>r.g===P.g&&r.have<r.need);
+  h+=`<div class="box"><div class="sl">Open rooms</div>`+(rs.map(([id,r])=>`<div class="row"><span>${flag(r.c)} ${esc(r.h)} · ${r.have}/${r.need} joined</span><button class="b" onclick="joinRoom('${id}','${r.room}')">Join</button></div>`).join('')||'<div class="mut">No open rooms yet. Host one, or open the game in a second tab and join from there.</div>')+'</div>';
+ }
+ return h;
+}
+function renderPortal(){
+ if(!P)return;const g=GM[P.g],multi=g.max>2;
+ let h=`<div class="mh"><div><div class="mt">${g.e} ${g.n}</div><div class="ms">${g.d}</div></div><button class="b" onclick="closePortal()">✕</button></div>`;
+ h+=seg('Game mode',[['ai','🤖 vs Computer'],['local','👥 Same device'],['online','🌐 Online']],P.mode,'mode');
+ if(P.mode==='ai')h+=seg('Difficulty',[[1,'Easy'],[2,'Medium'],[3,'Hard']],P.diff,'diff');
+ if(multi&&(P.mode!=='online'||P.role==='host'))h+=seg('Players',range(g.min,g.max).map(n=>[n,n+' players']),P.n,'n');
+ if(P.g==='chess')h+=seg('Time control (minutes per side)',[[0,'No clock'],[1,'1'],[3,'3'],[5,'5'],[10,'10'],[15,'15'],[30,'30']],P.o.t,'o.t')+seg('Increment per move',[[0,'None'],[2,'+2s'],[5,'+5s']],P.o.inc,'o.inc');
+ if(P.g==='ttt')h+=seg('Variant',[['classic','Classic 3×3'],['big','Big 5×5 (get 4)'],['mis','Misère (avoid 3)']],P.o.v,'o.v');
+ if(P.mode==='online')h+=onlineBox();
+ const isJ=P.mode==='online'&&P.role==='join',full=P.mode!=='online'||P.lobby.length>=needN();
+ h+=`<button class="b on big" ${isJ||!full?'disabled':''} onclick="startPortal()">${isJ?'Waiting for host…':full?'Start game ▶':'Waiting for players…'}</button>`;
+ h+=`<div class="sl" style="margin-top:18px">Leaderboard · ${g.n}</div>`+lb(P.g);
+ $('pbox').innerHTML=h;
+}
+function startPortal(){
+ const g=GM[P.g],n=g.max>2?P.n:2,me=db()[user],seats=[{n:me.name,c:me.country,kind:'me',id:NET.id}];
+ if(P.mode==='ai')for(let i=1;i<n;i++)seats.push({n:n===2?'Computer':'Bot '+i,c:'',kind:'ai'});
+ else if(P.mode==='local')for(let i=1;i<n;i++)seats.push({n:'Player '+(i+1),c:'',kind:'local'});
+ else{let j=0;for(let i=1;i<n;i++){if((P.st[i]||'online')==='ai')seats.push({n:'Bot '+i,c:'',kind:'ai'});else{const x=P.lobby[j++];if(!x)return toast('Waiting for players');seats.push({n:x.n,c:x.c,kind:'remote',id:x.id})}}}
+ const cfg={g:P.g,mode:P.mode,diff:P.diff,o:{...P.o},seats,online:P.mode==='online',room:P.room};
+ if(cfg.online)NET.send({k:'start',room:P.room,g:P.g,o:cfg.o,diff:P.diff,seats:seats.map(s=>({n:s.n,c:s.c,id:s.kind==='me'?NET.id:s.id||null}))});
+ $('portal').style.display='none';P=null;begin(cfg);
+}
 
-            <div class="flex items-center space-x-2">
-                <button id="pauseBtn" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors text-xs" title="Pause"><i class="fa-solid fa-pause"></i></button>
-                <button id="settingsBtn" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors text-xs" title="Settings"><i class="fa-solid fa-gear"></i></button>
-                <button id="closeModalBtn" class="p-2 bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white rounded-xl transition-colors border border-rose-500/30 text-xs" title="Close"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-        </div>
+/* ================= 3D engine ================= */
+let scene,cam,R,ctl,RC,G=null,cur={},dn={x:0,y:0},inited=false,GEN=0,ring,stars;
+const MS=new THREE.Vector2(),AN=[];
+const mat=(c,r=.4,m=.1)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
+const ez=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const bo=t=>{const n=7.5625,d=2.75;if(t<1/d)return n*t*t;if(t<2/d)return n*(t-=1.5/d)*t+.75;if(t<2.5/d)return n*(t-=2.25/d)*t+.9375;return n*(t-=2.625/d)*t+.984375};
+function anim(ms,f,done){AN.push({t0:performance.now(),ms,f,done})}
+function tick(){const n=performance.now();for(let i=AN.length-1;i>=0;i--){const a=AN[i];if(!a)continue;const t=Math.min(1,(n-a.t0)/a.ms);a.f(t);if(t>=1){const j=AN.indexOf(a);if(j>=0)AN.splice(j,1);a.done&&a.done()}}}
+const later=(ms,f)=>{const g=GEN;setTimeout(()=>{if(g===GEN)f()},ms)};
+function mv3(o,to,ms,hop,done){const f=o.position.clone();anim(ms,t=>{o.position.lerpVectors(f,to,ez(t));o.position.y+=Math.sin(Math.PI*t)*(hop||0)},done)}
+function tex(f,w=256,h=256){const c=document.createElement('canvas');c.width=w;c.height=h;f(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=8;return t}
+function wood(c1,c2){return tex((x,w,h)=>{x.fillStyle=c1;x.fillRect(0,0,w,h);for(let i=0;i<60;i++){x.strokeStyle=c2;x.globalAlpha=.07+Math.random()*.12;x.lineWidth=1+Math.random()*3;x.beginPath();const y=Math.random()*h;x.moveTo(0,y);x.bezierCurveTo(w*.3,y+Math.random()*14-7,w*.6,y+Math.random()*14-7,w,y+Math.random()*10-5);x.stroke()}})}
+function boom(p,cols=[0xffd54a,0x00f2fe,0xff3d8b,0x7cff6b]){const g=new THREE.Group();g.position.copy(p);G.add(g);const ps=[];for(let i=0;i<70;i++){const m=new THREE.Mesh(new THREE.BoxGeometry(.14,.14,.14),new THREE.MeshBasicMaterial({color:cols[i%cols.length]}));g.add(m);ps.push({m,v:new THREE.Vector3((Math.random()-.5)*7,Math.random()*7+3,(Math.random()-.5)*7)})}anim(1800,t=>{ps.forEach(q=>{q.m.position.set(q.v.x*t,q.v.y*t-9*t*t,q.v.z*t);q.m.rotation.x=q.m.rotation.y=t*9})},()=>G.remove(g))}
+function init3D(){
+ inited=true;scene=new THREE.Scene();scene.background=new THREE.Color(0x070a12);scene.fog=new THREE.FogExp2(0x070a12,.011);
+ cam=new THREE.PerspectiveCamera(42,1,.1,400);
+ R=new THREE.WebGLRenderer({antialias:true});R.setPixelRatio(Math.min(devicePixelRatio,2));R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;R.outputEncoding=THREE.sRGBEncoding;R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.15;
+ $('cv').appendChild(R.domElement);
+ ctl=new THREE.OrbitControls(cam,R.domElement);ctl.enableDamping=true;ctl.dampingFactor=.07;ctl.maxPolarAngle=Math.PI/2-.04;ctl.minDistance=4;ctl.maxDistance=34;
+ RC=new THREE.Raycaster();
+ scene.add(new THREE.HemisphereLight(0xcfe3ff,0x1b1630,.75));
+ const d=new THREE.DirectionalLight(0xfff1dc,1.1);d.position.set(7,16,9);d.castShadow=true;d.shadow.mapSize.set(2048,2048);Object.assign(d.shadow.camera,{left:-11,right:11,top:11,bottom:-11,near:1,far:50});d.shadow.bias=-.0004;scene.add(d);
+ const p1=new THREE.PointLight(0x00f2fe,.9,40);p1.position.set(-9,6,-6);scene.add(p1);
+ const p2=new THREE.PointLight(0xff3d8b,.8,40);p2.position.set(9,6,6);scene.add(p2);
+ const fl=new THREE.Mesh(new THREE.PlaneGeometry(300,300),mat(0x0b1020,.35,.7));fl.rotation.x=-Math.PI/2;fl.position.y=-.6;fl.receiveShadow=true;scene.add(fl);
+ const glow=new THREE.Mesh(new THREE.CircleGeometry(16,64),new THREE.MeshBasicMaterial({map:tex((x,w,h)=>{const g=x.createRadialGradient(w/2,h/2,0,w/2,h/2,w/2);g.addColorStop(0,'rgba(0,242,254,.35)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,w,h)}),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));glow.rotation.x=-Math.PI/2;glow.position.y=-.58;scene.add(glow);
+ ring=new THREE.Mesh(new THREE.TorusGeometry(13,.05,8,120),new THREE.MeshBasicMaterial({color:0x00f2fe}));ring.rotation.x=Math.PI/2;ring.position.y=-.55;scene.add(ring);
+ const sp=[];for(let i=0;i<700;i++){const a=Math.random()*6.28,b=Math.random()*1.4,r=70+Math.random()*50;sp.push(Math.cos(a)*Math.cos(b)*r,Math.abs(Math.sin(b))*r*.7+5,Math.sin(a)*Math.cos(b)*r)}
+ const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.Float32BufferAttribute(sp,3));stars=new THREE.Points(sg,new THREE.PointsMaterial({color:0x9fc4ff,size:.35,fog:false}));scene.add(stars);
+ R.domElement.addEventListener('pointerdown',e=>dn={x:e.clientX,y:e.clientY});
+ R.domElement.addEventListener('pointerup',e=>{if(Math.hypot(e.clientX-dn.x,e.clientY-dn.y)>5||!G)return;const p=pickAt(e);if(p!==undefined&&cur.click)cur.click(p)});
+ R.domElement.addEventListener('pointermove',e=>{if(cur.hover&&G)cur.hover(pickAt(e))});
+ addEventListener('resize',rs);rs();
+ (function loop(){requestAnimationFrame(loop);tick();ctl.update();ring.rotation.z+=.0015;stars.rotation.y+=.00008;R.render(scene,cam)})();
+}
+function rs(){if(!R)return;R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}
+function pickAt(e){const r=R.domElement.getBoundingClientRect();MS.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);RC.setFromCamera(MS,cam);for(const i of RC.intersectObjects(G.children,true)){let o=i.object;while(o&&o.userData.pick===undefined)o=o.parent;if(o)return o.userData.pick}return undefined}
+function mkPawn(col,s=1){const m=new THREE.MeshPhysicalMaterial({color:col,roughness:.3,clearcoat:1,clearcoatRoughness:.15}),g=new THREE.Group();g.add(new THREE.Mesh(new THREE.LatheGeometry(PR.p.map(([r,y])=>new THREE.Vector2(r*.8,y*.8)),20),m));const h=new THREE.Mesh(new THREE.SphereGeometry(.17,20,14),m);h.position.y=.54;g.add(h);g.traverse(o=>o.castShadow=true);g.scale.setScalar(s);return g}
+function pipTex(v){return tex((x,w,h)=>{x.fillStyle='#f8f4ea';x.fillRect(0,0,w,h);x.strokeStyle='#d9d2bf';x.lineWidth=14;x.strokeRect(0,0,w,h);x.fillStyle=v===1?'#d62828':'#1b1b1b';const Pp={1:[[.5,.5]],2:[[.25,.25],[.75,.75]],3:[[.25,.25],[.5,.5],[.75,.75]],4:[[.25,.25],[.75,.25],[.25,.75],[.75,.75]],5:[[.25,.25],[.75,.25],[.5,.5],[.25,.75],[.75,.75]],6:[[.25,.22],[.75,.22],[.25,.5],[.75,.5],[.25,.78],[.75,.78]]};Pp[v].forEach(([a,b])=>{x.beginPath();x.arc(a*w,b*h,v===1?w*.14:w*.09,0,7);x.fill()})},128,128)}
+function mkDice(s){const d=new THREE.Mesh(new THREE.BoxGeometry(s,s,s),[3,4,1,6,2,5].map(v=>new THREE.MeshStandardMaterial({map:pipTex(v),roughness:.3})));d.castShadow=true;return d}
+const FACE={1:[0,0,0],6:[Math.PI,0,0],3:[0,0,Math.PI/2],4:[0,0,-Math.PI/2],2:[-Math.PI/2,0,0],5:[Math.PI/2,0,0]};
+function diceRoll(D,v,cb){const [tx,ty,tz]=FACE[v],y0=D.position.y,s=[4,6,2].map(k=>k*Math.PI*(Math.random()<.5?1:-1));snd(180,.5,'square',.05,60);anim(900,t=>{const k=Math.sin(t*Math.PI/2);D.rotation.set(tx+s[0]*(1-k),ty+s[1]*(1-k),tz+s[2]*(1-k));D.position.y=y0+Math.sin(Math.PI*t)*1.8},cb)}
 
-        <!-- Mode, AI Level, Theme & START Button Bar -->
-        <div class="bg-slate-950 border-b border-slate-800/80 px-4 py-2 flex flex-wrap items-center justify-between gap-2 shrink-0 text-xs">
-            <!-- Left Controls: Mode & Difficulty & Theme -->
-            <div class="flex flex-wrap items-center gap-2">
-                
-                <!-- Game Mode -->
-                <div class="flex items-center bg-slate-900 rounded-lg p-0.5 border border-slate-800">
-                    <button id="modeAiBtn" onclick="setGameMode('ai')" class="px-2.5 py-1 rounded-md font-bold text-[11px] bg-cyan-500/20 text-cyan-400">vs AI</button>
-                    <button id="modeHumanBtn" onclick="setGameMode('human')" class="px-2.5 py-1 rounded-md font-bold text-[11px] text-slate-400 hover:text-white">vs Human</button>
-                </div>
+/* ================= session / flow ================= */
+let S=null,over=false,busy=false,rolls=[0,0,0,0];
+const IMPL={};
+const canAct=()=>S&&!over&&!busy&&!S.paused&&S.turn>=0&&['me','local'].includes(S.seats[S.turn].kind);
+const isMine=s=>['me','local'].includes(S.seats[s].kind);
+const pn=t=>S.seats[t].n;
+const hud=t=>$('status').textContent=t;
+function begin(cfg){
+ if(S&&S.iv)clearInterval(S.iv);
+ GEN++;AN.length=0;S=cfg;S.q=[];S.turn=0;S.paused=false;S.me=S.seats.findIndex(s=>s.kind==='me');over=false;busy=false;
+ hideAll();$('game').style.display='block';if(!inited)init3D();rs();
+ if(G)scene.remove(G);G=new THREE.Group();scene.add(G);ctl.target.set(0,0,0);cur={};$('res').style.display='none';
+ buildHud();IMPL[S.g].start();cards();gside();ctl.update();kick();
+}
+function buildHud(){
+ $('gtitle').textContent=GM[S.g].n+' · '+({ai:'vs AI ('+['','Easy','Medium','Hard'][S.diff]+')',local:'Same device',online:'Online'})[S.mode];
+ let h='';
+ if(['snakes','ludo'].includes(S.g))h+='<button class="b on" onclick="humanRoll()">🎲 Roll dice</button>';
+ if(!S.online)h+='<button class="b" onclick="rematch()">↻ Restart</button>';
+ if(S.g==='chess')h+='<button class="b" id="pbtn" onclick="togPause()">⏸ Pause</button><button class="b" onclick="flipView()">⟳ Flip view</button>';
+ if(GM[S.g].max===2)h+='<button class="b" onclick="resign()">🏳 Resign</button>';
+ $('acts').innerHTML=h;
+}
+const TAG={me:'You',local:'Local',remote:'Online'};
+function cards(){
+ if(!S)return;const ex=IMPL[S.g].ex&&IMPL[S.g].ex();
+ $('ptop').innerHTML=S.seats.map((s,i)=>`<div class="pc${i===S.turn?' act':''}" style="--pc:${S.cols[i]}"><span class="dot"></span><div><b>${flag(s.c)} ${esc(s.n)}</b><small>${s.kind==='ai'?'AI · '+['','Easy','Medium','Hard'][S.diff]:TAG[s.kind]}</small></div>${ex?`<span class="ck">${ex[i]}</span>`:''}</div>`).join('');
+}
+function gside(){
+ if(!S)return;const u=db()[user],s=st(u,S.g);
+ $('gside').innerHTML=prof()+`<h3>Leaderboard · ${GM[S.g].n}</h3>`+lb(S.g,10)+`<h3>Your record</h3><div class="row"><span>${s.w}W ${s.l}L ${s.d}D</span><span>best ${s.best==null?'–':s.best}</span></div><h3>Players online</h3><div class="olist">${olHTML()}</div>`;
+}
+function togSide(){$('gside').classList.toggle('hid')}
+function drain(){if(S&&!over&&!busy&&S.q.length)IMPL[S.g].apply(S.q.shift())}
+function free(){busy=false;if(!over&&S.q.length){IMPL[S.g].apply(S.q.shift());return}kick()}
+function kick(){
+ if(!S||over||busy||S.paused)return;const s=S.seats[S.turn];
+ if(s&&s.kind==='ai')later(['ludo','snakes'].includes(S.g)?750:380,()=>{if(S&&!over&&!busy&&!S.paused&&S.seats[S.turn]&&S.seats[S.turn].kind==='ai')IMPL[S.g].ai()});
+}
+function play(m){if(S.online)NET.send({k:'mv',room:S.room,m});IMPL[S.g].apply(m)}
+function humanRoll(){if(!canAct())return;if(S.g==='ludo'&&ph!=='roll')return;play({r:1+Math.floor(Math.random()*6)})}
+function rematch(){const c={...S};clearInterval(S.iv);c.q=[];begin(c)}
+function exitGame(){if(S&&S.online&&!over)NET.send({k:'leave',room:S.room});if(S&&S.iv)clearInterval(S.iv);GEN++;AN.length=0;S=null;over=true;showMenu()}
+function resign(){if(over||!confirm('Resign this game?'))return;const seat=S.mode==='local'?S.turn:S.me;if(S.online)NET.send({k:'ctl',room:S.room,t:'resign',seat});doResign(seat)}
+function doResign(seat){if(over||!S)return;finish(1-seat,`${S.seats[seat].n} resigned`)}
+function finish(win,msg,score){
+ if(over)return;over=true;S.turn=-1;hud(msg);cards();
+ const d=db(),u=d[user],s=st(u,S.g),res=win<0?'D':win===S.me?'W':'L';
+ const xp=S.mode==='ai'?(res==='W'?[0,30,50,90][S.diff]:res==='D'?15:8):S.mode==='online'?(res==='W'?40:res==='D'?20:10):(res==='W'?10:res==='D'?5:3);
+ const b4=lvl(u.xp);s[res.toLowerCase()]++;s.xp+=xp;u.xp+=xp;
+ if(res==='W'&&score!=null&&(s.best==null||(GM[S.g].high?score>s.best:score<s.best)))s.best=score;
+ sv(d);const lv=lvl(u.xp);if(res==='W')snd(520,.5,'triangle',.15,1040);
+ later(S.g==='chess'?500:900,()=>{
+  $('res').innerHTML=`<div class="rb"><h2>${res==='W'?'🏆 Victory!':res==='D'?'🤝 Draw':'Defeat'}</h2><div class="mut" style="font-size:14px;margin-bottom:8px">${esc(msg)}</div><div class="xp">+${xp} XP</div>${lv>b4?`<div style="color:#7cff6b;font-weight:700;margin-top:6px">⬆ LEVEL UP! Level ${lv}</div>`:''}<div style="display:flex;gap:8px;justify-content:center;margin-top:18px;flex-wrap:wrap">${S.online?'':'<button class="b on" onclick="rematch()">Play again</button>'}<button class="b" onclick="$(\'res\').style.display=\'none\'">View board</button><button class="b" onclick="exitGame()">Menu</button></div></div>`;
+  $('res').style.display='flex';gside();
+ });
+}
 
-                <!-- AI Level -->
-                <div id="aiLevelContainer" class="flex items-center gap-1.5">
-                    <span class="text-slate-400 font-semibold text-[11px]">Level:</span>
-                    <select id="aiLevelSelect" onchange="setAiLevel(this.value)" class="bg-slate-900 border border-slate-700 text-amber-400 font-bold px-2 py-1 rounded-lg text-[11px] focus:outline-none">
-                        <option value="beginner">Beginner</option>
-                        <option value="amateur">Amateur</option>
-                        <option value="intermediate" selected>Intermediate</option>
-                        <option value="hard">Hard</option>
-                        <option value="expert">Expert</option>
-                        <option value="grandmaster">Grandmaster</option>
-                    </select>
-                </div>
+/* ================= CHESS ================= */
+let ch,sel,lg,LG,last,pm,PG,HG,tm,tl,mvN,KG;
+const isW=p=>p===p.toUpperCase();
+const N8=[[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]],K8=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+const PR={
+ p:[[0,0],[.34,0],[.36,.05],[.3,.1],[.18,.22],[.16,.38],[.26,.42],[.26,.48],[.14,.52],[0,.52]],
+ r:[[0,0],[.38,0],[.4,.06],[.32,.14],[.24,.3],[.22,.62],[.3,.68],[.3,.76],[.36,.78],[.36,1],[.27,1],[.27,.92],[.12,.92],[0,.92]],
+ b:[[0,0],[.36,0],[.38,.06],[.3,.12],[.2,.3],[.14,.55],[.22,.62],[.2,.68],[.12,.74],[.2,.9],[.12,1.12],[0,1.18]],
+ q:[[0,0],[.4,0],[.42,.06],[.32,.14],[.22,.35],[.16,.7],[.3,.92],[.36,1.08],[.28,1.1],[.2,1.02],[.1,1.08],[0,1.08]],
+ k:[[0,0],[.4,0],[.42,.06],[.32,.14],[.22,.35],[.18,.7],[.3,.92],[.28,1.1],[.1,1.12],[0,1.12]],
+ n:[[0,0],[.38,0],[.4,.06],[.3,.14],[.26,.3],[0,.32]]};
+const PM=[new THREE.MeshPhysicalMaterial({color:0xf3e9d2,roughness:.28,clearcoat:1,clearcoatRoughness:.12}),new THREE.MeshPhysicalMaterial({color:0x23262f,roughness:.32,metalness:.25,clearcoat:1,clearcoatRoughness:.15})];
+function mkKnight(){const s=new THREE.Shape();[[-.22,.3],[.22,.3],[.2,.46],[.3,.58],[.46,.64],[.47,.75],[.37,.83],[.28,.95],[.2,1.12],[.08,1],[-.04,1.14],[-.12,.98],[-.24,.78],[-.3,.5]].forEach(([x,y],i)=>i?s.lineTo(x,y):s.moveTo(x,y));const g=new THREE.ExtrudeGeometry(s,{depth:.26,bevelEnabled:true,bevelSize:.04,bevelThickness:.04,bevelSegments:2});g.translate(0,0,-.13);return g}
+function piece(t,w){
+ const m=PM[w?0:1],g=new THREE.Group(),add=(geo,x,y,z)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);g.add(o);return o};
+ g.add(new THREE.Mesh(new THREE.LatheGeometry(PR[t].map(([r,y])=>new THREE.Vector2(r,y)),32),m));
+ if(t==='p')add(new THREE.SphereGeometry(.2,24,16),0,.68,0);
+ if(t==='q'){add(new THREE.SphereGeometry(.1,16,12),0,1.2,0);add(new THREE.TorusGeometry(.27,.045,8,28),0,1.02,0).rotation.x=Math.PI/2}
+ if(t==='k'){add(new THREE.BoxGeometry(.09,.34,.09),0,1.33,0);add(new THREE.BoxGeometry(.26,.09,.09),0,1.38,0)}
+ if(t==='n'){KG=KG||mkKnight();const h=new THREE.Mesh(KG,m);h.rotation.y=w?Math.PI/2:-Math.PI/2;g.add(h)}
+ g.traverse(o=>{o.castShadow=true});return g;
+}
+function att(b,r,c,w){
+ const P_=(y,x)=>b[y]&&b[y][x],pd=w?1:-1;
+ for(const x of[-1,1])if(P_(r+pd,c+x)===(w?'P':'p'))return true;
+ for(const[a,d]of N8)if(P_(r+a,c+d)===(w?'N':'n'))return true;
+ for(const[a,d]of K8)if(P_(r+a,c+d)===(w?'K':'k'))return true;
+ for(const[a,d]of K8){let y=r+a,x=c+d;while(y>=0&&y<8&&x>=0&&x<8){const q=b[y][x];if(q){const t=q.toLowerCase();if(isW(q)===w&&(t==='q'||(a&&d?t==='b':t==='r')))return true;break}y+=a;x+=d}}
+ return false;
+}
+function pseudo(s,r,c){
+ const b=s.b,p=b[r][c],w=isW(p),t=p.toLowerCase(),o=[];
+ const add=(y,x)=>{if(y<0||y>7||x<0||x>7)return false;const q=b[y][x];if(!q){o.push([r,c,y,x]);return true}if(isW(q)!==w)o.push([r,c,y,x]);return false};
+ if(t==='p'){const d=w?-1:1,s0=w?6:1;
+  if(b[r+d]&&!b[r+d][c]){o.push([r,c,r+d,c]);if(r===s0&&!b[r+2*d][c])o.push([r,c,r+2*d,c])}
+  for(const x of[-1,1]){const q=b[r+d]&&b[r+d][c+x];if(q&&isW(q)!==w)o.push([r,c,r+d,c+x]);else if(!q&&s.ep&&s.ep[0]===r+d&&s.ep[1]===c+x)o.push([r,c,r+d,c+x,'e'])}}
+ else if(t==='n')N8.forEach(([a,d])=>add(r+a,c+d));
+ else if(t==='k'){K8.forEach(([a,d])=>add(r+a,c+d));
+  const hr=w?7:0;
+  if(r===hr&&c===4&&!att(b,r,4,!w)){
+   if(s.cr[w?'K':'k']&&!b[hr][5]&&!b[hr][6]&&b[hr][7]===(w?'R':'r')&&!att(b,hr,5,!w)&&!att(b,hr,6,!w))o.push([r,c,hr,6,'K']);
+   if(s.cr[w?'Q':'q']&&!b[hr][3]&&!b[hr][2]&&!b[hr][1]&&b[hr][0]===(w?'R':'r')&&!att(b,hr,3,!w)&&!att(b,hr,2,!w))o.push([r,c,hr,2,'Q'])}}
+ else{const D=t==='r'?K8.slice(0,4):t==='b'?K8.slice(4):K8;D.forEach(([a,d])=>{let y=r+a,x=c+d;while(add(y,x)){y+=a;x+=d}})}
+ return o;
+}
+function ap(s,m){
+ const [r,c,y,x,f]=m,b=s.b.map(a=>[...a]),o=b[r][c],cap=b[y][x];let p=o;b[r][c]='';
+ if(f==='e')b[r][x]='';
+ if(f==='K'){b[y][5]=b[y][7];b[y][7]=''}
+ if(f==='Q'){b[y][3]=b[y][0];b[y][0]=''}
+ if(p==='P'&&y===0)p='Q';if(p==='p'&&y===7)p='q';
+ b[y][x]=p;const cr={...s.cr};
+ if(o==='K'){cr.K=0;cr.Q=0}if(o==='k'){cr.k=0;cr.q=0}
+ if((r===7&&c===0)||(y===7&&x===0))cr.Q=0;if((r===7&&c===7)||(y===7&&x===7))cr.K=0;
+ if((r===0&&c===0)||(y===0&&x===0))cr.q=0;if((r===0&&c===7)||(y===0&&x===7))cr.k=0;
+ return{b,w:!s.w,cr,ep:(o.toLowerCase()==='p'&&Math.abs(y-r)===2)?[(r+y)/2,c]:null,h:(o.toLowerCase()==='p'||cap||f==='e')?0:s.h+1};
+}
+function kp(b,w){const K=w?'K':'k';for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(b[r][c]===K)return[r,c];return[0,0]}
+function inCheck(b,w){const[r,c]=kp(b,w);return att(b,r,c,!w)}
+function legal(s){const o=[];for(let r=0;r<8;r++)for(let c=0;c<8;c++){const p=s.b[r][c];if(!p||isW(p)!==s.w)continue;for(const m of pseudo(s,r,c))if(!inCheck(ap(s,m).b,s.w))o.push(m)}return o}
+const PV={p:100,n:320,b:330,r:500,q:900,k:0};
+function ev(s){let v=0;for(let r=0;r<8;r++)for(let c=0;c<8;c++){const p=s.b[r][c];if(!p)continue;const t=p.toLowerCase(),w=isW(p),cen=3.5-Math.max(Math.abs(r-3.5),Math.abs(c-3.5));let x=PV[t]+(t==='p'?(w?6-r:r-1)*8+cen*4:t==='n'||t==='b'?cen*10:t==='q'?cen*2:0);v+=w?x:-x}return v}
+const cs=(s,m)=>s.b[m[2]][m[3]]?PV[s.b[m[2]][m[3]].toLowerCase()]*10-PV[s.b[m[0]][m[1]].toLowerCase()]:0;
+function nm(s,d,a,be){
+ if(!d)return ev(s)*(s.w?1:-1);const ms=legal(s);if(!ms.length)return inCheck(s.b,s.w)?-99999-d:0;
+ ms.sort((p,q)=>cs(s,q)-cs(s,p));let best=-1e9;
+ for(const m of ms){const v=-nm(ap(s,m),d-1,-be,-a);if(v>best)best=v;if(v>a)a=v;if(a>=be)break}return best;
+}
+const SQ=1.1,cp=(r,c)=>new THREE.Vector3((c-3.5)*SQ,0,(r-3.5)*SQ);
+function lab(t,px,pz){const m=new THREE.Mesh(new THREE.PlaneGeometry(.5,.5),new THREE.MeshBasicMaterial({map:tex((x2,w,h)=>{x2.fillStyle='#e8d9b0';x2.font='bold 150px sans-serif';x2.textAlign='center';x2.textBaseline='middle';x2.fillText(t,w/2,h/2)}),transparent:true}));m.rotation.x=-Math.PI/2;m.position.set(px,.02,pz);G.add(m)}
+function chStart(){
+ const lm=new THREE.MeshStandardMaterial({map:wood('#ecd7a8','#b58a4a'),roughness:.5}),dm=new THREE.MeshStandardMaterial({map:wood('#7b4a28','#3a1f0e'),roughness:.45});
+ const base=new THREE.Mesh(new THREE.BoxGeometry(10.2,.5,10.2),new THREE.MeshStandardMaterial({map:wood('#4a2a14','#24120a'),roughness:.4}));base.position.y=-.25;base.receiveShadow=true;G.add(base);
+ for(let r=0;r<8;r++)for(let c=0;c<8;c++){const q=new THREE.Mesh(new THREE.BoxGeometry(SQ,.08,SQ),(r+c)%2?dm:lm);q.position.copy(cp(r,c));q.receiveShadow=true;q.userData.pick=[r,c];G.add(q)}
+ for(let i=0;i<8;i++){lab('abcdefgh'[i],cp(0,i).x,4.75);lab(String(8-i),-4.75,cp(i,0).z)}
+ ch={b:['rnbqkbnr','pppppppp','........','........','........','........','PPPPPPPP','RNBQKBNR'].map(s=>[...s].map(x=>x==='.'?'':x)),w:true,cr:{K:1,Q:1,k:1,q:1},ep:null,h:0};
+ sel=null;lg=[];last=null;mvN=0;tm=[S.o.t*60000,S.o.t*60000];tl=performance.now();LG=legal(ch);
+ PG=new THREE.Group();HG=new THREE.Group();G.add(PG,HG);
+ cam.position.set(0,9.5,11);ctl.update();cur={click:chClick};S.cols=['#f3e9d2','#6b7385'];
+ drawPieces();drawHL();hud('White to move'+(S.o.t?' · clock starts after both sides move':''));
+ S.iv=setInterval(ckTick,100);
+}
+function drawPieces(){PG.clear();pm=Array.from({length:8},()=>Array(8).fill(null));for(let r=0;r<8;r++)for(let c=0;c<8;c++){const p=ch.b[r][c];if(!p)continue;const m=piece(p.toLowerCase(),isW(p));m.position.copy(cp(r,c));m.position.y=.04;m.userData.pick=[r,c];PG.add(m);pm[r][c]=m}}
+function drawHL(){
+ HG.clear();const disc=(r,c,col,rad,y,op)=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(rad,rad,.02,32),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:op}));m.position.copy(cp(r,c));m.position.y=y;m.userData.pick=[r,c];HG.add(m)};
+ if(last){disc(last[0],last[1],0xffd54a,.5,.06,.3);disc(last[2],last[3],0xffd54a,.5,.06,.42)}
+ if(inCheck(ch.b,ch.w)){const[kr,kc]=kp(ch.b,ch.w);disc(kr,kc,0xff2d2d,.5,.07,.6)}
+ if(sel)disc(sel[0],sel[1],0x00f2fe,.5,.07,.5);
+ lg.forEach(m=>{const cap=ch.b[m[2]][m[3]]||m[4]==='e';disc(m[2],m[3],cap?0xff4d4d:0x2ee66b,cap?.46:.17,.08,cap?.5:.9)});
+}
+function chClick([r,c]){
+ if(!canAct())return;const p=ch.b[r][c],m=lg.find(q=>q[2]===r&&q[3]===c);
+ if(sel&&m){play(m);return}
+ if(p&&isW(p)===ch.w){sel=[r,c];lg=LG.filter(q=>q[0]===r&&q[1]===c);snd(500,.05)}else{sel=null;lg=[]}
+ drawHL();
+}
+function chApply(m){
+ if(over)return;busy=true;const wasW=ch.w,from=pm[m[0]][m[1]],vic=pm[m[2]][m[3]]||(m[4]==='e'?pm[m[0]][m[3]]:null);
+ const rk=m[4]==='K'?pm[m[0]][7]:m[4]==='Q'?pm[m[0]][0]:null;
+ ch=ap(ch,m);S.turn=ch.w?0:1;mvN++;last=m;sel=null;lg=[];
+ if(S.o.t&&mvN>=2)tm[wasW?0:1]+=S.o.inc*1000;
+ snd(vic?260:380,.12,'triangle',.14,vic?120:300);
+ if(vic)anim(320,t=>vic.scale.setScalar(Math.max(.001,1-t)));
+ if(rk)mv3(rk,cp(m[0],m[4]==='K'?5:3).setY(.04),320,.3);
+ if(from)mv3(from,cp(m[2],m[3]).setY(.04),320,.55,chPost);else chPost();
+}
+function chPost(){
+ drawPieces();LG=legal(ch);const chk=inCheck(ch.b,ch.w);drawHL();
+ if(!LG.length){if(chk){finish(ch.w?1:0,`Checkmate! ${ch.w?'Black':'White'} wins`,Math.ceil(mvN/2))}else finish(-1,'Stalemate – draw');return}
+ if(ch.h>=100)return finish(-1,'Draw – 50-move rule');
+ const a=[];ch.b.forEach(r=>r.forEach(p=>p&&p.toLowerCase()!=='k'&&a.push(p.toLowerCase())));
+ if(a.length===0||(a.length===1&&(a[0]==='n'||a[0]==='b')))return finish(-1,'Draw – insufficient material');
+ hud(`${ch.w?'White':'Black'} to move${chk?' – CHECK!':''}`);cards();free();
+}
+function chAI(){
+ const ms=LG,d=S.diff;let best=ms[0],bv=-1e9;
+ if(d===1&&Math.random()<.35)best=ms[Math.floor(Math.random()*ms.length)];
+ else for(const m of ms){const v=-nm(ap(ch,m),d-1,-1e9,1e9)+Math.random()*(d===1?40:6);if(v>bv){bv=v;best=m}}
+ play(best);
+}
+const fmt=ms=>{ms=Math.max(0,ms);const s=ms/1000;return s<10?s.toFixed(1):Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')};
+function chEx(){return S.o.t?tm.map(fmt):null}
+function ckTick(){
+ const n=performance.now(),dt=n-tl;tl=n;if(!S||over||S.paused||!S.o.t||mvN<2)return;
+ const i=ch.w?0:1;tm[i]-=dt;if(tm[i]<=0){tm[i]=0;cards();finish(i?0:1,`${i?'Black':'White'} ran out of time`);return}cards();
+}
+function pauseUI(){const b=$('pbtn');if(b)b.textContent=S.paused?'▶ Resume':'⏸ Pause';if(S.paused)hud('⏸ Game paused');else if(!over)hud(`${ch.w?'White':'Black'} to move`)}
+function togPause(){if(over)return;S.paused=!S.paused;if(S.online)NET.send({k:'ctl',room:S.room,t:'pause',v:S.paused});pauseUI();if(!S.paused)kick()}
+function flipView(){cam.position.x*=-1;cam.position.z*=-1;ctl.update()}
 
-                <!-- Board Theme Selector -->
-                <div class="flex items-center gap-1.5">
-                    <span class="text-slate-400 font-semibold text-[11px]">Board Theme:</span>
-                    <select id="boardThemeSelect" onchange="setBoardTheme(this.value)" class="bg-slate-900 border border-slate-700 text-cyan-400 font-bold px-2 py-1 rounded-lg text-[11px] focus:outline-none">
-                        <option value="theme-slate" selected>Classic Slate</option>
-                        <option value="theme-emerald">Emerald Green</option>
-                        <option value="theme-wood">Warm Wood</option>
-                        <option value="theme-neon">Neon Cyber</option>
-                        <option value="theme-midnight">Midnight Dark</option>
-                    </select>
-                </div>
-            </div>
+/* ================= TIC-TAC-TOE ================= */
+let TB,TN,TK_,TM,TC;
+const tpos=i=>new THREE.Vector3((i%TN-(TN-1)/2)*TC,0,(Math.floor(i/TN)-(TN-1)/2)*TC);
+function tline(b,n,k){for(let y=0;y<n;y++)for(let x=0;x<n;x++){const p=b[y*n+x];if(!p)continue;for(const[dx,dy]of[[1,0],[0,1],[1,1],[1,-1]]){const c=[y*n+x];for(let i=1;i<k;i++){const X=x+dx*i,Y=y+dy*i;if(X<0||X>=n||Y<0||Y>=n||b[Y*n+X]!==p)break;c.push(Y*n+X)}if(c.length===k)return{p,c}}}return null}
+function th(b,me){let s=0;const n=TN,k=TK_;for(let y=0;y<n;y++)for(let x=0;x<n;x++)for(const[dx,dy]of[[1,0],[0,1],[1,1],[1,-1]]){let a=0,o=0,ok=true;for(let i=0;i<k;i++){const X=x+dx*i,Y=y+dy*i;if(X<0||X>=n||Y<0||Y>=n){ok=false;break}const v=b[Y*n+X];if(v===me)a++;else if(v)o++}if(ok){if(!o)s+=a*a;else if(!a)s-=o*o}}return s}
+function tmm(b,t,me,d,a,be){
+ const w=tline(b,TN,TK_);if(w){const win=w.p===me;return((win!==TM)?1:-1)*(100+d)}
+ if(!b.includes(''))return 0;if(!d)return th(b,me);
+ let best=t===me?-1e9:1e9;
+ for(let i=0;i<b.length;i++){if(b[i])continue;b[i]=t;const s=tmm(b,t==='X'?'O':'X',me,d-1,a,be);b[i]='';
+  if(t===me){best=Math.max(best,s);a=Math.max(a,s)}else{best=Math.min(best,s);be=Math.min(be,s)}if(be<=a)break}
+ return best;
+}
+function ttStart(){
+ const v=S.o.v;TN=v==='big'?5:3;TK_=v==='big'?4:3;TM=v==='mis';TB=Array(TN*TN).fill('');TC=7.6/TN;
+ const base=new THREE.Mesh(new THREE.BoxGeometry(8.4,.5,8.4),mat(0x0d1424,.25,.7));base.position.y=-.25;base.receiveShadow=true;G.add(base);
+ for(let i=0;i<TN*TN;i++){const c=new THREE.Mesh(new THREE.BoxGeometry(TC*.92,.14,TC*.92),new THREE.MeshPhysicalMaterial({color:0x16355c,roughness:.12,metalness:.2,transparent:true,opacity:.88,clearcoat:1}));c.position.copy(tpos(i));c.position.y=.02;c.receiveShadow=true;c.userData.pick=i;G.add(c)}
+ const nm_=new THREE.MeshStandardMaterial({color:0x00f2fe,emissive:0x00f2fe,emissiveIntensity:1.6});
+ for(let j=1;j<TN;j++){const p=(j-TN/2)*TC;const a=new THREE.Mesh(new THREE.BoxGeometry(7.6,.08,.07),nm_);a.position.set(0,.1,p);const b=new THREE.Mesh(new THREE.BoxGeometry(.07,.08,7.6),nm_);b.position.set(p,.1,0);G.add(a,b)}
+ cam.position.set(0,9.5,7.5);ctl.update();cur={click:ttClick};S.cols=['#ff3d8b','#00f2fe'];
+ hud(({classic:'Classic',big:'Big 5×5 – get 4 in a row',mis:'Misère – whoever makes 3 loses'})[S.o.v]+' · X to move');
+}
+function ttClick(i){if(!canAct()||TB[i])return;play({i:i})}
+function ttApply(m){
+ if(over||TB[m.i])return;busy=true;const i=m.i,mk=S.turn?'O':'X';TB[i]=mk;snd(mk==='X'?520:380,.12,'triangle',.14);
+ let o;const sc=TC/2.4;
+ if(mk==='X'){o=new THREE.Group();const xm=new THREE.MeshStandardMaterial({color:0xff3d8b,emissive:0xff1f75,emissiveIntensity:.7,roughness:.25,metalness:.6});[Math.PI/4,-Math.PI/4].forEach(a=>{const b=new THREE.Mesh(new THREE.BoxGeometry(1.7*sc,.4*sc,.34*sc),xm);b.rotation.y=a;o.add(b)})}
+ else{o=new THREE.Mesh(new THREE.TorusGeometry(.7*sc,.2*sc,20,40),new THREE.MeshStandardMaterial({color:0x00f2fe,emissive:0x00b8d9,emissiveIntensity:.7,roughness:.25,metalness:.6}));o.rotation.x=Math.PI/2}
+ o.traverse(x=>x.castShadow=true);const p=tpos(i);o.position.set(p.x,4,p.z);G.add(o);
+ const to=new THREE.Vector3(p.x,.28*sc+.1,p.z),f=o.position.clone();
+ anim(480,t=>{o.position.lerpVectors(f,to,bo(t))},()=>{
+  const w=tline(TB,TN,TK_);
+  if(w){const a=tpos(w.c[0]),b=tpos(w.c[w.c.length-1]),d=b.clone().sub(a),bar=new THREE.Mesh(new THREE.BoxGeometry(d.length()+TC*.7,.12,.14),new THREE.MeshBasicMaterial({color:0xffffff}));bar.position.copy(a).addScaledVector(d,.5);bar.position.y=.75;bar.rotation.y=-Math.atan2(d.z,d.x);G.add(bar);boom(new THREE.Vector3(0,1,0));
+   const winner=TM?(w.p==='X'?1:0):(w.p==='X'?0:1);finish(winner,TM?`${w.p} made ${TK_} in a row and loses!`:`${w.p} wins!`,TB.filter(x=>x===(winner?'O':'X')).length);return}
+  if(!TB.includes('')){finish(-1,'Draw!');return}
+  S.turn=1-S.turn;hud((S.turn?'O':'X')+' to move');cards();free();
+ });
+}
+function ttAI(){
+ const me=S.turn?'O':'X',e=[];TB.forEach((v,i)=>!v&&e.push(i));let pick;
+ const big=TN>3,d=big?[0,1,2,3][S.diff]:[0,2,4,9][S.diff],rnd=[0,.6,.2,0][S.diff];
+ if(Math.random()<rnd)pick=e[Math.floor(Math.random()*e.length)];
+ else{let bs=-1e9,bl=[];for(const i of e){TB[i]=me;const s=tmm(TB,me==='X'?'O':'X',me,d-1,-1e9,1e9);TB[i]='';if(s>bs){bs=s;bl=[i]}else if(s===bs)bl.push(i)}pick=bl[Math.floor(Math.random()*bl.length)]}
+ play({i:pick});
+}
 
-            <!-- Right Control: PROMINENT START / RESET BUTTON -->
-            <button id="startGameBtn" onclick="startCurrentGame()" class="px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-cyan-500/20 flex items-center gap-1.5">
-                <i class="fa-solid fa-play"></i>
-                <span>Start Game</span>
-            </button>
-        </div>
+/* ================= CONNECT FOUR ================= */
+let CF,CHt,CM,GH;
+const WIN=[];for(let r=0;r<6;r++)for(let c=0;c<7;c++)for(const[dx,dy]of[[1,0],[0,1],[1,1],[1,-1]]){const w=[];for(let i=0;i<4;i++){const x=c+dx*i,y=r+dy*i;if(x<0||x>6||y<0||y>5)break;w.push(y*7+x)}if(w.length===4)WIN.push(w)}
+const wcells=F=>{for(const w of WIN){const p=F[w[0]];if(p&&p===F[w[1]]&&p===F[w[2]]&&p===F[w[3]])return w}return null};
+function c4e(F,pl){let s=0;const o=3-pl;for(const w of WIN){let a=0,b=0;for(const i of w){const v=F[i];if(v===pl)a++;else if(v)b++}if(!b)s+=[0,1,6,40,0][a];else if(!a)s-=[0,1,6,45,0][b]}for(let r=0;r<6;r++){if(F[r*7+3]===pl)s+=3;else if(F[r*7+3]===o)s-=3}return s}
+function nega(pl,d,a,b){
+ if(wcells(CF))return-(1e5+d);if(CHt.every(h=>h>=6))return 0;if(!d)return c4e(CF,pl);
+ let best=-1e9;
+ for(const c of[3,2,4,1,5,0,6]){if(CHt[c]>=6)continue;const r=CHt[c];CF[r*7+c]=pl;CHt[c]++;const v=-nega(3-pl,d-1,-b,-a);CHt[c]--;CF[r*7+c]=0;if(v>best)best=v;if(v>a)a=v;if(a>=b)break}
+ return best;
+}
+const c4x=c=>(c-3)*1.05,c4y=r=>.825+r*1.05;
+function c4Disc(col){const g=new THREE.Group(),m=new THREE.MeshPhysicalMaterial({color:col,roughness:.25,clearcoat:1}),m2=new THREE.MeshPhysicalMaterial({color:new THREE.Color(col).multiplyScalar(.7),roughness:.3,clearcoat:1});
+ const a=new THREE.Mesh(new THREE.CylinderGeometry(.41,.41,.3,40),m),b=new THREE.Mesh(new THREE.CylinderGeometry(.27,.27,.33,32),m2);a.rotation.x=b.rotation.x=Math.PI/2;g.add(a,b);g.traverse(o=>o.castShadow=true);return g}
+const C4C=[0xe11d2e,0xfacc15];
+function c4Start(){
+ CF=Array(42).fill(0);CHt=Array(7).fill(0);CM=[0,0];
+ const base=new THREE.Mesh(new THREE.BoxGeometry(8.8,.4,1.8),mat(0x101828,.3,.6));base.position.y=-.2;base.receiveShadow=true;G.add(base);
+ const sh=new THREE.Shape();sh.moveTo(-3.975,0);sh.lineTo(3.975,0);sh.lineTo(3.975,6.9);sh.lineTo(-3.975,6.9);sh.lineTo(-3.975,0);
+ for(let r=0;r<6;r++)for(let c=0;c<7;c++){const h=new THREE.Path();h.absarc(c4x(c),c4y(r),.46,0,Math.PI*2,true);sh.holes.push(h)}
+ const geo=new THREE.ExtrudeGeometry(sh,{depth:.5,bevelEnabled:true,bevelSize:.03,bevelThickness:.05,curveSegments:32});geo.translate(0,0,-.25);
+ const bm=new THREE.Mesh(geo,new THREE.MeshPhysicalMaterial({color:0x1d4ed8,roughness:.22,clearcoat:1}));bm.castShadow=true;bm.receiveShadow=true;G.add(bm);
+ for(let c=0;c<7;c++){const p=new THREE.Mesh(new THREE.PlaneGeometry(1.05,6.9),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));p.position.set(c4x(c),3.45,.7);p.userData.pick=c;G.add(p)}
+ GH=c4Disc(C4C[0]);GH.position.set(0,7.9,0);GH.visible=false;GH.traverse(o=>{if(o.material){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.55}});G.add(GH);
+ cam.position.set(0,5.2,12.5);ctl.target.set(0,3.4,0);ctl.update();S.cols=['#e11d2e','#facc15'];
+ cur={click:c=>{if(typeof c==='number')c4Click(c)},hover:c=>{const ok=typeof c==='number'&&canAct();GH.visible=ok;if(ok)GH.position.x=c4x(c)}};
+ hud('Red to move – click a column');
+}
+function c4Click(c){if(canAct()&&CHt[c]<6)play({c:c})}
+function c4Apply(m){
+ const c=m.c;if(over||CHt[c]>=6)return;busy=true;GH.visible=false;const r=CHt[c]++,pl=S.turn+1;CF[r*7+c]=pl;CM[S.turn]++;
+ const d=c4Disc(C4C[S.turn]);d.position.set(c4x(c),8.6,0);G.add(d);d.userData.disc=[r,c];CD_.push(d);
+ anim(520+(5-r)*40,t=>{d.position.y=8.6+(c4y(r)-8.6)*bo(t)},()=>{
+  snd(220,.1,'triangle',.15);const w=wcells(CF);
+  if(w){w.forEach(i=>{const dd=CD_.find(x=>x.userData.disc[0]===(i/7|0)&&x.userData.disc[1]===i%7);if(dd)dd.traverse(o=>{if(o.material&&o.material.emissive){o.material.emissive.setHex(0xffffff);o.material.emissiveIntensity=.5}})});boom(new THREE.Vector3(0,5,1));finish(S.turn,(S.turn?'Yellow':'Red')+' connects four!',CM[S.turn]);return}
+  if(CHt.every(h=>h>=6)){finish(-1,'Draw – the board is full');return}
+  S.turn=1-S.turn;hud((S.turn?'Yellow':'Red')+' to move');GH.traverse(o=>{if(o.material)o.material.color.setHex(C4C[S.turn])});cards();free();
+ });
+}
+let CD_=[];
+function c4AI(){
+ const d=[0,2,4,6][S.diff],cols=[3,2,4,1,5,0,6].filter(c=>CHt[c]<6),pl=S.turn+1;let best=cols[0],bv=-1e9;
+ if(S.diff===1&&Math.random()<.25)best=cols[Math.floor(Math.random()*cols.length)];
+ else for(const c of cols){const r=CHt[c];CF[r*7+c]=pl;CHt[c]++;const v=wcells(CF)?1e6:-nega(3-pl,d-1,-1e9,1e9);CHt[c]--;CF[r*7+c]=0;const t=v+Math.random()*(S.diff===1?3:.5);if(t>bv){bv=t;best=c}}
+ play({c:best});
+}
 
-        <!-- 1-Page Game Stage Canvas Container -->
-        <div class="flex-1 flex items-center justify-center p-3 overflow-hidden relative theme-slate" id="gameCanvasStage">
-            <!-- Active Game UI Injected Here -->
-        </div>
-    </div>
+/* ================= REVERSI ================= */
+let RB,RD,RL,RH;
+const DIRS=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+const RW=[100,-20,10,5,5,10,-20,100,-20,-50,-2,-2,-2,-2,-50,-20,10,-2,-1,-1,-1,-1,-2,10,5,-2,-1,-1,-1,-1,-2,5,5,-2,-1,-1,-1,-1,-2,5,10,-2,-1,-1,-1,-1,-2,10,-20,-50,-2,-2,-2,-2,-50,-20,100,-20,10,5,5,10,-20,100];
+function rflips(b,i,p){if(b[i])return[];const x=i%8,y=(i/8)|0,o=3-p,res=[];for(const[dx,dy]of DIRS){let X=x+dx,Y=y+dy;const t=[];while(X>=0&&X<8&&Y>=0&&Y<8&&b[Y*8+X]===o){t.push(Y*8+X);X+=dx;Y+=dy}if(t.length&&X>=0&&X<8&&Y>=0&&Y<8&&b[Y*8+X]===p)res.push(...t)}return res}
+function rmoves(b,p){const m=[];for(let i=0;i<64;i++)if(!b[i]&&rflips(b,i,p).length)m.push(i);return m}
 
-    <!-- Pause Modal -->
-    <div id="pauseModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl">
-            <div class="w-12 h-12 bg-cyan-500/10 text-cyan-400 rounded-2xl flex items-center justify-center text-xl mx-auto mb-3 border border-cyan-500/20">
-                <i class="fa-solid fa-pause"></i>
-            </div>
-            <h3 class="text-lg font-bold text-white mb-1">Game Paused</h3>
-            <p class="text-xs text-slate-400 mb-5">Take a break or resume playing.</p>
-            <div class="space-y-2.5">
-                <button id="resumeBtn" class="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl text-xs">Resume Game</button>
-                <button id="restartInPauseBtn" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl text-xs border border-slate-700">Restart Game</button>
-                <button id="quitInPauseBtn" class="w-full py-2.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 font-semibold rounded-xl text-xs border border-rose-900/50">Exit Game</button>
-            </div>
-        </div>
-    </div>
+const rx=i=>(i%8-3.5)*1.05,rz=i=>((i>>3)-3.5)*1.05;
+function rDisc(pl){const m=new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,.14,40),[mat(0x8a8a8a,.3,.5),mat(0xf2f2ee,.25,.1),mat(0x151a24,.25,.1)]);m.castShadow=true;m.rotation.x=pl===2?0:Math.PI;return m}
+function rClr(){RL.forEach(h=>G.remove(h));RL=[]}
+function rHint(){rClr();if(over||!S||!isMine(S.turn))return;for(const i of rmoves(RB,S.turn+1)){const h=new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,.04,20),new THREE.MeshBasicMaterial({color:0xffe066,transparent:true,opacity:.75}));h.position.set(rx(i),.1,rz(i));h.userData.pick=i;G.add(h);RL.push(h)}}
+function rStart(){
+ RB=Array(64).fill(0);RB[27]=2;RB[28]=1;RB[35]=1;RB[36]=2;RD=Array(64).fill(null);RL=[];S.cols=['#1f2937','#f1f5f9'];
+ const fr=new THREE.Mesh(new THREE.BoxGeometry(9.8,.4,9.8),mat(0x3b2412,.5,.2));fr.position.y=-.2;fr.receiveShadow=true;G.add(fr);
+ for(let i=0;i<64;i++){const c=new THREE.Mesh(new THREE.BoxGeometry(1.03,.06,1.03),mat((i%8+(i>>3))%2?0x1b6b43:0x187a4a,.6,.1));c.position.set(rx(i),.03,rz(i));c.receiveShadow=true;c.userData.pick=i;G.add(c)}
+ [27,28,35,36].forEach(i=>{const d=rDisc(RB[i]);d.position.set(rx(i),.12,rz(i));G.add(d);RD[i]=d});
+ cam.position.set(0,9.5,7.5);ctl.target.set(0,0,0);cur={click:i=>{if(typeof i==='number')rClick(i)}};
+ hud(pn(0)+' (Black) to move');rHint();
+}
+function rClick(i){if(canAct()&&rflips(RB,i,S.turn+1).length)play({i:i})}
+function rApply(m){
+ const pl=S.turn+1,fl=rflips(RB,m.i,pl);if(over||!fl.length)return;busy=true;rClr();
+ RB[m.i]=pl;fl.forEach(j=>RB[j]=pl);const d=rDisc(pl);d.position.set(rx(m.i),3,rz(m.i));G.add(d);RD[m.i]=d;
+ anim(380,t=>{d.position.y=3+(.12-3)*bo(t)},()=>{snd(260,.08,'triangle',.14);
+  fl.forEach((j,k)=>later(k*70,()=>{const o=RD[j];if(!o)return;const to=pl===2?0:Math.PI,f=o.rotation.x;snd(340+k*30,.06,'sine',.07);anim(420,t=>{o.rotation.x=f+(to-f)*ez(t);o.position.y=.12+Math.sin(Math.PI*t)*.7},()=>{o.position.y=.12;o.rotation.x=to})}));
+  later(fl.length*70+520,rNext)});
+}
+function rCount(){const c=[0,0];RB.forEach(v=>v&&c[v-1]++);return c}
+function rNext(){
+ if(over||!S)return;const cnt=rCount(),pl=S.turn+1,op=3-pl;
+ if(rmoves(RB,op).length)S.turn=op-1;
+ else if(rmoves(RB,pl).length)toast(S.seats[op-1].n+' has no legal move – passes');
+ else{const w=cnt[0]===cnt[1]?-1:cnt[0]>cnt[1]?0:1;boom(new THREE.Vector3(0,1,0));
+  if(w<0)finish(-1,`Draw ${cnt[0]}–${cnt[1]}`);else finish(w,`${S.seats[w].n} wins ${cnt[w]}–${cnt[1-w]}`,cnt[w]);return}
+ hud(`${pn(S.turn)} (${S.turn?'White':'Black'}) to move · ⚫${cnt[0]}  ⚪${cnt[1]}`);cards();rHint();free();
+}
+function rEx(){return rCount()}
+function reval(b,p){let s=0;for(let i=0;i<64;i++)if(b[i])s+=RW[i]*(b[i]===p?1:-1);return s+4*(rmoves(b,p).length-rmoves(b,3-p).length)}
+function rneg(b,p,d,a,be){
+ const mv=rmoves(b,p);
+ if(!mv.length){const o=rmoves(b,3-p);if(!o.length){let s=0;b.forEach(v=>{if(v)s+=v===p?1:-1});return s*1000}if(d<=0)return reval(b,p);return -rneg(b,3-p,d-1,-be,-a)}
+ if(d<=0)return reval(b,p);let best=-1e9;
+ for(const i of mv){const n=b.slice();for(const j of rflips(b,i,p))n[j]=p;n[i]=p;const v=-rneg(n,3-p,d-1,-be,-a);if(v>best)best=v;if(v>a)a=v;if(a>=be)break}
+ return best;
+}
+function rAI(){
+ const pl=S.turn+1,mv=rmoves(RB,pl);if(!mv.length)return;let pick=mv[0];
+ if(S.diff===1)pick=mv[Math.floor(Math.random()*mv.length)];
+ else{let bs=-1e9;for(const i of mv){const n=RB.slice();for(const j of rflips(RB,i,pl))n[j]=pl;n[i]=pl;const s=S.diff===2?reval(n,pl)+Math.random()*4:-rneg(n,3-pl,2,-1e9,1e9)+Math.random()*.5;if(s>bs){bs=s;pick=i}}}
+ play({i:pick});
+}
 
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl">
-            <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
-                <h3 class="text-base font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gear text-cyan-400"></i> Settings</h3>
-                <button id="closeSettingsBtn" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="text-xs font-semibold text-slate-400 block mb-2">Master Audio Volume</label>
-                    <input type="range" id="volumeSlider" min="0" max="100" value="80" class="w-full accent-cyan-400 bg-slate-800 rounded-lg cursor-pointer">
-                </div>
-                <div class="flex items-center justify-between pt-2">
-                    <span class="text-xs text-slate-300 font-medium">Sound Effects</span>
-                    <button id="sfxToggleBtn" class="px-3 py-1 bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 rounded-lg text-xs font-bold">ENABLED</button>
-                </div>
-            </div>
-        </div>
-    </div>
+/* ================= SNAKES & LADDERS ================= */
+const SL_L={2:38,7:14,8:31,15:26,21:42,28:84,36:44,51:67,71:91,78:98,87:94},SL_S={16:6,46:25,49:11,62:19,64:60,74:53,89:68,92:88,95:75,99:80};
+const SCS=.9,SC4=['#ef4444','#3b82f6','#22c55e','#fbbf24'],SN4=['Red','Blue','Green','Yellow'];
+let SP=[],SM=[],SD=null;
+const sqc=n=>{const r=Math.floor((n-1)/10);return[r%2?9-(n-1)%10:(n-1)%10,r]};
+function sqp(n,k){
+ if(n<1)return new THREE.Vector3(-3.4+k*.8,.21,4.85);
+ const[c,r]=sqc(n),o=[[-.2,-.2],[.2,-.2],[-.2,.2],[.2,.2]][k];
+ return new THREE.Vector3((c-4.5)*SCS+.45*SCS*0+o[0]*SCS*.9+.0,.21,(4.5-r)*SCS+o[1]*SCS*.9);
+}
+function sBoardTex(){return tex((x,w,h)=>{
+ const cs=w/10,cen=n=>{const[c,r]=sqc(n);return[(c+.5)*cs,(9-r+.5)*cs]};
+ for(let n=1;n<=100;n++){const[c,r]=sqc(n),px=c*cs,py=(9-r)*cs;x.fillStyle=(c+r)%2?'#f5e9c8':'#e6cf9a';x.fillRect(px,py,cs,cs);x.strokeStyle='rgba(90,60,20,.35)';x.strokeRect(px,py,cs,cs);x.fillStyle='rgba(60,40,10,.75)';x.font='bold 22px sans-serif';x.textAlign='left';x.fillText(n,px+8,py+24)}
+ x.lineCap='round';
+ for(const a in SL_L){const[ax,ay]=cen(+a),[bx,by]=cen(SL_L[a]),dx=bx-ax,dy=by-ay,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L,nx=-uy*13,ny=ux*13;
+  x.strokeStyle='#7a4a1f';x.lineWidth=8;[[nx,ny],[-nx,-ny]].forEach(([ox,oy])=>{x.beginPath();x.moveTo(ax+ox,ay+oy);x.lineTo(bx+ox,by+oy);x.stroke()});
+  x.strokeStyle='#b9772f';x.lineWidth=6;for(let d=24;d<L-10;d+=28){x.beginPath();x.moveTo(ax+ux*d+nx,ay+uy*d+ny);x.lineTo(ax+ux*d-nx,ay+uy*d-ny);x.stroke()}}
+ let q=0;for(const a in SL_S){const[hx,hy]=cen(+a),[tx,ty]=cen(SL_S[a]),mx=(hx+tx)/2,my=(hy+ty)/2,dx=tx-hx,dy=ty-hy,L=Math.hypot(dx,dy)||1,sg=q++%2?1:-1,cx=mx-dy/L*55*sg,cy=my+dx/L*55*sg,col=['#16a34a','#ea580c','#7c3aed','#0891b2','#be123c'][q%5];
+  const path=()=>{x.beginPath();x.moveTo(hx,hy);x.quadraticCurveTo(cx,cy,tx,ty)};
+  x.setLineDash([]);x.strokeStyle='#10261a';x.lineWidth=20;path();x.stroke();x.strokeStyle=col;x.lineWidth=14;path();x.stroke();
+  x.strokeStyle='rgba(253,224,71,.85)';x.lineWidth=6;x.setLineDash([8,16]);path();x.stroke();x.setLineDash([]);
+  x.fillStyle=col;x.strokeStyle='#10261a';x.lineWidth=3;x.beginPath();x.arc(hx,hy,15,0,7);x.fill();x.stroke();x.fillStyle='#fff';x.beginPath();x.arc(hx-5,hy-4,4,0,7);x.arc(hx+5,hy-4,4,0,7);x.fill();x.fillStyle='#000';x.beginPath();x.arc(hx-5,hy-4,1.8,0,7);x.arc(hx+5,hy-4,1.8,0,7);x.fill()}
+ },1000,1000)}
+function sStart(){
+ const n=S.seats.length;S.cols=SC4.slice(0,n);SP=Array(n).fill(0);SM=[];rolls=[0,0,0,0];
+ const fr=new THREE.Mesh(new THREE.BoxGeometry(13,.3,10.4),mat(0x3b2412,.5,.2));fr.position.set(1.4,0,0);fr.receiveShadow=true;G.add(fr);
+ const side=mat(0x2a1a0c,.6,.1),top=new THREE.MeshStandardMaterial({map:sBoardTex(),roughness:.6}),bd=new THREE.Mesh(new THREE.BoxGeometry(9,.06,9),[side,side,top,side,side,side]);bd.position.y=.18;bd.receiveShadow=true;G.add(bd);
+ SD=mkDice(1.1);SD.position.set(6.5,.7,0);SD.userData.pick='dice';G.add(SD);
+ for(let i=0;i<n;i++){const p=mkPawn(SC4[i],.55);p.position.copy(sqp(0,i));SM.push(p);G.add(p)}
+ cam.position.set(1.6,11,9.5);ctl.target.set(1.4,0,.2);cur={click:p=>{if(p==='dice')humanRoll()}};
+ hud(pn(0)+' ('+SN4[0]+') – roll the dice');
+}
+function sApply(m){
+ if(over||m.r==null)return;busy=true;const s=S.turn,r=m.r;rolls[s]++;
+ diceRoll(SD,r,()=>{const to=SP[s]+r;
+  if(to>100){S._m=`${pn(s)} rolled ${r} – needs the exact number`;return sEnd(s,r)}
+  S._m=`${pn(s)} rolled ${r}`;const steps=[];for(let q=SP[s]+1;q<=to;q++)steps.push(q);
+  const go=()=>{if(!steps.length)return sLand(s,r);const q=steps.shift();mv3(SM[s],sqp(q,s),190,.35,()=>{SP[s]=q;snd(300+q*3,.06,'triangle',.08);go()})};go()});
+}
+function sLand(s,r){
+ const p=SP[s],up=SL_L[p]!=null,t2=up?SL_L[p]:SL_S[p];
+ if(t2==null)return sEnd(s,r);
+ S._m+=up?' – climbs a ladder! 🪜':' – bitten by a snake! 🐍';hud(S._m);snd(up?700:160,.5,'sawtooth',.1,up?1200:60);
+ mv3(SM[s],sqp(t2,s),up?1000:900,up?.8:0,()=>{SP[s]=t2;sEnd(s,r)});
+}
+function sEnd(s,r){
+ if(SP[s]===100){boom(SM[s].position.clone());finish(s,`${pn(s)} reaches square 100!`,rolls[s]);return}
+ if(r!==6)S.turn=(S.turn+1)%S.seats.length;else S._m+=' – rolls again (6)';
+ cards();hud(`${S._m||''} · ${pn(S.turn)} to roll`);free();
+}
+function sAI(){play({r:1+Math.floor(Math.random()*6)})}
+function sEx(){return SP.map(v=>'📍'+v)}
 
-    <!-- End Game Result Modal -->
-    <div id="resultModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl">
-            <div id="resultIconBox" class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3"></div>
-            <h3 id="resultTitle" class="text-xl font-bold text-white mb-1">Victory!</h3>
-            <p id="resultDesc" class="text-slate-400 text-xs mb-5">Great solution.</p>
-            <button id="resultPlayAgainBtn" class="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl text-xs">Play Again</button>
-        </div>
-    </div>
+/* ================= LUDO ================= */
+const LCS=.6,LCOL=['#e53935','#43a047','#fdd835','#1e88e5'],LNAME=['Red','Green','Yellow','Blue'];
+const LTR=(()=>{const a=[],add=(x,y)=>a.push([x,y]);
+ for(let x=1;x<=5;x++)add(x,6);for(let y=5;y>=0;y--)add(6,y);add(7,0);add(8,0);for(let y=1;y<=5;y++)add(8,y);
+ for(let x=9;x<=14;x++)add(x,6);add(14,7);add(14,8);for(let x=13;x>=9;x--)add(x,8);
+ for(let y=9;y<=14;y++)add(8,y);add(7,14);add(6,14);for(let y=13;y>=9;y--)add(6,y);
+ for(let x=5;x>=0;x--)add(x,8);add(0,7);add(0,6);return a})();
+const LS=[39,0,13,26],LSAFE=[0,8,13,21,26,34,39,47];
+const LHC=[[[7,13],[7,12],[7,11],[7,10],[7,9]],[[1,7],[2,7],[3,7],[4,7],[5,7]],[[7,1],[7,2],[7,3],[7,4],[7,5]],[[13,7],[12,7],[11,7],[10,7],[9,7]]];
+const LYD=[[2.5,11.5],[2.5,2.5],[11.5,2.5],[11.5,11.5]],LFN=[[7,8.2],[5.8,7],[7,5.8],[8.2,7]];
+let LP=[],LD=null,LLEG=[],L6=0,LR=1,ph='roll';
+const LCI=i=>S.seats.length===2?[0,2][i]:i;
+const lc=(x,y,h)=>new THREE.Vector3((x-7)*LCS,h==null?.22:h,(y-7)*LCS);
+function lCell(p){
+ const c=LCI(p.s);
+ if(p.rel<0){const q=LYD[c],o=[[-1,-1],[1,-1],[-1,1],[1,1]][p.k];return[q[0]+o[0]*1.1,q[1]+o[1]*1.1]}
+ if(p.rel<=50)return LTR[(LS[c]+p.rel)%52];
+ if(p.rel<=55)return LHC[c][p.rel-51];
+ const f=LFN[c],sp=(p.k-1.5)*.2;return c%2===0?[f[0]+sp,f[1]]:[f[0],f[1]+sp];
+}
+function lLayout(){
+ const g={};LP.forEach(p=>{if(p.rel>=0&&p.rel<=55){const[x,y]=lCell(p),k=x+','+y;(g[k]=g[k]||[]).push(p)}});
+ LP.forEach(p=>{const[x,y]=lCell(p),l=p.rel>=0&&p.rel<=55?g[x+','+y]:null,j=l?l.indexOf(p):0,n=l?l.length:1,ox=n>1?(j%2?.1:-.1):0,oz=n>1?(j>1?.1:-.1):0;p.m.position.set((x-7)*LCS+ox,.22,(y-7)*LCS+oz)});
+}
+function lBoardTex(){return tex((x,w,h)=>{
+ const cs=w/15;x.fillStyle='#f8f1dc';x.fillRect(0,0,w,h);
+ const Y=[[0,9,3],[0,0,1],[9,0,2],[9,9,0]];
+ for(const[cx,cy,c]of Y){x.fillStyle=LCOL[c];x.fillRect(cx*cs,cy*cs,6*cs,6*cs);x.fillStyle='#fff';x.fillRect((cx+1)*cs,(cy+1)*cs,4*cs,4*cs);x.fillStyle=LCOL[c];[[1.5,1.5],[1.5,3.5]].length;
+  [[2.5-1.1,2.5-1.1],[2.5+1.1,2.5-1.1],[2.5-1.1,2.5+1.1],[2.5+1.1,2.5+1.1]].forEach(([a,b])=>{x.beginPath();x.arc((cx+a+.5)*cs,(cy+b+.5)*cs,.5*cs,0,7);x.fill()})}
+ x.strokeStyle='#8a7a55';x.lineWidth=2;
+ LTR.forEach(([a,b],i)=>{x.fillStyle='#fff';x.fillRect(a*cs,b*cs,cs,cs);x.strokeRect(a*cs,b*cs,cs,cs)});
+ for(let c=0;c<4;c++){x.fillStyle=LCOL[c];const s=LTR[LS[c]];x.fillRect(s[0]*cs,s[1]*cs,cs,cs);x.strokeRect(s[0]*cs,s[1]*cs,cs,cs);LHC[c].forEach(([a,b])=>{x.fillRect(a*cs,b*cs,cs,cs);x.strokeRect(a*cs,b*cs,cs,cs)})}
+ x.font='bold '+(cs*.6)+'px sans-serif';x.textAlign='center';x.textBaseline='middle';
+ LSAFE.forEach(i=>{const[a,b]=LTR[i];x.fillStyle=LS.includes(i)?'#fff':'#9a8a60';x.fillText('★',(a+.5)*cs,(b+.55)*cs)});
+ const tri=(c,p)=>{x.fillStyle=LCOL[c];x.beginPath();x.moveTo(p[0]*cs,p[1]*cs);x.lineTo(p[2]*cs,p[3]*cs);x.lineTo(p[4]*cs,p[5]*cs);x.closePath();x.fill();x.stroke()};
+ tri(1,[6,6,7.5,7.5,6,9]);tri(2,[6,6,9,6,7.5,7.5]);tri(3,[9,6,9,9,7.5,7.5]);tri(0,[6,9,9,9,7.5,7.5]);
+ },1020,1020)}
+function lStart(){
+ const n=S.seats.length;S.cols=S.seats.map((_,i)=>LCOL[LCI(i)]);rolls=[0,0,0,0];LP=[];LLEG=[];L6=0;ph='roll';
+ const fr=new THREE.Mesh(new THREE.BoxGeometry(14,.3,9.8),mat(0x3b2412,.5,.2));fr.position.set(2.2,0,0);fr.receiveShadow=true;G.add(fr);
+ const side=mat(0x2a1a0c,.6,.1),top=new THREE.MeshStandardMaterial({map:lBoardTex(),roughness:.6}),bd=new THREE.Mesh(new THREE.BoxGeometry(9,.06,9),[side,side,top,side,side,side]);bd.position.y=.18;bd.receiveShadow=true;G.add(bd);
+ for(let s=0;s<n;s++)for(let k=0;k<4;k++){const m=mkPawn(LCOL[LCI(s)],.55);m.userData.pick=s*4+k;G.add(m);LP.push({s,k,rel:-1,m,ring:null})}
+ lLayout();LD=mkDice(.9);LD.position.set(6.9,.65,0);LD.userData.pick='dice';G.add(LD);
+ cam.position.set(2.2,12,9.5);ctl.target.set(2.2,0,0);
+ cur={click:id=>{if(id==='dice')humanRoll();else if(typeof id==='number')lClick(id)}};
+ hud(`${pn(0)} (${LNAME[LCI(0)]}) – roll the dice`);
+}
+function lLegal(s,r){const ids=[];let base=false;for(let k=0;k<4;k++){const p=LP[s*4+k];if(p.rel<0){if(r===6&&!base){base=true;ids.push(s*4+k)}}else if(p.rel+r<=56)ids.push(s*4+k)}return ids}
+function lHide(){LP.forEach(p=>{if(p.ring){p.m.remove(p.ring);p.ring=null}})}
+function lShow(){LLEG.forEach(id=>{const p=LP[id],r=new THREE.Mesh(new THREE.TorusGeometry(.42,.05,8,28),new THREE.MeshBasicMaterial({color:0xffffff}));r.rotation.x=Math.PI/2;r.position.y=.03;p.m.add(r);p.ring=r})}
+function lClick(id){if(canAct()&&ph==='pick'&&LLEG.includes(id))play({p:id})}
+function lApply(m){
+ if(over)return;const s=S.turn;
+ if(m.r!=null){
+  if(ph!=='roll')return;busy=true;rolls[s]++;
+  diceRoll(LD,m.r,()=>{LR=m.r;L6=m.r===6?L6+1:0;
+   if(L6>=3){hud(`${pn(s)} rolled three 6s – turn lost`);return later(700,()=>lNext(false))}
+   LLEG=lLegal(s,m.r);
+   if(!LLEG.length){hud(`${pn(s)} rolled ${m.r} – no moves`);return later(700,()=>lNext(false))}
+   if(LLEG.length===1){hud(`${pn(s)} rolled ${m.r}`);return lMove(LLEG[0],m.r)}
+   ph='pick';hud(`${pn(s)} rolled ${m.r} – choose a pawn`);lShow();free()});
+ }else if(m.p!=null){if(ph!=='pick'||!LLEG.includes(m.p))return;busy=true;lMove(m.p,LR)}
+}
+function lMove(id,r){
+ busy=true;lHide();LLEG=[];const p=LP[id],from=p.rel,steps=[];
+ if(from<0)steps.push(0);else for(let q=from+1;q<=from+r;q++)steps.push(q);
+ const go=()=>{if(!steps.length)return lLand(p,r);p.rel=steps.shift();const[x,y]=lCell(p);snd(320,.05,'triangle',.08);mv3(p.m,lc(x,y),from<0?420:190,.3,go)};go();
+}
+function lLand(p,r){
+ const s=p.s,c=LCI(s);let cap=0,ex=r===6;
+ if(p.rel<=50){const idx=(LS[c]+p.rel)%52;
+  if(!LSAFE.includes(idx))for(const o of LP)if(o.s!==s&&o.rel>=0&&o.rel<=50&&(LS[LCI(o.s)]+o.rel)%52===idx){o.rel=-1;cap++;const[x,y]=lCell(o);mv3(o.m,lc(x,y),650,1.4,()=>{})}}
+ if(cap){ex=true;boom(p.m.position.clone());snd(150,.3,'sawtooth',.14,50);hud(`${pn(s)} captures a pawn!`)}
+ if(p.rel===56){ex=true;snd(700,.3,'triangle',.12,1200);boom(p.m.position.clone());hud(`${pn(s)} gets a pawn home!`)}
+ if(LP.filter(o=>o.s===s&&o.rel===56).length===4){finish(s,`${pn(s)} brings all four pawns home!`,rolls[s]);return}
+ later(cap?720:160,()=>{lLayout();lNext(ex)});
+}
+function lNext(extra){
+ if(over||!S)return;ph='roll';LLEG=[];lHide();
+ if(!extra){S.turn=(S.turn+1)%S.seats.length;L6=0}
+ cards();hud(`${pn(S.turn)} (${LNAME[LCI(S.turn)]}) – ${extra?'roll again':'roll the dice'}`);free();
+}
+function lAI(){
+ if(ph==='roll'){play({r:1+Math.floor(Math.random()*6)});return}
+ let bs=-1e9,b=LLEG[0];
+ for(const id of LLEG){const p=LP[id],c=LCI(p.s),to=p.rel<0?0:p.rel+LR;let v=Math.random()*(S.diff===1?60:2);
+  if(S.diff>1){if(to===56)v+=60;if(p.rel<0)v+=40;
+   if(to<=50){const idx=(LS[c]+to)%52,safe=LSAFE.includes(idx);
+    if(!safe&&LP.some(o=>o.s!==p.s&&o.rel>=0&&o.rel<=50&&(LS[LCI(o.s)]+o.rel)%52===idx))v+=80;
+    if(safe)v+=15;
+    if(S.diff===3&&!safe&&LP.some(o=>{if(o.s===p.s||o.rel<0||o.rel>50)return false;const d=(idx-(LS[LCI(o.s)]+o.rel)%52+52)%52;return d>0&&d<=6}))v-=25}
+   else v+=20;v+=to*.5}
+  if(v>bs){bs=v;b=id}}
+ play({p:b});
+}
+function lEx(){return S.seats.map((_,i)=>LP.filter(p=>p.s===i&&p.rel===56).length+'/4')}
 
-    <!-- App Engine Script -->
-    <script>
-        // Web Audio Synthesizer
-        const AudioFX = {
-            ctx: null,
-            enabled: true,
-            volume: 0.8,
-            init() {
-                if (!this.ctx) {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    if (AudioContext) this.ctx = new AudioContext();
-                }
-            },
-            playTone(freq, type = 'sine', duration = 0.15) {
-                if (!this.enabled || this.volume === 0) return;
-                this.init();
-                if (!this.ctx) return;
-                try {
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = type;
-                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                    gain.gain.setValueAtTime(0.15 * this.volume, this.ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    osc.start();
-                    osc.stop(this.ctx.currentTime + duration);
-                } catch(e) {}
-            },
-            playSuccess() {
-                this.playTone(523.25, 'triangle', 0.1);
-                setTimeout(() => this.playTone(659.25, 'triangle', 0.12), 80);
-                setTimeout(() => this.playTone(783.99, 'triangle', 0.18), 160);
-            },
-            playError() {
-                this.playTone(220, 'sawtooth', 0.15);
-                setTimeout(() => this.playTone(180, 'sawtooth', 0.25), 120);
-            },
-            playClick() { this.playTone(400, 'sine', 0.05); },
-            playMove() { this.playTone(300, 'sine', 0.08); }
-        };
-
-        let currentGameMode = 'ai'; // 'ai' or 'human'
-        let currentAiLevel = 'intermediate'; // 'beginner','amateur','intermediate','hard','expert','grandmaster'
-        let currentBoardTheme = 'theme-slate';
-        let activeGameInstance = null;
-        let currentGameMeta = null;
-
-        function setGameMode(mode) {
-            currentGameMode = mode;
-            document.getElementById('modeAiBtn').className = mode === 'ai' ? 'px-2.5 py-1 rounded-md font-bold text-[11px] bg-cyan-500/20 text-cyan-400 border border-cyan-500/40' : 'px-2.5 py-1 rounded-md font-bold text-[11px] text-slate-400 hover:text-white';
-            document.getElementById('modeHumanBtn').className = mode === 'human' ? 'px-2.5 py-1 rounded-md font-bold text-[11px] bg-cyan-500/20 text-cyan-400 border border-cyan-500/40' : 'px-2.5 py-1 rounded-md font-bold text-[11px] text-slate-400 hover:text-white';
-            document.getElementById('aiLevelContainer').style.display = mode === 'ai' ? 'flex' : 'none';
-            startCurrentGame();
-        }
-
-        function setAiLevel(lvl) {
-            currentAiLevel = lvl;
-            startCurrentGame();
-        }
-
-        function setBoardTheme(theme) {
-            currentBoardTheme = theme;
-            const stage = document.getElementById('gameCanvasStage');
-            stage.className = `flex-1 flex items-center justify-center p-3 overflow-hidden relative ${theme}`;
-        }
-
-        const GAMES_DATA = [
-            { id: 'chess', title: 'Chess', desc: 'Minimax AI engine with 6 levels', icon: 'fa-chess', bg: 'bg-gradient-to-br from-blue-600 to-indigo-700' },
-            { id: 'sudoku', title: 'Sudoku', desc: 'Interactive grid with candidate notes', icon: 'fa-table-cells', bg: 'bg-gradient-to-br from-emerald-600 to-teal-700' },
-            { id: 'g2048', title: '2048', desc: 'Matrix grid sliding & tile merger', icon: 'fa-cubes', bg: 'bg-gradient-to-br from-amber-500 to-orange-600' },
-            { id: 'memory', title: 'Memory Match', desc: 'Visual card flip pairing system', icon: 'fa-clone', bg: 'bg-gradient-to-br from-pink-600 to-rose-700' },
-            { id: 'connect4', title: 'Connect Four', desc: 'Gravity dropping 4-in-a-row aligner', icon: 'fa-circle-dot', bg: 'bg-gradient-to-br from-blue-500 to-cyan-600' },
-            { id: 'minesweeper', title: 'Minesweeper', desc: 'Flagging & flood-fill mine sweeper', icon: 'fa-land-mine-on', bg: 'bg-gradient-to-br from-rose-600 to-red-700' },
-            { id: 'tictactoe', title: 'Tic-Tac-Toe', desc: 'Unbeatable Minimax AI challenge', icon: 'fa-xmarks-lines', bg: 'bg-gradient-to-br from-purple-600 to-pink-700' },
-            { id: 'wordscramble', title: 'Word Scramble', desc: 'Anagram solver & letter unscrambler', icon: 'fa-arrow-down-a-z', bg: 'bg-gradient-to-br from-indigo-600 to-blue-700' },
-            { id: 'wordguess', title: 'Word Guess', desc: '5-letter Wordle style puzzle', icon: 'fa-spell-check', bg: 'bg-gradient-to-br from-emerald-500 to-green-700' },
-            { id: 'simon', title: 'Simon Says', desc: 'Synthesized audio sequence playback', icon: 'fa-lightbulb', bg: 'bg-gradient-to-br from-amber-600 to-yellow-600' },
-            { id: 'pattern', title: 'Pattern Puzzle', desc: 'Matrix spatial memory test', icon: 'fa-border-all', bg: 'bg-gradient-to-br from-cyan-600 to-teal-700' },
-            { id: 'math', title: 'Math Challenge', desc: 'Rapid mental arithmetic equations', icon: 'fa-calculator', bg: 'bg-gradient-to-br from-violet-600 to-purple-800' },
-            { id: 'wordsearch', title: 'Word Search', desc: 'Hidden letter grid selector', icon: 'fa-magnifying-glass', bg: 'bg-gradient-to-br from-blue-600 to-sky-700' },
-            { id: 'lightsout', title: 'Lights Out', desc: 'Orthogonal binary grid logic', icon: 'fa-toggle-on', bg: 'bg-gradient-to-br from-orange-600 to-red-600' },
-            { id: 'numbermemory', title: 'Number Memory', desc: 'Expanding digit recall interval', icon: 'fa-brain', bg: 'bg-gradient-to-br from-fuchsia-600 to-pink-600' }
-        ];
-
-        function renderGrid() {
-            const grid = document.getElementById('gamesGrid');
-            grid.innerHTML = '';
-            GAMES_DATA.forEach(game => {
-                const card = document.createElement('div');
-                card.className = `bg-cardBg hover:bg-cardHover border border-slate-800 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg group flex flex-col justify-between`;
-                card.innerHTML = `
-                    <div class="h-28 ${game.bg} flex items-center justify-center p-4 relative">
-                        <i class="fa-solid ${game.icon} text-4xl text-white/90 drop-shadow-md group-hover:scale-110 transition-transform duration-300"></i>
-                    </div>
-                    <div class="p-3 flex flex-col justify-between flex-1">
-                        <div>
-                            <h3 class="font-bold text-white text-xs group-hover:text-cyan-400 transition-colors">${game.title}</h3>
-                            <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-1">${game.desc}</p>
-                        </div>
-                        <div class="mt-2 flex items-center justify-end text-[10px] text-cyan-400 font-semibold pt-2 border-t border-slate-800/80">
-                            <span class="group-hover:translate-x-0.5 transition-transform flex items-center gap-1">Play <i class="fa-solid fa-play text-[8px]"></i></span>
-                        </div>
-                    </div>
-                `;
-                card.onclick = () => openGameModal(game);
-                grid.appendChild(card);
-            });
-        }
-
-        function openGameModal(game) {
-            AudioFX.playClick();
-            currentGameMeta = game;
-
-            document.getElementById('modalGameTitle').textContent = game.title;
-            document.getElementById('modalGameDesc').textContent = game.desc;
-
-            const iconBox = document.getElementById('modalGameIcon');
-            iconBox.className = `w-8 h-8 rounded-xl flex items-center justify-center text-white text-base font-bold ${game.bg}`;
-            iconBox.innerHTML = `<i class="fa-solid ${game.icon}"></i>`;
-
-            document.getElementById('gameModal').classList.remove('hidden');
-            startCurrentGame();
-        }
-
-        function startCurrentGame() {
-            if (!currentGameMeta) return;
-            AudioFX.playClick();
-            const stage = document.getElementById('gameCanvasStage');
-            stage.innerHTML = '';
-
-            switch (currentGameMeta.id) {
-                case 'chess': activeGameInstance = new ChessGame(stage); break;
-                case 'tictactoe': activeGameInstance = new TicTacToeGame(stage); break;
-                case 'connect4': activeGameInstance = new Connect4Game(stage); break;
-                case 'sudoku': activeGameInstance = new SudokuGame(stage); break;
-                case 'g2048': activeGameInstance = new Game2048(stage); break;
-                case 'memory': activeGameInstance = new MemoryGame(stage); break;
-                case 'minesweeper': activeGameInstance = new MinesweeperGame(stage); break;
-                case 'wordscramble': activeGameInstance = new WordScrambleGame(stage); break;
-                case 'wordguess': activeGameInstance = new WordGuessGame(stage); break;
-                case 'simon': activeGameInstance = new SimonGame(stage); break;
-                case 'pattern': activeGameInstance = new PatternPuzzleGame(stage); break;
-                case 'math': activeGameInstance = new MathChallengeGame(stage); break;
-                case 'wordsearch': activeGameInstance = new WordSearchGame(stage); break;
-                case 'lightsout': activeGameInstance = new LightsOutGame(stage); break;
-                case 'numbermemory': activeGameInstance = new NumberMemoryGame(stage); break;
-            }
-        }
-
-        function closeGame() {
-            document.getElementById('gameModal').classList.add('hidden');
-            document.getElementById('gameCanvasStage').innerHTML = '';
-            activeGameInstance = null;
-            currentGameMeta = null;
-        }
-
-        function showResultModal(title, desc, isWin = true, onRetry = null) {
-            const iconBox = document.getElementById('resultIconBox');
-            iconBox.className = `w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 ${isWin ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}`;
-            iconBox.innerHTML = `<i class="fa-solid ${isWin ? 'fa-trophy' : 'fa-skull'}"></i>`;
-            document.getElementById('resultTitle').textContent = title;
-            document.getElementById('resultDesc').textContent = desc;
-
-            const modal = document.getElementById('resultModal');
-            modal.classList.remove('hidden');
-
-            document.getElementById('resultPlayAgainBtn').onclick = () => {
-                modal.classList.add('hidden');
-                if (onRetry) onRetry();
-            };
-        }
-
-        // Global Modals Setup
-        document.getElementById('closeModalBtn').onclick = closeGame;
-        document.getElementById('pauseBtn').onclick = () => document.getElementById('pauseModal').classList.remove('hidden');
-        document.getElementById('resumeBtn').onclick = () => document.getElementById('pauseModal').classList.add('hidden');
-        document.getElementById('quitInPauseBtn').onclick = () => {
-            document.getElementById('pauseModal').classList.add('hidden');
-            closeGame();
-        };
-        document.getElementById('restartInPauseBtn').onclick = () => {
-            document.getElementById('pauseModal').classList.add('hidden');
-            startCurrentGame();
-        };
-
-        document.getElementById('settingsBtn').onclick = () => document.getElementById('settingsModal').classList.remove('hidden');
-        document.getElementById('closeSettingsBtn').onclick = () => document.getElementById('settingsModal').classList.add('hidden');
-
-        document.getElementById('volumeSlider').oninput = (e) => {
-            AudioFX.volume = parseInt(e.target.value, 10) / 100;
-        };
-        document.getElementById('sfxToggleBtn').onclick = () => {
-            AudioFX.enabled = !AudioFX.enabled;
-            const btn = document.getElementById('sfxToggleBtn');
-            btn.textContent = AudioFX.enabled ? 'ENABLED' : 'MUTED';
-            btn.className = AudioFX.enabled ? 'px-3 py-1 bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 rounded-lg text-xs font-bold' : 'px-3 py-1 bg-slate-800 text-slate-400 rounded-lg text-xs font-bold';
-        };
-
-        /* ==================== 1. CHESS ENGINE ==================== */
-        class ChessGame {
-            constructor(c) { this.container = c; this.symbols = {'r':'♜','n':'♞','b':'♝','q':'♛','k':'♚','p':'♟','R':'♖','N':'♘','B':'♗','Q':'♕','K':'♔','P':'♙'}; this.init(); }
-            init() {
-                this.board = [
-                    ['r','n','b','q','k','b','n','r'],
-                    ['p','p','p','p','p','p','p','p'],
-                    ['','','','','','','',''],
-                    ['','','','','','','',''],
-                    ['','','','','','','',''],
-                    ['','','','','','','',''],
-                    ['P','P','P','P','P','P','P','P'],
-                    ['R','N','B','Q','K','B','N','R']
-                ];
-                this.turn = 'white';
-                this.selected = null;
-                this.validMoves = [];
-                this.render();
-            }
-            render() {
-                this.container.innerHTML = `
-                    <div class="flex flex-col items-center max-w-md w-full">
-                        <div class="mb-2 flex items-center justify-between w-full text-xs font-semibold">
-                            <span class="text-slate-400">Turn: <strong class="${this.turn==='white'?'text-cyan-400':'text-amber-400'} uppercase">${this.turn}</strong></span>
-                            <span class="text-slate-400 text-[11px]">${currentGameMode === 'ai' ? `vs AI (${currentAiLevel.toUpperCase()})` : 'vs Human'}</span>
-                        </div>
-                        <div class="grid grid-cols-8 border-4 border-slate-800 rounded-xl overflow-hidden w-full aspect-square shadow-2xl">
-                            ${this.board.map((row, r) => row.map((cell, c) => {
-                                const isWhiteSq = (r + c) % 2 === 0;
-                                const isSel = this.selected && this.selected.r === r && this.selected.c === c;
-                                const isHigh = this.validMoves.some(m => m.r === r && m.c === c);
-                                let bgClass = isWhiteSq ? 'chess-sq-white' : 'chess-sq-black';
-                                if (isSel) bgClass = 'chess-sq-selected';
-                                if (isHigh) bgClass = 'chess-sq-highlight';
-                                return `<button data-r="${r}" data-c="${c}" class="${bgClass} text-2xl sm:text-4xl font-bold flex items-center justify-center transition-all select-none hover:opacity-90">
-                                            ${this.symbols[cell] || ''}
-                                        </button>`;
-                            }).join('')).join('')}
-                        </div>
-                    </div>
-                `;
-                this.container.querySelectorAll('[data-r]').forEach(btn => {
-                    btn.onclick = () => this.handleClick(parseInt(btn.dataset.r), parseInt(btn.dataset.c));
-                });
-            }
-            handleClick(r, c) {
-                const piece = this.board[r][c];
-                if (this.selected) {
-                    const isMove = this.validMoves.find(m => m.r === r && m.c === c);
-                    if (isMove) {
-                        this.board[r][c] = this.board[this.selected.r][this.selected.c];
-                        this.board[this.selected.r][this.selected.c] = '';
-                        this.turn = this.turn === 'white' ? 'black' : 'white';
-                        this.selected = null; this.validMoves = [];
-                        AudioFX.playMove();
-                        this.render();
-                        
-                        if (currentGameMode === 'ai' && this.turn === 'black') {
-                            setTimeout(() => this.makeAiMove(), 400);
-                        }
-                        return;
-                    }
-                }
-                if (piece && ((this.turn === 'white' && piece === piece.toUpperCase()) || (this.turn === 'black' && piece === piece.toLowerCase()))) {
-                    this.selected = { r, c };
-                    this.validMoves = this.getMoves(r, c, piece);
-                    AudioFX.playClick();
-                } else { this.selected = null; this.validMoves = []; }
-                this.render();
-            }
-            getMoves(r, c, p) {
-                const moves = [];
-                const dir = (p === p.toUpperCase()) ? -1 : 1;
-                if (p.toLowerCase() === 'p') {
-                    if (r + dir >= 0 && r + dir < 8 && !this.board[r + dir][c]) moves.push({ r: r + dir, c });
-                } else {
-                    [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr, dc]) => {
-                        let nr = r + dr, nc = c + dc;
-                        if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) moves.push({ r: nr, c: nc });
-                    });
-                }
-                return moves;
-            }
-            makeAiMove() {
-                let blackPieces = [];
-                for(let r=0; r<8; r++) {
-                    for(let c=0; c<8; c++) {
-                        let p = this.board[r][c];
-                        if (p && p === p.toLowerCase()) {
-                            let moves = this.getMoves(r, c, p);
-                            if (moves.length > 0) blackPieces.push({ r, c, moves });
-                        }
-                    }
-                }
-                if (blackPieces.length > 0) {
-                    let pick = blackPieces[Math.floor(Math.random() * blackPieces.length)];
-                    let target = pick.moves[Math.floor(Math.random() * pick.moves.length)];
-                    this.board[target.r][target.c] = this.board[pick.r][pick.c];
-                    this.board[pick.r][pick.c] = '';
-                    this.turn = 'white';
-                    AudioFX.playMove();
-                    this.render();
-                }
-            }
-        }
-
-        /* ==================== 2. TIC TAC TOE ==================== */
-        class TicTacToeGame {
-            constructor(c) { this.container = c; this.init(); }
-            init() { this.board = Array(9).fill(''); this.active = true; this.turn = 'X'; this.render(); }
-            render() {
-                this.container.innerHTML = `
-                    <div class="flex flex-col items-center max-w-xs w-full">
-                        <div class="mb-2 text-xs font-semibold text-slate-400">Turn: <span class="${this.turn==='X'?'text-cyan-400':'text-amber-400'}">${this.turn}</span></div>
-                        <div class="grid grid-cols-3 gap-3 w-full aspect-square board-bg p-3 rounded-2xl border">
-                            ${this.board.map((val, idx) => `
-                                <button data-idx="${idx}" class="bg-slate-800 rounded-xl text-5xl font-extrabold flex items-center justify-center ${val==='X'?'text-cyan-400':'text-amber-400'}">${val}</button>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-                this.container.querySelectorAll('[data-idx]').forEach(btn => btn.onclick = () => this.move(parseInt(btn.dataset.idx)));
-            }
-            move(idx) {
-                if (!this.active || this.board[idx] !== '') return;
-                this.board[idx] = this.turn;
-                AudioFX.playMove();
-                this.render();
-                if (this.checkWin(this.turn)) {
-                    showResultModal(`${this.turn} Wins!`, 'Tic-Tac-Toe Win!', true, () => this.init());
-                    return;
-                }
-                this.turn = this.turn === 'X' ? 'O' : 'X';
-                this.render();
-
-                if (currentGameMode === 'ai' && this.turn === 'O') {
-                    setTimeout(() => {
-                        const empty = this.board.map((v, i) => v === '' ? i : null).filter(v => v !== null);
-                        if (empty.length > 0) {
-                            let aiChoice = empty[Math.floor(Math.random() * empty.length)];
-                            this.board[aiChoice] = 'O';
-                            AudioFX.playMove();
-                            if (this.checkWin('O')) {
-                                showResultModal('AI Wins!', 'Tic-Tac-Toe AI Victory.', false, () => this.init());
-                                return;
-                            }
-                            this.turn = 'X';
-                            this.render();
-                        }
-                    }, 300);
-                }
-            }
-            checkWin(p) {
-                const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-                return wins.some(w => w.every(idx => this.board[idx] === p));
-            }
-        }
-
-        /* ==================== 3. CONNECT FOUR ==================== */
-        class Connect4Game {
-            constructor(c) { this.container = c; this.init(); }
-            init() { this.board = Array(6).fill(0).map(() => Array(7).fill(0)); this.turn = 1; this.render(); }
-            render() {
-                this.container.innerHTML = `
-                    <div class="flex flex-col items-center max-w-md w-full">
-                        <div class="mb-2 text-xs font-semibold text-slate-400">Turn: <span class="${this.turn===1?'text-cyan-400':'text-amber-400'}">${this.turn===1?'Player 1 (Cyan)':'Player 2 (Amber)'}</span></div>
-                        <div class="grid grid-cols-7 gap-2 board-bg p-3 rounded-2xl border w-full">
-                            ${Array(7).fill(0).map((_, col) => `
-                                <button data-col="${col}" class="flex flex-col gap-2">
-                                    ${Array(6).fill(0).map((_, row) => {
-                                        const v = this.board[row][col];
-                                        let bg = 'bg-slate-950';
-                                        if (v === 1) bg = 'bg-cyan-400';
-                                        if (v === 2) bg = 'bg-amber-400';
-                                        return `<div class="w-full aspect-square rounded-full border-2 border-slate-800 ${bg}"></div>`;
-                                    }).join('')}
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-                this.container.querySelectorAll('[data-col]').forEach(btn => btn.onclick = () => this.drop(parseInt(btn.dataset.col)));
-            }
-            drop(col) {
-                for (let r = 5; r >= 0; r--) {
-                    if (this.board[r][col] === 0) {
-                        this.board[r][col] = this.turn;
-                        AudioFX.playMove();
-                        this.turn = this.turn === 1 ? 2 : 1;
-                        this.render();
-                        if (currentGameMode === 'ai' && this.turn === 2) {
-                            setTimeout(() => this.aiDrop(), 350);
-                        }
-                        return;
-                    }
-                }
-            }
-            aiDrop() {
-                const cols = [];
-                for (let c = 0; c < 7; c++) if (this.board[0][c] === 0) cols.push(c);
-                if (cols.length > 0) {
-                    const col = cols[Math.floor(Math.random() * cols.length)];
-                    for (let r = 5; r >= 0; r--) {
-                        if (this.board[r][col] === 0) {
-                            this.board[r][col] = 2;
-                            AudioFX.playMove();
-                            this.turn = 1;
-                            this.render();
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-
-        /* ==================== 4. SUDOKU ==================== */
-        class SudokuGame {
-            constructor(c) { this.container = c; this.init(); }
-            init() {
-                this.grid = [[5,3,0,0,7,0,0,0,0],[6,0,0,1,9,5,0,0,0],[0,9,8,0,0,0,0,6,0],[8,0,0,0,6,0,0,0,3],[4,0,0,8,0,3,0,0,1],[7,0,0,0,2,0,0,0,6],[0,6,0,0,0,0,2,8,0],[0,0,0,4,1,9,0,0,5],[0,0,0,0,8,0,0,7,9]];
-                this.initial = this.grid.map(r => [...r]);
-                this.selected = { r: 0, c: 0 };
-                this.render();
-            }
-            render() {
-                this.container.innerHTML = `
-                    <div class="flex flex-col items-center max-w-sm w-full">
-                        <div class="grid grid-cols-9 border-2 border-slate-700 board-bg rounded-xl overflow-hidden w-full aspect-square mb-3">
-                            ${this.grid.map((row, r) => row.map((val, c) => {
-                                const isFixed = this.initial[r][c] !== 0;
-                                const isSel = this.selected.r === r && this.selected.c === c;
-                                return `<button data-r="${r}" data-c="${c}" class="border border-slate-800 ${isSel?'bg-cyan-500/30 ring-2 ring-cyan-400':(isFixed?'bg-slate-800/60':'bg-slate-900')} text-slate-100 font-bold text-base flex items-center justify-center transition-all ${isFixed?'text-slate-400':'text-cyan-400'}">
-                                            ${val !== 0 ? val : ''}
-                                        </button>`;
-                            }).join('')).join('')}
-                        </div>
-                        <div class="grid grid-cols-9 gap-1.5 w-full">
-                            ${[1,2,3,4,5,6,7,8,9].map(n => `<button data-num="${n}" class="py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-bold text-slate-200">${n}</button>`).join('')}
-                        </div>
-                    </div>
-                `;
-                this.container.querySelectorAll('[data-r]').forEach(btn => {
-                    btn.onclick = () => { this.selected = { r: parseInt(btn.dataset.r), c: parseInt(btn.dataset.c) }; this.render(); };
-                });
-                this.container.querySelectorAll('[data-num]').forEach(btn => {
-                    btn.onclick = () => {
-                        const num = parseInt(btn.dataset.num);
-                        const { r, c } = this.selected;
-                        if (this.initial[r][c] === 0) {
-                            this.grid[r][c] = num;
-                            AudioFX.playMove();
-                            this.render();
-                        }
-                    };
-                });
-            }
-        }
-
-        /* ==================== 5. 2048 ==================== */
-        class Game2048 {
-            constructor(c) { this.container = c; this.init(); }
-            init() {
-                this.grid = Array(4).fill(0).map(() => Array(4).fill(0));
-                this.grid[0][0] = 2; this.grid[0][1] = 2;
-                this.render();
-            }
-            render() {
-                this.container.innerHTML = `
-                    <div class="flex flex-col items-center max-w-xs w-full">
-                        <div class="grid grid-cols-4 gap-2 board-bg p-3 rounded-2xl border w-full aspect-square">
-                            ${this.grid.map(row => row.map(v => `
-                                <div class="rounded-xl font-bold text-xl flex items-center justify-center ${v > 0 ? 'bg-amber-500 text-slate-950' : 'bg-slate-950/50 text-transparent'}">
-                                    ${v > 0 ? v : ''}
-                                </div>
-                            `).join('')).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
-        /* ==================== 6. MEMORY MATCH ==================== */
-        class MemoryGame {
-            constructor(c) { this.container = c; this.init(); }
-            init() {
-                const icons = ['fa-bolt', 'fa-ghost', 'fa-fire', 'fa-gear'];
-                this.cards = [...icons, ...icons].sort(() => Math.random() - 0.5).map((icon, idx) => ({ id: idx, icon, flipped: false, matched: false }));
-                this.selected = [];
-                this.render();
-            }
-            render() {
-                this.container.innerHTML = `
-                    <div class="grid grid-cols-4 gap-3 max-w-xs w-full aspect-square">
-                        ${this.cards.map(c => `
-                            <button data-id="${c.id}" class="rounded-xl border border-slate-700 flex items-center justify-center text-2xl transition-all ${c.flipped || c.matched ? 'bg-cyan-500 text-slate-950' : 'bg-slate-800 text-transparent'}">
-                                <i class="fa-solid ${c.icon}"></i>
-                            </button>
-                        `).join('')}
-                    </div>
-                `;
-                this.container.querySelectorAll('[data-id]').forEach(btn => btn.onclick = () => this.flip(parseInt(btn.dataset.id)));
-            }
-            flip(id) {
-                const card = this.cards.find(c => c.id === id);
-                if (!card || card.flipped || card.matched || this.selected.length >= 2) return;
-                card.flipped = true; this.selected.push(card); AudioFX.playClick(); this.render();
-                if (this.selected.length === 2) {
-                    const [a, b] = this.selected;
-                    if (a.icon === b.icon) {
-                        a.matched = b.matched = true; this.selected = []; AudioFX.playSuccess(); this.render();
-                        if (this.cards.every(c => c.matched)) showResultModal('Memory Master!', 'Pairs matched!', true, () => this.init());
-                    } else {
-                        setTimeout(() => { a.flipped = b.flipped = false; this.selected = []; this.render(); }, 600);
-                    }
-                }
-            }
-        }
-
-        /* ==================== 7. MINESWEEPER ==================== */
-        class MinesweeperGame {
-            constructor(c) { this.container = c; this.init(); }
-            init() {
-                this.grid = Array(6).fill(0).map(() => Array(6).fill(0).map(() => ({ mine: Math.random() < 0.2, revealed: false })));
-                this.render();
-            }
-            render() {
-                this.container.innerHTML = `
-                    <div class="grid grid-cols-6 gap-2 board-bg p-3 rounded-2xl border max-w-xs w-full aspect-square">
-                        ${this.grid.map((row, r) => row.map((cell, c) => `
-                            <button data-r="${r}" data-c="${c}" class="rounded-xl flex items-center justify-center font-bold ${cell.revealed ? (cell.mine ? 'bg-rose-600' : 'bg-slate-950') : 'bg-slate-800 hover:bg-slate-700'}">
-                                ${cell.revealed && cell.mine ? '<i class="fa-solid fa-bomb text-white"></i>' : ''}
-                            </button>
-                        `).join('')).join('')}
-                    </div>
-                `;
-                this.container.querySelectorAll('[data-r]').forEach(b => {
-                    b.onclick = () => {
-                        const r = parseInt(b.dataset.r), c = parseInt(b.dataset.c);
-                        this.grid[r][c].revealed = true;
-                        if (this.grid[r][c].mine) AudioFX.playError(); else AudioFX.playClick();
-                        this.render();
-                    };
-                });
-            }
-        }
-
-        /* ==================== 8. WORD SCRAMBLE ==================== */
-        class WordScrambleGame {
-            constructor(c) { this.container = c; this.init(); }
-            init() { this.target = 'BRAIN'; this.scrambled = 'RBAIN'; this.render(); }
-            render() {
-                this.container.innerHTML = `
-                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-sm w-full text-center">
-                        <div class="text-3xl font-mono font-black text-cyan-400 tracking-widest mb-4">${this.scrambled}</div>
-                        <form id="scrambleForm" class="flex gap-2">
-                            <input type="text" id="scrambleInput" autocomplete="off" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 font-mono uppercase text-white font-bold" />
-                            <button type="submit" class="px-4 bg-cyan-500 font-bold text-slate-950 rounded-xl text-xs">Submit</button>
-                        </form>
-                    </div>
-                `;
-                document.getElementById('scrambleForm').onsubmit = (e) => {
-                    e.preventDefault();
-                    if (document.getElementById('scrambleInput').value.trim().toUpperCase() === this.target) {
-                        AudioFX.playSuccess(); showResultModal('Correct!', `Target: ${this.target}`, true, () => this.init());
-                    } else AudioFX.playError();
-                };
-            }
-        }
-
-        /* ==================== 9. WORD GUESS ==================== */
-        class WordGuessGame {
-            constructor(c) { this.container = c; this.init(); }
-            init() { this.target = 'SMART'; this.guess = ''; this.render(); }
-            render() {
-                this.container.innerHTML = `
-                    <div class="flex flex-col items-center max-w-xs w-full">
-                        <div class="flex gap-2 mb-4">
-                            ${[0,1,2,3,4].map(i => `<div class="w-10 h-10 rounded-xl border border-slate-700 bg-slate-900 flex items-center justify-center font-bold text-lg text-cyan-400">${this.guess[i]||''}</div>`).join('')}
-                        </div>
-                        <input type="text" id="wGuessInput" maxlength="5" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold uppercase text-center focus:outline-none w-full text-sm" placeholder="Type 5 letters..." />
-                    </div>
-                `;
-                document.getElementById('wGuessInput').oninput = (e) => {
-                    this.guess = e.target.value.toUpperCase();
-                    this.render();
-                    if (this.guess === this.target) {
-                        AudioFX.playSuccess(); showResultModal('Correct Word!', 'Target was SMART!', true, () => this.init());
-                    }
-                };
-            }
-        }
-
-        /* ==================== 10. SIMON SAYS ==================== */
-        class SimonGame {
-            constructor(c) { this.container = c; this.init(); }
-            init() { this.render(); }
-            render() {
-                this.container.innerHTML = `
-                    <div class="grid grid-cols-2 gap-3 max-w-xs w-full aspect-square bg-slate-900 p-3 rounded-2xl border border-slate-800">
-                        <button class="bg-rose-500/40 rounded-xl border border-rose-500 active:scale-95" onclick="AudioFX.playTone(261)"></button>
-                        <button class="bg-cyan-500/40 rounded-xl border border-cyan-500 active:scale-95" onclick="AudioFX.playTone(329)"></button>
-                        <button class="bg-amber-500/40 rounded-xl border border-amber-500 active:scale-95" onclick="AudioFX.playTone(392)"></button>
-                        <button class="bg-emerald-500/40 rounded-xl border border-emerald-500 active:scale-95" onclick="AudioFX.playTone(523)"></button>
-                    </div>
-                `;
-            }
-        }
-
-        /* ==================== 11. PATTERN PUZZLE ==================== */
-        class PatternPuzzleGame {
-            constructor(c) { this.container = c; this.init(); }
-            init() { this.render(); }
-            render() {
-                this.container.innerHTML = `
-                    <div class="grid grid-cols-3 gap-3 max-w-xs w-full aspect-square bg-slate-900 p-3 rounded-2xl border border-slate-800">
-                        ${Array(9).fill(0).map((_, i) => `<button class="bg-slate-800 hover:bg-cyan-500 rounded-xl transition-colors" onclick="AudioFX.playClick()"></button>`).join('')}
-                    </div>
-                `;
-            }
-        }
-
-        /* ==================== 12. MATH CHALLENGE ==================== */
-        class MathChallengeGame {
-            constructor(c) { this.container = c; this.init(); }
-            init() { this.a = 7; this.b = 8; this.ans = 56; this.render(); }
-            render() {
-                this.container.innerHTML = `
-                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-sm w-full text-center">
-                        <div class="text-4xl font-mono font-bold text-white mb-4">${this.a} × ${this.b} = ?</div>
-                        <form id="mathF" class="flex gap-2">
-                            <input type="number" id="mathI" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 font-mono text-white text-xl focus:outline-none" />
-                            <button type="submit" class="px-4 bg-cyan-500 font-bold text-slate-950 rounded-xl text-xs">Submit</button>
-                        </form>
-                    </div>
-                `;
-                document.getElementById('mathF').onsubmit = (e) => {
-                    e.preventDefault();
-                    if (parseInt(document.getElementById('mathI').value, 10) === this.ans) {
-                        AudioFX.playSuccess(); showResultModal('Math Master!', 'Correct answer!', true, () => this.init());
-                    } else AudioFX.playError();
-                };
-            }
-        }
-
-        /* ==================== 13. WORD SEARCH ==================== */
-        class WordSearchGame {
-            constructor(c) { this.container = c; this.init(); }
-            init() { this.render(); }
-            render() {
-                this.container.innerHTML = `
-                    <div class="grid grid-cols-5 gap-2 bg-slate-900 p-3 rounded-2xl border border-slate-800 max-w-xs w-full">
-                        ${'BRAINLOGICSMART'.split('').map(ch => `<button class="bg-slate-800 rounded-lg h-10 font-bold font-mono text-white" onclick="AudioFX.playClick()">${ch}</button>`).join('')}
-                    </div>
-                `;
-            }
-        }
-
-        /* ==================== 14. LIGHTS OUT ==================== */
-        class LightsOutGame {
-            constructor(c) { this.container = c; this.init(); }
-            init() { this.grid = Array(9).fill(true); this.render(); }
-            render() {
-                this.container.innerHTML = `
-                    <div class="grid grid-cols-3 gap-3 max-w-xs w-full aspect-square bg-slate-900 p-3 rounded-2xl border border-slate-800">
-                        ${this.grid.map((on, i) => `<button data-i="${i}" class="${on ? 'bg-amber-400 shadow-lg shadow-amber-400/50' : 'bg-slate-800'} rounded-xl transition-all"></button>`).join('')}
-                    </div>
-                `;
-                this.container.querySelectorAll('[data-i]').forEach(b => b.onclick = () => {
-                    const idx = parseInt(b.dataset.i);
-                    this.grid[idx] = !this.grid[idx];
-                    AudioFX.playClick(); this.render();
-                });
-            }
-        }
-
-        /* ==================== 15. NUMBER MEMORY ==================== */
-        class NumberMemoryGame {
-            constructor(c) { this.container = c; this.init(); }
-            init() { this.num = '8492'; this.show = true; this.render(); setTimeout(() => { this.show = false; this.render(); }, 1500); }
-            render() {
-                if (this.show) {
-                    this.container.innerHTML = `<div class="text-4xl font-mono font-bold text-cyan-400">${this.num}</div>`;
-                } else {
-                    this.container.innerHTML = `
-                        <form id="numF" class="flex flex-col gap-3 max-w-xs w-full">
-                            <input type="number" id="numI" class="bg-slate-950 border border-slate-700 rounded-xl p-2.5 font-mono text-xl text-center text-white focus:outline-none" placeholder="Enter recall..." />
-                            <button type="submit" class="py-2 bg-cyan-500 font-bold text-slate-950 rounded-xl text-xs">Submit</button>
-                        </form>
-                    `;
-                    document.getElementById('numF').onsubmit = (e) => {
-                        e.preventDefault();
-                        if (document.getElementById('numI').value === this.num) { AudioFX.playSuccess(); showResultModal('Recall Success!', 'Memory verified.', true, () => this.init()); }
-                        else AudioFX.playError();
-                    };
-                }
-            }
-        }
-
-        // Initialize Standalone Page
-        window.addEventListener('DOMContentLoaded', renderGrid);
-    </script>
-</body>
-</html>
+/* ================= register games + boot ================= */
+IMPL.chess={start:chStart,apply:chApply,ai:chAI,ex:chEx};
+IMPL.ttt={start:ttStart,apply:ttApply,ai:ttAI};
+IMPL.c4={start:c4Start,apply:c4Apply,ai:c4AI};
+IMPL.reversi={start:rStart,apply:rApply,ai:rAI,ex:rEx};
+IMPL.snakes={start:sStart,apply:sApply,ai:sAI,ex:sEx};
+IMPL.ludo={start:lStart,apply:lApply,ai:lAI,ex:lEx};
+NET.init();
+setTab('new');
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&$('login').style.display!=='none'&&['uName','uPass'].includes(document.activeElement&&document.activeElement.id))submitLogin()});
+try{const k=localStorage.getItem('arena_sess'),d=db();if(k&&d[k])enter(k)}catch(e){}
+</script>
+</body></html>
